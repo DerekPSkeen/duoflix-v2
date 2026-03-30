@@ -26,7 +26,7 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together - simple version
+  // Watch Together - minimal version
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
@@ -194,4 +194,141 @@ function App() {
   return (
     <div className="app">
       <div className="header">
-       
+        <div className="logo">DuoFlix</div>
+        <div className="likes">❤️ {likedMovies.length}</div>
+      </div>
+
+      {currentTab === 'swipe' && (
+        <div className="swipe-page">
+          <div className="poster-container">
+            {currentMovie && (
+              <div
+                ref={cardRef}
+                className={`poster-card ${isFlyingOff ? (flyDirection === 'right' ? 'flying-off-right' : 'flying-off-left') : ''}`}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerUp}
+                style={{ transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)` }}
+              >
+                <img
+                  className="poster-img"
+                  src={`https://image.tmdb.org/t/p/w780${currentMovie.poster_path}`}
+                  alt={currentMovie.title}
+                />
+                <div className="overlay">
+                  <div className="title">{currentMovie.title}</div>
+                  <div className="meta">
+                    {currentMovie.release_date?.slice(0,4) || 'N/A'} • {currentMovie.vote_average?.toFixed(1) || '0'} ★
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {!showDetails && (
+            <div className="button-layer">
+              <button className="btn undo" onClick={handleUndo}>↩</button>
+              <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
+              <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
+              <button className="btn like" onClick={() => triggerFlyOff(true)}>♥</button>
+            </div>
+          )}
+
+          {showDetails && detailMovie && (
+            <div className="modal-overlay" onClick={() => setShowDetails(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <button className="close-btn" onClick={() => setShowDetails(false)}>×</button>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.8rem', color: 'white' }}>{detailMovie.title}</h2>
+                <p className="modal-meta">
+                  {detailMovie.release_date?.slice(0,4) || 'N/A'} • {detailMovie.vote_average?.toFixed(1) || '0'} ★
+                </p>
+                <p className="modal-description">{detailMovie.overview}</p>
+                <h3>Top Actors</h3>
+                <ul className="actors-list">
+                  {actors.length > 0 ? actors.map((a, i) => <li key={i}>{a.name}</li>) : <li>Loading actors...</li>}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {currentTab === 'matches' && (
+        <div className="matches-page">
+          <div className="matches-tabs">
+            <button className={matchesSubTab === 'mutual' ? 'active' : ''} onClick={() => setMatchesSubTab('mutual')}>Mutual Matches</button>
+            <button className={matchesSubTab === 'my-likes' ? 'active' : ''} onClick={() => setMatchesSubTab('my-likes')}>My Likes</button>
+          </div>
+          {matchesSubTab === 'my-likes' && (
+            <div className="matches-grid">
+              {likedMovies.map(movie => (
+                <div key={movie.id} className="match-card">
+                  <img className="match-img" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
+                  <div className="match-overlay">{movie.title}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {currentTab === 'watch' && (
+        <div className="watch-page">
+          <h2>Watch Together</h2>
+          <p>{roomStatus}</p>
+          
+          {!isInRoom ? (
+            <>
+              <input 
+                type="text" 
+                value={joinedCode} 
+                onChange={e => setJoinedCode(e.target.value)} 
+                placeholder="Enter 6-digit room code" 
+                maxLength={6}
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '1rem auto', padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white', textAlign: 'center' }}
+              />
+              <button 
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem', fontSize: '1.1rem', border: 'none', borderRadius: '999px', background: '#3b82f6', color: 'white' }}
+                onClick={joinRoom}
+              >
+                Join Room
+              </button>
+              <button 
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem', fontSize: '1.1rem', border: 'none', borderRadius: '999px', background: '#22c55e', color: 'white' }}
+                onClick={createRoom}
+              >
+                Create New Room
+              </button>
+            </>
+          ) : (
+            <>
+              <p>Room Code: <strong>{roomCode}</strong></p>
+              <button 
+                style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white', padding: '1rem', border: 'none', borderRadius: '999px', width: '100%' }}
+                onClick={() => { setIsInRoom(false); setRoomCode(null); setRoomStatus('Create or join a room to watch together!'); }}
+              >
+                Leave Room
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {currentTab === 'prefs' && (
+        <div className="prefs-page">
+          <h2>Preferences</h2>
+          <p>Preferences tab coming soon.</p>
+        </div>
+      )}
+
+      <nav className="tab-bar">
+        <button onClick={() => setCurrentTab('swipe')}>Swipe</button>
+        <button onClick={() => setCurrentTab('matches')}>Matches</button>
+        <button onClick={() => setCurrentTab('watch')}>Watch</button>
+        <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
+      </nav>
+    </div>
+  );
+}
+
+export default App;
