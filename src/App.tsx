@@ -145,4 +145,53 @@ function App() {
     setDragOffset(delta);
   };
 
-  const onPointer
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (isFlyingOff) return;
+    const delta = dragOffset;
+    if (Math.abs(delta) > 120) {
+      triggerFlyOff(delta > 0);
+    } else {
+      setDragOffset(0);
+    }
+    setStartX(0);
+  };
+
+  const handleUndo = () => {
+    if (lastLiked) {
+      setLikedMovies(prev => prev.filter(m => m.id !== lastLiked.id));
+      setLastLiked(null);
+      setCurrentIndex(prev => (prev - 1 + movies.length) % movies.length);
+    }
+  };
+
+  const createRoom = () => {
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+    setRoomCode(newCode);
+    setRoomStatus(`Room created! Code: ${newCode}`);
+    setIsInRoom(true);
+  };
+
+  const joinRoom = () => {
+    if (joinedCode.length === 6) {
+      setRoomCode(joinedCode);
+      setRoomStatus(`Joined room ${joinedCode}`);
+      setIsInRoom(true);
+    } else {
+      setRoomStatus('Please enter a valid 6-digit code');
+    }
+  };
+
+  const savePreferences = () => {
+    alert('Preferences saved!');
+  };
+
+  const addActor = () => {
+    if (newActor.trim()) {
+      // placeholder
+    }
+  };
+
+  return (
+    <div className="app">
+      <div className="header">
+       
