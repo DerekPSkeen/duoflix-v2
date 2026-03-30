@@ -100,7 +100,7 @@ function App() {
     setDragOffset(e.clientX - startX);
   };
 
-  const onPointerUp = (e: React.PointerEvent) => {
+  const onPointerUp = () => {
     if (isFlyingOff) return;
     const delta = dragOffset;
     if (Math.abs(delta) > 120) {
