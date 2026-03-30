@@ -304,18 +304,24 @@ function App() {
               
               <input 
                 type="text" 
-                className="room-input" 
                 value={joinedCode} 
                 onChange={e => setJoinedCode(e.target.value)} 
                 placeholder="Enter 6-digit room code" 
                 maxLength={6}
+                style={{ width: '100%', maxWidth: '280px', margin: '0 auto 1.5rem', padding: '0.9rem 1rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white', textAlign: 'center', display: 'block' }}
               />
               
-              <button className="watch-btn join" onClick={joinRoom}>
+              <button 
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem 2rem', fontSize: '1.2rem', fontWeight: '600', border: 'none', borderRadius: '999px', background: '#3b82f6', color: 'white' }}
+                onClick={joinRoom}
+              >
                 Join Room
               </button>
               
-              <button className="watch-btn create" onClick={createRoom}>
+              <button 
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem 2rem', fontSize: '1.2rem', fontWeight: '600', border: 'none', borderRadius: '999px', background: '#22c55e', color: 'white' }}
+                onClick={createRoom}
+              >
                 Create New Room
               </button>
             </>
@@ -337,14 +343,13 @@ function App() {
                   placeholder="Type a message..." 
                   style={{ flex: 1, padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white' }}
                 />
-                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', border-radius: '12px' }}>
+                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '12px' }}>
                   Send
                 </button>
               </div>
               
               <button 
-                style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white' }}
-                className="watch-btn" 
+                style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white', width: '100%', padding: '1rem', border: 'none', borderRadius: '999px' }}
                 onClick={() => { setIsInRoom(false); setRoomCode(null); setChatMessages([]); setRoomStatus('Create or join a room to watch together!'); }}
               >
                 Leave Room
