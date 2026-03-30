@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Stop arguing. Start watching. Tinder for movies, made for couples." />
+  <title>DuoFlix • Movie Night, Sorted</title>
+  <style>
+    :root { --accent: #ef4444; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background:#000; 
+      color:#fff; 
+      line-height:1.5; 
+      overflow-x: hidden; 
+      -webkit-text-size-adjust: none; 
+      text-size-adjust: none;
+    }
+    
+    .hero { 
+      min-height:100dvh; 
+      background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.9)), url('https://picsum.photos/id/1015/2000/1200') center/cover no-repeat;
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      text-align:center; 
+      position:relative;
+      padding: 2rem 1rem;
+    }
+    .hero-content { 
+      max-width:680px; 
+      width: 100%;
+      z-index:2; 
+    }
+    h1 { 
+      font-size: clamp(2.2rem, 8vw, 3.8rem); 
+      font-weight:900; 
+      line-height:1.05; 
+      margin-bottom:1rem; 
+    }
+    .sub { 
+      font-size: clamp(1.1rem, 4.5vw, 1.45rem); 
+      margin-bottom:2rem; 
+      opacity:0.95; 
+    }
+    .cta { 
+      display:flex; 
+      gap:1rem; 
+      justify-content:center; 
+      flex-wrap:wrap; 
+      margin-bottom:2.5rem;
+    }
+    .btn {
+      padding:1rem 2rem; 
+      font-size: clamp(1.05rem, 4vw, 1.25rem); 
+      font-weight:700; 
+      border-radius:9999px; 
+      text-decoration:none;
+      transition:all 0.2s; 
+      border:none; 
+      cursor:pointer;
+      min-width: 160px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-secondary { background:#fff; color:#000; }
+    .btn:hover { transform:scale(1.05); }
+    
+    .trust { 
+      display:flex; 
+      gap:1.5rem; 
+      justify-content:center; 
+      flex-wrap:wrap; 
+      font-size: clamp(0.95rem, 3.5vw, 1.05rem); 
+      opacity:0.85; 
+    }
+    
+    section { 
+      padding:4rem 1rem; 
+      max-width:1100px; 
+      margin:0 auto; 
+    }
+    h2 { 
+      text-align:center; 
+      font-size: clamp(1.8rem, 6vw, 2.4rem); 
+      margin-bottom:2.5rem; 
+    }
+    
+    .steps { 
+      display:grid; 
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+      gap:1.5rem; 
+    }
+    .step-card {
+      background:#111; 
+      padding:2rem 1.2rem; 
+      border-radius:24px; 
+      text-align:center;
+    }
+    .step-card div:first-child { 
+      font-size:3rem; 
+      margin-bottom:1rem; 
+    }
+    
+    .footer-cta { 
+      text-align:center; 
+      padding:4rem 1rem; 
+      background:#111; 
+    }
+    
+    .demo-swipe { 
+      display: none;
+    }
+    
+    .premium-box {
+      background:#111; 
+      padding:2rem; 
+      border-radius:24px; 
+      width:100%; 
+      max-width:340px; 
+      text-align:center; 
+      border:3px solid var(--accent); 
+      position:relative;
+    }
+    
+    .premium-btn {
+      width:100%; 
+      display:block; 
+      padding:1rem 1.8rem; 
+      font-size: clamp(1.0rem, 3.8vw, 1.15rem); 
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    @media (min-width: 641px) {
+      .demo-swipe { 
+        display: block;
+        position:absolute; 
+        bottom:12%; 
+        right:8%; 
+        width:240px; 
+        transform:rotate(6deg); 
+        background:#111; 
+        padding:12px; 
+        border-radius:24px; 
+        box-shadow:0 25px 50px rgba(0,0,0,0.7);
+      }
+      .steps { gap:2rem; }
+      .step-card { padding:2.5rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO LANDING -->
+  <header class="hero">
+    <div class="hero-content">
+      <h1>Stop arguing.<br>Start watching.</h1>
+      <p class="sub">Tinder for movies, made for couples.<br>Swipe together. Match instantly. Stream tonight.</p>
+      
+      <div class="cta">
+        <a href="/" class="btn btn-primary">Open DuoFlix Now</a>
+        <a href="/" class="btn btn-secondary">Try Free – No Sign-Up</a>
+      </div>
+
+      <div class="trust">
+        <div>❤️ 4.9 ★ on Product Hunt</div>
+        <div>Used by 87,000+ couples</div>
+        <div>Netflix • Hulu • Disney+ • Max</div>
+      </div>
+    </div>
+
+    <!-- Floating demo card (desktop only) -->
+    <div class="demo-swipe">
+      <img src="https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" style="width:100%; border-radius:18px;" alt="Dune">
+      <div style="text-align:center; margin-top:10px; font-size:1.15rem; font-weight:600;">Dune: Part Two</div>
+    </div>
+  </header>
+
+  <!-- HOW IT WORKS -->
+  <section>
+    <h2>Three swipes. One perfect night.</h2>
+    <div class="steps">
+      <div class="step-card">
+        <div>1️⃣</div>
+        <h3>Swipe Privately</h3>
+        <p>You each swipe on your own phone. No pressure, no arguments.</p>
+      </div>
+      <div class="step-card">
+        <div>2️⃣</div>
+        <h3>Matches Appear</h3>
+        <p>Only movies you both ❤️ show up. Instant chemistry.</p>
+      </div>
+      <div class="step-card">
+        <div>3️⃣</div>
+        <h3>Watch Together</h3>
+        <p>Jump into a private room with synced playback and chat.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY COUPLES LOVE IT -->
+  <section style="background:#111;">
+    <h2>Real couples, real date nights saved</h2>
+    <div style="display:flex; gap:1.5rem; flex-wrap:wrap; justify-content:center; max-width:900px; margin:0 auto;">
+      <div style="background:#222; padding:2rem; border-radius:20px; max-width:340px; flex:1;">
+        “We fought over movies every Friday. Now we have a date night every single week.”<br><br>
+        <strong>— Sarah & Mike, Chicago</strong>
+      </div>
+      <div style="background:#222; padding:2rem; border-radius:20px; max-width:340px; flex:1;">
+        “The Watch Together room is addictive. We’ve watched 14 movies together this month!”<br><br>
+        <strong>— Priya & Alex, LA</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING TEASER -->
+  <section>
+    <h2>Free to start. Premium to never stop.</h2>
+    <p style="text-align:center; max-width:520px; margin:0 auto 3rem; font-size:1.15rem;">Unlimited swipes, private rooms for friends, and streak rewards.</p>
+    
+    <div style="display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap;">
+      <div style="background:#111; padding:2rem; border-radius:24px; width:100%; max-width:340px; text-align:center;">
+        <h3 style="color:#22c55e; margin-bottom:1.5rem;">Free</h3>
+        <ul style="list-style:none; margin:1.5rem 0; font-size:1.1rem;">
+          <li style="margin:0.8rem 0;">10 swipes per day</li>
+          <li style="margin:0.8rem 0;">Basic matches</li>
+          <li style="margin:0.8rem 0;">Watch Together room</li>
+        </ul>
+        <a href="/" class="btn btn-secondary" style="width:100%; display:block;">Start Free</a>
+      </div>
+      
+      <div class="premium-box">
+        <div style="position:absolute; top:-14px; right:24px; background:var(--accent); color:#fff; padding:6px 16px; border-radius:9999px; font-size:0.95rem; font-weight:700;">Most Popular</div>
+        <h3 style="color:#ef4444; margin-bottom:1.5rem;">Premium • $4.99/mo</h3>
+        <ul style="list-style:none; margin:1.5rem 0; font-size:1.1rem;">
+          <li style="margin:0.8rem 0;">Unlimited swipes</li>
+          <li style="margin:0.8rem 0;">Priority recommendations</li>
+          <li style="margin:0.8rem 0;">Group rooms for 4+</li>
+          <li style="margin:0.8rem 0;">Streak badges & rewards</li>
+          <li style="margin:0.8rem 0;">Ad-free experience</li>
+        </ul>
+        <a href="/" class="btn btn-primary premium-btn">Go Premium Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <div class="footer-cta">
+    <h2 style="font-size: clamp(1.8rem, 6vw, 2.6rem); margin-bottom:1rem;">Ready for your best date night ever?</h2>
+    <a href="/" class="btn btn-primary" style="font-size: clamp(1.1rem, 4vw, 1.4rem); padding:1.1rem 3rem; white-space: nowrap;">Open DuoFlix Now</a>
+    <p style="margin-top:2rem; opacity:0.8; font-size:1.1rem;">Works instantly in your browser • Add to home screen in 2 taps</p>
+  </div>
+
+</body>
+</html>
