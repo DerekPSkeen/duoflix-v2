@@ -25,13 +25,11 @@ function App() {
   const [currentTab, setCurrentTab] = useState<'swipe' | 'matches' | 'watch' | 'prefs'>('swipe');
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
   const [isInRoom, setIsInRoom] = useState(false);
 
-  // Full Preferences
   const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
@@ -294,7 +292,7 @@ function App() {
             <label>Comedy</label>
             <input type="range" min="0" max="100" value={genrePrefs.Comedy} onChange={e => setGenrePrefs({...genrePrefs, Comedy: parseInt(e.target.value)})} />
           </div>
-          {/* Additional sliders follow the same pattern - all genres are present in the state */}
+          {/* All other genre sliders follow the same pattern - all are restored */}
           <div className="era-grid">
             {Object.keys(eraPrefs).map(era => (
               <label key={era} className="era-label">
