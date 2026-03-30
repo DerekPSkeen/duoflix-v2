@@ -26,24 +26,11 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together - minimal version
+  // Watch Together - minimal
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
   const [isInRoom, setIsInRoom] = useState(false);
-
-  // Preferences
-  const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
-    Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
-    Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
-    SciFi: 50, Thriller: 50, War: 50, Western: 50
-  });
-
-  const [eraPrefs, setEraPrefs] = useState<Record<string, boolean>>({
-    '1920s': false, '1930s': false, '1940s': false, '1950s': false,
-    '1960s': false, '1970s': false, '1980s': false, '1990s': false,
-    '2000s': false, '2010s': false, '2020s': true
-  });
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [dragOffset, setDragOffset] = useState(0);
@@ -59,31 +46,6 @@ function App() {
 
     let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
 
-    const activeGenres = Object.keys(genrePrefs).filter(g => genrePrefs[g] > 60);
-    if (activeGenres.length > 0) {
-      const genreIds = activeGenres.map(g => {
-        const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
-        return map[g];
-      }).join(',');
-      url += `&with_genres=${genreIds}`;
-    }
-
-    const activeEras = Object.keys(eraPrefs).filter(e => eraPrefs[e]);
-    if (activeEras.length > 0) {
-      let minYear = 2020, maxYear = 2025;
-      if (activeEras.includes('1920s')) { minYear = 1920; maxYear = 1929; }
-      else if (activeEras.includes('1930s')) { minYear = 1930; maxYear = 1939; }
-      else if (activeEras.includes('1940s')) { minYear = 1940; maxYear = 1949; }
-      else if (activeEras.includes('1950s')) { minYear = 1950; maxYear = 1959; }
-      else if (activeEras.includes('1960s')) { minYear = 1960; maxYear = 1969; }
-      else if (activeEras.includes('1970s')) { minYear = 1970; maxYear = 1979; }
-      else if (activeEras.includes('1980s')) { minYear = 1980; maxYear = 1989; }
-      else if (activeEras.includes('1990s')) { minYear = 1990; maxYear = 1999; }
-      else if (activeEras.includes('2000s')) { minYear = 2000; maxYear = 2009; }
-      else if (activeEras.includes('2010s')) { minYear = 2010; maxYear = 2019; }
-      url += `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
-    }
-
     try {
       const res = await fetch(url);
       const data = await res.json();
@@ -96,7 +58,7 @@ function App() {
 
   useEffect(() => {
     fetchMovies();
-  }, [genrePrefs, eraPrefs]);
+  }, []);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -126,7 +88,7 @@ function App() {
     setIsFlyingOff(true);
     setFlyDirection(liked ? 'right' : 'left');
     setTimeout(() => {
-      setCurrentIndex(prev => (prev + 1) % movies.length);
+      setCurrentIndex(prev => (prev + 1) % (movies.length || 1));
       setIsFlyingOff(false);
       setFlyDirection(null);
       setDragOffset(0);
@@ -160,7 +122,7 @@ function App() {
     if (lastLiked) {
       setLikedMovies(prev => prev.filter(m => m.id !== lastLiked.id));
       setLastLiked(null);
-      setCurrentIndex(prev => (prev - 1 + movies.length) % movies.length);
+      setCurrentIndex(prev => (prev - 1 + (movies.length || 1)) % (movies.length || 1));
     }
   };
 
@@ -178,16 +140,6 @@ function App() {
       setIsInRoom(true);
     } else {
       setRoomStatus('Please enter a valid 6-digit code');
-    }
-  };
-
-  const savePreferences = () => {
-    alert('Preferences saved!');
-  };
-
-  const addActor = () => {
-    if (newActor.trim()) {
-      // placeholder
     }
   };
 
@@ -276,7 +228,6 @@ function App() {
         <div className="watch-page">
           <h2>Watch Together</h2>
           <p>{roomStatus}</p>
-          
           {!isInRoom ? (
             <>
               <input 
