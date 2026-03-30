@@ -308,7 +308,7 @@ function App() {
                 onChange={e => setJoinedCode(e.target.value)} 
                 placeholder="Enter 6-digit room code" 
                 maxLength={6}
-                style={{ width: '100%', maxWidth: '280px', margin: '0 auto 1.5rem', padding: '0.9rem 1rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white', textAlign: 'center', display: 'block' }}
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0 auto 1.5rem', padding: '0.9rem 1rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white', textAlign: 'center' }}
               />
               
               <button 
