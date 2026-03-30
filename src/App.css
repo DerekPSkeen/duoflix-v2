@@ -210,3 +210,85 @@ html, body, #root, .app { height: 100dvh; background: #000; color: white; font-f
 .match-card { position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; }
 .match-img { width: 100%; height: auto; display: block; }
 .match-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 1rem 0.5rem; text-align: center; }
+
+/* Prefs page */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.slider-row label {
+  min-width: 110px;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.slider-row input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.actor-input {
+  display: flex;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.actor-input input {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.05rem;
+}
+
+.actor-input button {
+  padding: 0 1.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+
+.actor-input button:active {
+  transform: scale(0.95);
+  background: #dc2626;
+}
+
+.era-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.8rem 1.2rem;
+  margin: 1rem 0;
+}
+
+.era-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.save-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  font-weight: 600;
+}
