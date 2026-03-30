@@ -192,7 +192,6 @@ function App() {
     if (newChatMessage.trim()) {
       setChatMessages(prev => [...prev, `You: ${newChatMessage}`]);
       setNewChatMessage('');
-      // Simulate partner reply
       setTimeout(() => {
         setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
       }, 800);
@@ -338,7 +337,7 @@ function App() {
                   placeholder="Type a message..." 
                   style={{ flex: 1, padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white' }}
                 />
-                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '12px' }}>
+                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', border-radius: '12px' }}>
                   Send
                 </button>
               </div>
