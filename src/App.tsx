@@ -26,12 +26,10 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together
+  // Watch Together - simple version
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
-  const [chatMessages, setChatMessages] = useState<string[]>([]);
-  const [newChatMessage, setNewChatMessage] = useState('');
   const [isInRoom, setIsInRoom] = useState(false);
 
   // Preferences
@@ -46,9 +44,6 @@ function App() {
     '1960s': false, '1970s': false, '1980s': false, '1990s': false,
     '2000s': false, '2010s': false, '2020s': true
   });
-
-  const [favoriteActors, setFavoriteActors] = useState<string[]>([]);
-  const [newActor, setNewActor] = useState('');
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [dragOffset, setDragOffset] = useState(0);
@@ -174,7 +169,6 @@ function App() {
     setRoomCode(newCode);
     setRoomStatus(`Room created! Code: ${newCode}`);
     setIsInRoom(true);
-    setChatMessages([`Room ${newCode} created. Share this code with your partner.`]);
   };
 
   const joinRoom = () => {
@@ -182,19 +176,8 @@ function App() {
       setRoomCode(joinedCode);
       setRoomStatus(`Joined room ${joinedCode}`);
       setIsInRoom(true);
-      setChatMessages([`Joined room ${joinedCode}. Say hello!`]);
     } else {
       setRoomStatus('Please enter a valid 6-digit code');
-    }
-  };
-
-  const sendChatMessage = () => {
-    if (newChatMessage.trim()) {
-      setChatMessages(prev => [...prev, `You: ${newChatMessage}`]);
-      setNewChatMessage('');
-      setTimeout(() => {
-        setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
-      }, 800);
     }
   };
 
@@ -204,13 +187,8 @@ function App() {
 
   const addActor = () => {
     if (newActor.trim()) {
-      setFavoriteActors(prev => [...prev, newActor.trim()]);
-      setNewActor('');
+      // placeholder
     }
-  };
-
-  const removeActor = (actor: string) => {
-    setFavoriteActors(prev => prev.filter(a => a !== actor));
   };
 
   return (
@@ -297,29 +275,26 @@ function App() {
       {currentTab === 'watch' && (
         <div className="watch-page">
           <h2>Watch Together</h2>
+          <p>{roomStatus}</p>
           
           {!isInRoom ? (
             <>
-              <p>{roomStatus}</p>
-              
               <input 
                 type="text" 
                 value={joinedCode} 
                 onChange={e => setJoinedCode(e.target.value)} 
                 placeholder="Enter 6-digit room code" 
                 maxLength={6}
-                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0 auto 1.5rem', padding: '0.9rem 1rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white', textAlign: 'center' }}
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '1rem auto', padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white', textAlign: 'center' }}
               />
-              
               <button 
-                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem 2rem', fontSize: '1.2rem', fontWeight: '600', border: 'none', borderRadius: '999px', background: '#3b82f6', color: 'white' }}
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem', fontSize: '1.1rem', border: 'none', borderRadius: '999px', background: '#3b82f6', color: 'white' }}
                 onClick={joinRoom}
               >
                 Join Room
               </button>
-              
               <button 
-                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem 2rem', fontSize: '1.2rem', fontWeight: '600', border: 'none', borderRadius: '999px', background: '#22c55e', color: 'white' }}
+                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem', fontSize: '1.1rem', border: 'none', borderRadius: '999px', background: '#22c55e', color: 'white' }}
                 onClick={createRoom}
               >
                 Create New Room
@@ -328,29 +303,9 @@ function App() {
           ) : (
             <>
               <p>Room Code: <strong>{roomCode}</strong></p>
-              <div style={{ margin: '2rem 0', padding: '1rem', background: '#111', borderRadius: '12px', maxHeight: '300px', overflowY: 'auto' }}>
-                {chatMessages.map((msg, i) => (
-                  <div key={i} style={{ marginBottom: '0.8rem', textAlign: 'left' }}>{msg}</div>
-                ))}
-              </div>
-              
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input 
-                  type="text" 
-                  value={newChatMessage} 
-                  onChange={e => setNewChatMessage(e.target.value)}
-                  onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
-                  placeholder="Type a message..." 
-                  style={{ flex: 1, padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white' }}
-                />
-                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '12px' }}>
-                  Send
-                </button>
-              </div>
-              
               <button 
-                style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white', width: '100%', padding: '1rem', border: 'none', borderRadius: '999px' }}
-                onClick={() => { setIsInRoom(false); setRoomCode(null); setChatMessages([]); setRoomStatus('Create or join a room to watch together!'); }}
+                style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white', padding: '1rem', border: 'none', borderRadius: '999px', width: '100%' }}
+                onClick={() => { setIsInRoom(false); setRoomCode(null); setRoomStatus('Create or join a room to watch together!'); }}
               >
                 Leave Room
               </button>
@@ -361,36 +316,8 @@ function App() {
 
       {currentTab === 'prefs' && (
         <div className="prefs-page">
-          <div className="prefs-container">
-            <h2>Preferences</h2>
-            {Object.keys(genrePrefs).map(genre => (
-              <div key={genre} className="slider-row">
-                <label>{genre}</label>
-                <input type="range" min="0" max="100" value={genrePrefs[genre]} onChange={e => setGenrePrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} />
-              </div>
-            ))}
-            <div className="actor-input">
-              <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
-              <button onClick={addActor}>Add</button>
-            </div>
-            <ul className="actor-list">
-              {favoriteActors.map(actor => (
-                <li key={actor}>
-                  {actor}
-                  <button onClick={() => removeActor(actor)}>Remove</button>
-                </li>
-              ))}
-            </ul>
-            <div className="era-grid">
-              {Object.keys(eraPrefs).map(era => (
-                <label key={era} className="era-label">
-                  <input type="checkbox" checked={eraPrefs[era]} onChange={e => setEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
-                  {era}
-                </label>
-              ))}
-            </div>
-            <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
-          </div>
+          <h2>Preferences</h2>
+          <p>Preferences tab coming soon.</p>
         </div>
       )}
 
