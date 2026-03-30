@@ -6,18 +6,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>DuoFlix - Stop Arguing, Start Watching</title>
   <style>
-    body { margin:0; font-family:system-ui,sans-serif; background:#000; color:white; height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; }
-    .hero { max-width:800px; padding:2rem; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:system-ui,sans-serif; background:#000; color:white; }
+    .hero { height:100vh; background:linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)), url('https://picsum.photos/id/1015/2000/1200') center/cover; display:flex; align-items:center; justify-content:center; text-align:center; padding:2rem; }
+    .container { max-width:1100px; margin:0 auto; }
     h1 { font-size: clamp(2.8rem, 9vw, 5rem); margin-bottom:1rem; }
-    p { font-size:1.25rem; margin-bottom:2rem; opacity:0.9; }
-    .btn { display:inline-block; padding:1rem 3rem; font-size:1.3rem; background:#ef4444; color:white; border:none; border-radius:999px; cursor:pointer; text-decoration:none; }
+    p { font-size:1.25rem; max-width:600px; margin:0 auto 2rem; opacity:0.9; }
+    .btn { display:inline-block; padding:1rem 3rem; font-size:1.3rem; background:#ef4444; color:white; border:none; border-radius:999px; cursor:pointer; text-decoration:none; margin:0.5rem; }
+    section { padding:6rem 0; }
+    .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:2rem; }
+    .step-card { background:#111; padding:2rem; border-radius:16px; text-align:center; }
+    .premium-box { position:relative; background:#1a1a1a; border:3px solid #ef4444; border-radius:16px; padding:2.5rem; text-align:center; }
+    .most-popular { position:absolute; top:-14px; right:24px; background:#ef4444; color:white; padding:0.4rem 1.2rem; border-radius:999px; font-size:0.95rem; font-weight:bold; }
   </style>
 </head>
 <body>
   <div class="hero">
-    <h1>Stop arguing.<br>Start watching together.</h1>
-    <p>The perfect movie night for couples — swipe until you both say yes.</p>
-    <a href="/" class="btn">Open DuoFlix Now</a>
+    <div class="container">
+      <h1>Stop arguing.<br>Start watching together.</h1>
+      <p>The Tinder for couples — swipe on movies until you both say "yes" to the perfect night.</p>
+      <a href="/" class="btn">Open DuoFlix Now</a>
+    </div>
   </div>
+
+  <section class="container">
+    <h2 style="text-align:center;margin-bottom:3rem;">Three swipes. One perfect night.</h2>
+    <div class="steps">
+      <div class="step-card"><h3>1. Swipe Together</h3><p>Browse popular movies. Like or pass as a couple.</p></div>
+      <div class="step-card"><h3>2. Find Mutual Matches</h3><p>See what you both loved. No more arguments over what to watch.</p></div>
+      <div class="step-card"><h3>3. Watch Together</h3><p>Create a room and stream the winner with synced chat.</p></div>
+    </div>
+  </section>
+
+  <section class="container" style="background:#111;text-align:center;">
+    <div class="premium-box">
+      <div class="most-popular">Most Popular</div>
+      <h2>Go Premium for Unlimited Swipes</h2>
+      <p style="margin:1.5rem 0;">Unlock unlimited matches, ad-free experience, and private watch rooms.</p>
+      <a href="/" class="btn">Go Premium Now - Only $4.99/mo</a>
+    </div>
+  </section>
+
+  <section class="container" style="text-align:center;">
+    <h2>Ready for your best movie night ever?</h2>
+    <a href="/" class="btn" style="font-size:1.4rem;padding:1.2rem 3rem;">Open DuoFlix Now</a>
+  </section>
 </body>
 </html>
