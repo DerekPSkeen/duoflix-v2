@@ -24,6 +24,8 @@ function App() {
   const [actors, setActors] = useState<Actor[]>([]);
   const [currentTab, setCurrentTab] = useState<'swipe' | 'matches' | 'watch' | 'prefs'>('swipe');
 
+  const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
+
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
