@@ -292,7 +292,6 @@ function App() {
             <label>Comedy</label>
             <input type="range" min="0" max="100" value={genrePrefs.Comedy} onChange={e => setGenrePrefs({...genrePrefs, Comedy: parseInt(e.target.value)})} />
           </div>
-          {/* All other genre sliders follow the same pattern — all are restored */}
           <div className="era-grid">
             {Object.keys(eraPrefs).map(era => (
               <label key={era} className="era-label">
