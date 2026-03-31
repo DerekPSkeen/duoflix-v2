@@ -15,6 +15,7 @@ interface Actor {
 }
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true); // Landing view first
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedMovies, setLikedMovies] = useState<Movie[]>([]);
@@ -158,6 +159,16 @@ function App() {
       setNewActor('');
     }
   };
+
+  if (showLanding) {
+    return (
+      <div style={{ height: '100dvh', background: '#000', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
+        <h1 style={{ fontSize: 'clamp(2.8rem, 9vw, 5rem)', marginBottom: '1rem' }}>Stop arguing.<br>Start watching together.</h1>
+        <p style={{ fontSize: '1.25rem', maxWidth: '600px', marginBottom: '2rem', opacity: 0.9 }}>The Tinder for couples — swipe on movies until you both say "yes" to the perfect night.</p>
+        <button onClick={() => setShowLanding(false)} style={{ padding: '1rem 3rem', fontSize: '1.3rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '999px', cursor: 'pointer' }}>Open DuoFlix Now</button>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
