@@ -15,7 +15,8 @@ interface Actor {
 }
 
 function App() {
-  const [showLanding, setShowLanding] = useState(true); // Landing view first
+  const [showLanding, setShowLanding] = useState(true);
+
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedMovies, setLikedMovies] = useState<Movie[]>([]);
