@@ -15,8 +15,6 @@ interface Actor {
 }
 
 function App() {
-  const [showLanding, setShowLanding] = useState(true);
-
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedMovies, setLikedMovies] = useState<Movie[]>([]);
@@ -25,23 +23,31 @@ function App() {
   const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
   const [actors, setActors] = useState<Actor[]>([]);
   const [currentTab, setCurrentTab] = useState<'swipe' | 'matches' | 'watch' | 'prefs'>('swipe');
+
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
+  // Watch Together
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
+  const [chatMessages, setChatMessages] = useState<string[]>([]);
+  const [newChatMessage, setNewChatMessage] = useState('');
   const [isInRoom, setIsInRoom] = useState(false);
 
+  // Preferences
   const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
     SciFi: 50, Thriller: 50, War: 50, Western: 50
   });
+
   const [eraPrefs, setEraPrefs] = useState<Record<string, boolean>>({
     '1920s': false, '1930s': false, '1940s': false, '1950s': false,
     '1960s': false, '1970s': false, '1980s': false, '1990s': false,
     '2000s': false, '2010s': false, '2020s': true
   });
+
+  const [favoriteActors, setFavoriteActors] = useState<string[]>([]);
   const [newActor, setNewActor] = useState('');
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -55,8 +61,36 @@ function App() {
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
+
+    let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+
+    const activeGenres = Object.keys(genrePrefs).filter(g => genrePrefs[g] > 60);
+    if (activeGenres.length > 0) {
+      const genreIds = activeGenres.map(g => {
+        const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
+        return map[g];
+      }).join(',');
+      url += `&with_genres=${genreIds}`;
+    }
+
+    const activeEras = Object.keys(eraPrefs).filter(e => eraPrefs[e]);
+    if (activeEras.length > 0) {
+      let minYear = 2020, maxYear = 2025;
+      if (activeEras.includes('1920s')) { minYear = 1920; maxYear = 1929; }
+      else if (activeEras.includes('1930s')) { minYear = 1930; maxYear = 1939; }
+      else if (activeEras.includes('1940s')) { minYear = 1940; maxYear = 1949; }
+      else if (activeEras.includes('1950s')) { minYear = 1950; maxYear = 1959; }
+      else if (activeEras.includes('1960s')) { minYear = 1960; maxYear = 1969; }
+      else if (activeEras.includes('1970s')) { minYear = 1970; maxYear = 1979; }
+      else if (activeEras.includes('1980s')) { minYear = 1980; maxYear = 1989; }
+      else if (activeEras.includes('1990s')) { minYear = 1990; maxYear = 1999; }
+      else if (activeEras.includes('2000s')) { minYear = 2000; maxYear = 2009; }
+      else if (activeEras.includes('2010s')) { minYear = 2010; maxYear = 2019; }
+      url += `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
+    }
+
     try {
-      const res = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`);
+      const res = await fetch(url);
       const data = await res.json();
       setMovies(data.results || []);
       setCurrentIndex(0);
@@ -67,7 +101,7 @@ function App() {
 
   useEffect(() => {
     fetchMovies();
-  }, []);
+  }, [genrePrefs, eraPrefs]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -93,31 +127,35 @@ function App() {
       setLikedMovies(prev => [...prev, currentMovie]);
       setLastLiked(currentMovie);
     }
+    const card = cardRef.current;
     setIsFlyingOff(true);
     setFlyDirection(liked ? 'right' : 'left');
     setTimeout(() => {
-      setCurrentIndex(prev => (prev + 1) % (movies.length || 1));
+      setCurrentIndex(prev => (prev + 1) % movies.length);
       setIsFlyingOff(false);
       setFlyDirection(null);
       setDragOffset(0);
     }, 550);
   };
 
-  const onPointerDown = (e: React.PointerEvent) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isFlyingOff) return;
     setStartX(e.clientX);
     setDragOffset(0);
     cardRef.current?.setPointerCapture(e.pointerId);
   };
 
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (startX === 0 || isFlyingOff) return;
-    setDragOffset(e.clientX - startX);
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isFlyingOff || startX === 0) return;
+    e.preventDefault();                    // Fix for thumbnail collapse
+    const delta = e.clientX - startX;
+    setDragOffset(delta);
   };
 
-  const onPointerUp = () => {
+  const handlePointerUp = () => {          // Fixed unused 'e'
     if (isFlyingOff) return;
     const delta = dragOffset;
-    if (Math.abs(delta) > 120) {
+    if (Math.abs(delta) > 100) {
       triggerFlyOff(delta > 0);
     } else {
       setDragOffset(0);
@@ -129,7 +167,7 @@ function App() {
     if (lastLiked) {
       setLikedMovies(prev => prev.filter(m => m.id !== lastLiked.id));
       setLastLiked(null);
-      setCurrentIndex(prev => (prev - 1 + (movies.length || 1)) % (movies.length || 1));
+      setCurrentIndex(prev => (prev - 1 + movies.length) % movies.length);
     }
   };
 
@@ -138,6 +176,7 @@ function App() {
     setRoomCode(newCode);
     setRoomStatus(`Room created! Code: ${newCode}`);
     setIsInRoom(true);
+    setChatMessages([`Room ${newCode} created. Share this code with your partner.`]);
   };
 
   const joinRoom = () => {
@@ -145,8 +184,20 @@ function App() {
       setRoomCode(joinedCode);
       setRoomStatus(`Joined room ${joinedCode}`);
       setIsInRoom(true);
+      setChatMessages([`Joined room ${joinedCode}. Say hello!`]);
     } else {
       setRoomStatus('Please enter a valid 6-digit code');
+    }
+  };
+
+  const sendChatMessage = () => {
+    if (newChatMessage.trim()) {
+      setChatMessages(prev => [...prev, `You: ${newChatMessage}`]);
+      setNewChatMessage('');
+      // Simulate partner reply
+      setTimeout(() => {
+        setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
+      }, 800);
     }
   };
 
@@ -156,20 +207,14 @@ function App() {
 
   const addActor = () => {
     if (newActor.trim()) {
-      alert(`Added actor: ${newActor}`);
+      setFavoriteActors(prev => [...prev, newActor.trim()]);
       setNewActor('');
     }
   };
 
-  if (showLanding) {
-    return (
-      <div style={{ height: '100dvh', background: '#000', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
-        <h1 style={{ fontSize: 'clamp(2.8rem, 9vw, 5rem)', marginBottom: '1rem' }}>Stop arguing.<br>Start watching together.</h1>
-        <p style={{ fontSize: '1.25rem', maxWidth: '600px', marginBottom: '2rem', opacity: 0.9 }}>The Tinder for couples — swipe on movies until you both say "yes" to the perfect night.</p>
-        <button onClick={() => setShowLanding(false)} style={{ padding: '1rem 3rem', fontSize: '1.3rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '999px', cursor: 'pointer' }}>Open DuoFlix Now</button>
-      </div>
-    );
-  }
+  const removeActor = (actor: string) => {
+    setFavoriteActors(prev => prev.filter(a => a !== actor));
+  };
 
   return (
     <div className="app">
@@ -185,15 +230,21 @@ function App() {
               <div
                 ref={cardRef}
                 className={`poster-card ${isFlyingOff ? (flyDirection === 'right' ? 'flying-off-right' : 'flying-off-left') : ''}`}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerUp}
-                style={{ transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)` }}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                style={{ 
+                  transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)`,
+                  touchAction: 'none' 
+                }}
               >
                 <img
                   className="poster-img"
                   src={`https://image.tmdb.org/t/p/w780${currentMovie.poster_path}`}
                   alt={currentMovie.title}
+                  draggable={false}
+                  onDragStart={(e) => e.preventDefault()}
                 />
                 <div className="overlay">
                   <div className="title">{currentMovie.title}</div>
@@ -255,36 +306,55 @@ function App() {
       {currentTab === 'watch' && (
         <div className="watch-page">
           <h2>Watch Together</h2>
-          <p>{roomStatus}</p>
+          
           {!isInRoom ? (
             <>
+              <p>{roomStatus}</p>
+              
               <input 
                 type="text" 
+                className="room-input" 
                 value={joinedCode} 
                 onChange={e => setJoinedCode(e.target.value)} 
                 placeholder="Enter 6-digit room code" 
                 maxLength={6}
-                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '1rem auto', padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white', textAlign: 'center' }} 
               />
-              <button 
-                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem', fontSize: '1.1rem', border: 'none', borderRadius: '999px', background: '#3b82f6', color: 'white' }} 
-                onClick={joinRoom}
-              >
+              
+              <button className="watch-btn join" onClick={joinRoom}>
                 Join Room
               </button>
-              <button 
-                style={{ display: 'block', width: '100%', maxWidth: '280px', margin: '0.8rem auto', padding: '1rem', fontSize: '1.1rem', border: 'none', borderRadius: '999px', background: '#22c55e', color: 'white' }} 
-                onClick={createRoom}
-              >
+              
+              <button className="watch-btn create" onClick={createRoom}>
                 Create New Room
               </button>
             </>
           ) : (
             <>
               <p>Room Code: <strong>{roomCode}</strong></p>
+              <div style={{ margin: '2rem 0', padding: '1rem', background: '#111', borderRadius: '12px', maxHeight: '300px', overflowY: 'auto' }}>
+                {chatMessages.map((msg, i) => (
+                  <div key={i} style={{ marginBottom: '0.8rem', textAlign: 'left' }}>{msg}</div>
+                ))}
+              </div>
+              
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="text" 
+                  value={newChatMessage} 
+                  onChange={e => setNewChatMessage(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
+                  placeholder="Type a message..." 
+                  style={{ flex: 1, padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white' }}
+                />
+                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '12px' }}>
+                  Send
+                </button>
+              </div>
+              
               <button 
-                style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white', padding: '1rem', border: 'none', borderRadius: '999px', width: '100%' }} 
-                onClick={() => { setIsInRoom(false); setRoomCode(null); setRoomStatus('Create or join a room to watch together!'); }}
+                style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white' }}
+                className="watch-btn" 
+                onClick={() => { setIsInRoom(false); setRoomCode(null); setChatMessages([]); setRoomStatus('Create or join a room to watch together!'); }}
               >
                 Leave Room
               </button>
@@ -295,28 +365,36 @@ function App() {
 
       {currentTab === 'prefs' && (
         <div className="prefs-page">
-          <h2>Preferences</h2>
-          <div className="slider-row">
-            <label>Action</label>
-            <input type="range" min="0" max="100" value={genrePrefs.Action} onChange={e => setGenrePrefs({...genrePrefs, Action: parseInt(e.target.value)})} />
-          </div>
-          <div className="slider-row">
-            <label>Comedy</label>
-            <input type="range" min="0" max="100" value={genrePrefs.Comedy} onChange={e => setGenrePrefs({...genrePrefs, Comedy: parseInt(e.target.value)})} />
-          </div>
-          <div className="era-grid">
-            {Object.keys(eraPrefs).map(era => (
-              <label key={era} className="era-label">
-                <input type="checkbox" checked={eraPrefs[era]} onChange={e => setEraPrefs({...eraPrefs, [era]: e.target.checked})} />
-                {era}
-              </label>
+          <div className="prefs-container">
+            <h2>Preferences</h2>
+            {Object.keys(genrePrefs).map(genre => (
+              <div key={genre} className="slider-row">
+                <label>{genre}</label>
+                <input type="range" min="0" max="100" value={genrePrefs[genre]} onChange={e => setGenrePrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} />
+              </div>
             ))}
+            <div className="actor-input">
+              <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
+              <button onClick={addActor}>Add</button>
+            </div>
+            <ul className="actor-list">
+              {favoriteActors.map(actor => (
+                <li key={actor}>
+                  {actor}
+                  <button onClick={() => removeActor(actor)}>Remove</button>
+                </li>
+              ))}
+            </ul>
+            <div className="era-grid">
+              {Object.keys(eraPrefs).map(era => (
+                <label key={era} className="era-label">
+                  <input type="checkbox" checked={eraPrefs[era]} onChange={e => setEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
+                  {era}
+                </label>
+              ))}
+            </div>
+            <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
           </div>
-          <div className="actor-input">
-            <input type="text" value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
-            <button onClick={addActor}>Add</button>
-          </div>
-          <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
         </div>
       )}
 
