@@ -50,6 +50,9 @@ function App() {
   const [favoriteActors, setFavoriteActors] = useState<string[]>([]);
   const [newActor, setNewActor] = useState('');
 
+  // Landing page state
+  const [showLanding, setShowLanding] = useState(true);
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [dragOffset, setDragOffset] = useState(0);
   const [startX, setStartX] = useState(0);
@@ -147,12 +150,12 @@ function App() {
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (isFlyingOff || startX === 0) return;
-    e.preventDefault();                    // Fix for thumbnail collapse
+    e.preventDefault();
     const delta = e.clientX - startX;
     setDragOffset(delta);
   };
 
-  const handlePointerUp = () => {          // Fixed unused 'e'
+  const handlePointerUp = () => {
     if (isFlyingOff) return;
     const delta = dragOffset;
     if (Math.abs(delta) > 100) {
@@ -215,6 +218,47 @@ function App() {
   const removeActor = (actor: string) => {
     setFavoriteActors(prev => prev.filter(a => a !== actor));
   };
+
+  // Landing page
+  if (showLanding) {
+    return (
+      <div className="app" style={{ 
+        height: '100dvh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        textAlign: 'center', 
+        background: 'linear-gradient(180deg, #111 0%, #000 100%)' 
+      }}>
+        <div style={{ 
+          fontSize: '2.4rem', 
+          lineHeight: 1.1, 
+          fontWeight: 700, 
+          letterSpacing: '-0.03em', 
+          maxWidth: '320px', 
+          marginBottom: '48px' 
+        }}>
+          Stop arguing.<br />Start watching together.
+        </div>
+        <button
+          onClick={() => setShowLanding(false)}
+          style={{
+            background: '#fff',
+            color: '#000',
+            fontWeight: 600,
+            fontSize: '1.25rem',
+            padding: '18px 48px',
+            borderRadius: '9999px',
+            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)',
+            border: 'none'
+          }}
+        >
+          Open DuoFlix Now
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
