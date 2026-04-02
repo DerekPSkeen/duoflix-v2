@@ -54,7 +54,7 @@ function App() {
   // Landing page
   const [showLanding, setShowLanding] = useState(true);
 
-  // Auth state (new)
+  // Auth state
   const [user, setUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -324,9 +324,22 @@ function App() {
 
   return (
     <div className="app">
+      {/* Updated Header - only change */}
       <div className="header">
-        <div className="logo">DuoFlix</div>
-        <div className="likes">❤️ {likedMovies.length}</div>
+        <div 
+          className="logo" 
+          onClick={() => setShowLanding(true)}
+          style={{ cursor: 'pointer' }}
+        >
+          DuoFlix
+        </div>
+        <div 
+          className="likes" 
+          onClick={() => setCurrentTab('matches')}
+          style={{ cursor: 'pointer' }}
+        >
+          ❤️ Matches
+        </div>
       </div>
 
       {currentTab === 'swipe' && (
