@@ -217,13 +217,13 @@ function App() {
     }
   };
 
-  const sendChatMessage = () => {
-    if (newChatMessage.trim()) {
+   const sendChatMessage = () => {
+    if (newChatMessage.trim() && isInRoom) {
       const message = `You: ${newChatMessage}`;
       setChatMessages(prev => [...prev, message]);
       setNewChatMessage('');
       
-      // Shared chat - appears on both devices
+      // Shared chat - appears on both devices in the same room
       setTimeout(() => {
         setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
       }, 800);
