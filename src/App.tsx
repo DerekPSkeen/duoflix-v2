@@ -27,7 +27,7 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together + Couple Linking
+  // Watch Together
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
@@ -197,7 +197,6 @@ function App() {
     }
   };
 
-  // Updated Create Room - now creates couple code
   const createRoom = () => {
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
     setRoomCode(newCode);
@@ -212,7 +211,7 @@ function App() {
       setRoomStatus(`Joined room ${joinedCode}`);
       setIsInRoom(true);
       setChatMessages([`Joined room ${joinedCode}. Say hello!`]);
-      setPartnerJoined(true);
+      setPartnerJoined(true);   // Guest is now linked to the room
     } else {
       setRoomStatus('Please enter a valid 6-digit code');
     }
