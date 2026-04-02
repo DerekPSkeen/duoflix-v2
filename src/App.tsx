@@ -217,7 +217,7 @@ function App() {
     }
   };
 
-   const sendChatMessage = () => {
+  const sendChatMessage = () => {
     if (newChatMessage.trim() && isInRoom) {
       const message = `You: ${newChatMessage}`;
       setChatMessages(prev => [...prev, message]);
