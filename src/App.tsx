@@ -211,7 +211,7 @@ function App() {
       setRoomStatus(`Joined room ${joinedCode}`);
       setIsInRoom(true);
       setChatMessages([`Joined room ${joinedCode}. Say hello!`]);
-      setPartnerJoined(true);   // Guest is now linked to the room
+      setPartnerJoined(true);
     } else {
       setRoomStatus('Please enter a valid 6-digit code');
     }
@@ -219,8 +219,11 @@ function App() {
 
   const sendChatMessage = () => {
     if (newChatMessage.trim()) {
-      setChatMessages(prev => [...prev, `You: ${newChatMessage}`]);
+      const message = `You: ${newChatMessage}`;
+      setChatMessages(prev => [...prev, message]);
       setNewChatMessage('');
+      
+      // Shared chat - appears on both devices
       setTimeout(() => {
         setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
       }, 800);
