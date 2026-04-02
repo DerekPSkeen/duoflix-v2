@@ -223,7 +223,7 @@ function App() {
       setChatMessages(prev => [...prev, message]);
       setNewChatMessage('');
       
-      // Shared chat simulation - appears on both devices
+      // Shared chat simulation - the partner reply will appear on both devices
       setTimeout(() => {
         setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
       }, 800);
