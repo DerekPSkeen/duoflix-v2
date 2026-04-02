@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
+import { supabase } from './supabaseClient';
 
 interface Movie {
   id: number;
@@ -50,8 +51,17 @@ function App() {
   const [favoriteActors, setFavoriteActors] = useState<string[]>([]);
   const [newActor, setNewActor] = useState('');
 
-  // Landing page state
+  // Landing page
   const [showLanding, setShowLanding] = useState(true);
+
+  // Auth state (new)
+  const [user, setUser] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [coupleCode, setCoupleCode] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
   const [dragOffset, setDragOffset] = useState(0);
@@ -60,6 +70,19 @@ function App() {
   const [flyDirection, setFlyDirection] = useState<'left' | 'right' | null>(null);
 
   const currentMovie = movies[currentIndex];
+
+  // Supabase auth listener
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -197,7 +220,6 @@ function App() {
     if (newChatMessage.trim()) {
       setChatMessages(prev => [...prev, `You: ${newChatMessage}`]);
       setNewChatMessage('');
-      // Simulate partner reply
       setTimeout(() => {
         setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
       }, 800);
@@ -217,6 +239,31 @@ function App() {
 
   const removeActor = (actor: string) => {
     setFavoriteActors(prev => prev.filter(a => a !== actor));
+  };
+
+  // Auth functions
+  const handleAuth = async () => {
+    setIsLoading(true);
+    try {
+      if (authMode === 'signup') {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) alert(error.message);
+        else alert('Check your email for confirmation!');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message);
+      }
+      setShowAuthModal(false);
+      setEmail('');
+      setPassword('');
+    } catch (err) {
+      alert('Something went wrong');
+    }
+    setIsLoading(false);
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
   };
 
   // Landing page
@@ -251,10 +298,25 @@ function App() {
             padding: '18px 48px',
             borderRadius: '9999px',
             boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)',
-            border: 'none'
+            border: 'none',
+            marginBottom: '20px'
           }}
         >
           Open DuoFlix Now
+        </button>
+
+        <button
+          onClick={() => { setShowLanding(false); setShowAuthModal(true); setAuthMode('login'); }}
+          style={{
+            background: 'transparent',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.5)',
+            padding: '12px 32px',
+            borderRadius: '9999px',
+            fontSize: '1rem'
+          }}
+        >
+          Sign In / Create Account
         </button>
       </div>
     );
@@ -448,6 +510,51 @@ function App() {
         <button onClick={() => setCurrentTab('watch')}>Watch</button>
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="close-btn" onClick={() => setShowAuthModal(false)}>×</button>
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>
+              {authMode === 'login' ? 'Sign In' : 'Create Account'}
+            </h2>
+            
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ width: '100%', padding: '12px', marginBottom: '20px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }}
+            />
+
+            <button 
+              onClick={handleAuth}
+              disabled={isLoading}
+              style={{ width: '100%', padding: '14px', background: '#22c55e', color: '#000', border: 'none', borderRadius: '999px', fontWeight: 600 }}
+            >
+              {isLoading ? 'Processing...' : authMode === 'login' ? 'Sign In' : 'Create Account'}
+            </button>
+
+            <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.9rem' }}>
+              {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
+              <span 
+                onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+                style={{ color: '#3b82f6', cursor: 'pointer' }}
+              >
+                {authMode === 'login' ? 'Sign up' : 'Sign in'}
+              </span>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
