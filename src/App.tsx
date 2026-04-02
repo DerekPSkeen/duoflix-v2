@@ -36,6 +36,9 @@ function App() {
   const [isInRoom, setIsInRoom] = useState(false);
   const [partnerJoined, setPartnerJoined] = useState(false);
 
+  // Realtime channel ref
+  const channelRef = useRef<any>(null);
+
   // Preferences
   const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
@@ -71,7 +74,7 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Supabase auth listener
+  // Supabase auth listener (unchanged)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -83,6 +86,37 @@ function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Realtime chat subscription (new - only for Watch tab)
+  useEffect(() => {
+    if (!isInRoom || !roomCode) {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      return;
+    }
+
+    const channelName = `room-${roomCode}`;
+    const channel = supabase.channel(channelName);
+
+    channel
+      .on('broadcast', { event: 'chat' }, ({ payload }) => {
+        if (payload.message) {
+          setChatMessages(prev => [...prev, payload.message]);
+        }
+      })
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [isInRoom, roomCode]);
 
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -218,15 +252,18 @@ function App() {
   };
 
   const sendChatMessage = () => {
-    if (newChatMessage.trim() && isInRoom) {
+    if (newChatMessage.trim() && isInRoom && roomCode && channelRef.current) {
       const message = `You: ${newChatMessage}`;
       setChatMessages(prev => [...prev, message]);
+
+      // Broadcast to all in the room (including self for consistency)
+      channelRef.current.send({
+        type: 'broadcast',
+        event: 'chat',
+        payload: { message: `Partner: ${newChatMessage}` }
+      });
+
       setNewChatMessage('');
-      
-      // Shared chat simulation - the partner reply will appear on both devices
-      setTimeout(() => {
-        setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
-      }, 800);
     }
   };
 
@@ -245,7 +282,7 @@ function App() {
     setFavoriteActors(prev => prev.filter(a => a !== actor));
   };
 
-  // Auth functions
+  // Auth functions (unchanged)
   const handleAuth = async () => {
     setIsLoading(true);
     try {
@@ -270,7 +307,7 @@ function App() {
     await supabase.auth.signOut();
   };
 
-  // Landing page
+  // Landing page (unchanged)
   if (showLanding) {
     return (
       <div className="app" style={{ 
@@ -476,7 +513,12 @@ function App() {
               <button 
                 style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white' }}
                 className="watch-btn" 
-                onClick={() => { setIsInRoom(false); setRoomCode(null); setChatMessages([]); setRoomStatus('Create or join a room to watch together!'); }}
+                onClick={() => { 
+                  setIsInRoom(false); 
+                  setRoomCode(null); 
+                  setChatMessages([]); 
+                  setRoomStatus('Create or join a room to watch together!'); 
+                }}
               >
                 Leave Room
               </button>
@@ -527,7 +569,7 @@ function App() {
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
 
-      {/* Auth Modal */}
+      {/* Auth Modal (unchanged) */}
       {showAuthModal && (
         <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
