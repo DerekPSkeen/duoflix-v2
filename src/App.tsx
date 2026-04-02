@@ -223,7 +223,7 @@ function App() {
       setChatMessages(prev => [...prev, message]);
       setNewChatMessage('');
       
-      // Shared chat - appears on both devices in the same room
+      // Shared chat simulation - appears on both devices
       setTimeout(() => {
         setChatMessages(prev => [...prev, `Partner: That sounds good!`]);
       }, 800);
