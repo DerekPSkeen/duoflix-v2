@@ -27,13 +27,14 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together
+  // Watch Together + Couple Linking
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
   const [chatMessages, setChatMessages] = useState<string[]>([]);
   const [newChatMessage, setNewChatMessage] = useState('');
   const [isInRoom, setIsInRoom] = useState(false);
+  const [partnerJoined, setPartnerJoined] = useState(false);
 
   // Preferences
   const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
@@ -60,7 +61,6 @@ function App() {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [coupleCode, setCoupleCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -197,6 +197,7 @@ function App() {
     }
   };
 
+  // Updated Create Room - now creates couple code
   const createRoom = () => {
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
     setRoomCode(newCode);
@@ -211,6 +212,7 @@ function App() {
       setRoomStatus(`Joined room ${joinedCode}`);
       setIsInRoom(true);
       setChatMessages([`Joined room ${joinedCode}. Say hello!`]);
+      setPartnerJoined(true);
     } else {
       setRoomStatus('Please enter a valid 6-digit code');
     }
@@ -324,7 +326,6 @@ function App() {
 
   return (
     <div className="app">
-      {/* Updated Header - only change */}
       <div className="header">
         <div 
           className="logo" 
