@@ -18,7 +18,9 @@ interface Actor {
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [likedMovies, setLikedMovies] = useState<Movie[]>([]);
+  const [likedMovies, setLikedMovies] = useState<Movie[]>([]);           // My likes
+  const [sharedLikes, setSharedLikes] = useState<Movie[]>([]);           // Partner's likes (received via broadcast)
+  const [mutualMatches, setMutualMatches] = useState<Movie[]>([]);       // Movies both liked
   const [lastLiked, setLastLiked] = useState<Movie | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
@@ -36,10 +38,10 @@ function App() {
   const [isInRoom, setIsInRoom] = useState(false);
   const [partnerJoined, setPartnerJoined] = useState(false);
 
-  // Realtime channel ref
+  // Realtime channel
   const channelRef = useRef<any>(null);
 
-  // Preferences
+  // Preferences (unchanged)
   const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
@@ -87,7 +89,7 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Realtime chat subscription (new - only for Watch tab)
+  // Realtime channel for chat + likes (only when in room)
   useEffect(() => {
     if (!isInRoom || !roomCode) {
       if (channelRef.current) {
@@ -100,14 +102,25 @@ function App() {
     const channelName = `room-${roomCode}`;
     const channel = supabase.channel(channelName);
 
-    channel
-      .on('broadcast', { event: 'chat' }, ({ payload }) => {
-        if (payload.message) {
-          setChatMessages(prev => [...prev, payload.message]);
-        }
-      })
-      .subscribe();
+    // Chat broadcast (existing)
+    channel.on('broadcast', { event: 'chat' }, ({ payload }) => {
+      if (payload.message) {
+        setChatMessages(prev => [...prev, payload.message]);
+      }
+    });
 
+    // New: Like broadcast from partner
+    channel.on('broadcast', { event: 'like' }, ({ payload }) => {
+      if (payload.movie) {
+        setSharedLikes(prev => {
+          const alreadyExists = prev.some(m => m.id === payload.movie.id);
+          if (alreadyExists) return prev;
+          return [...prev, payload.movie];
+        });
+      }
+    });
+
+    channel.subscribe();
     channelRef.current = channel;
 
     return () => {
@@ -117,6 +130,14 @@ function App() {
       }
     };
   }, [isInRoom, roomCode]);
+
+  // Calculate mutual matches whenever likes change
+  useEffect(() => {
+    const mutual = likedMovies.filter(myMovie => 
+      sharedLikes.some(partnerMovie => partnerMovie.id === myMovie.id)
+    );
+    setMutualMatches(mutual);
+  }, [likedMovies, sharedLikes]);
 
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -183,13 +204,29 @@ function App() {
 
   const triggerFlyOff = (liked: boolean) => {
     if (!currentMovie || !cardRef.current) return;
+
     if (liked) {
-      setLikedMovies(prev => [...prev, currentMovie]);
+      setLikedMovies(prev => {
+        const alreadyLiked = prev.some(m => m.id === currentMovie.id);
+        if (alreadyLiked) return prev;
+        return [...prev, currentMovie];
+      });
       setLastLiked(currentMovie);
+
+      // Broadcast my like to partner (only if in room)
+      if (isInRoom && roomCode && channelRef.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'like',
+          payload: { movie: currentMovie }
+        });
+      }
     }
+
     const card = cardRef.current;
     setIsFlyingOff(true);
     setFlyDirection(liked ? 'right' : 'left');
+
     setTimeout(() => {
       setCurrentIndex(prev => (prev + 1) % movies.length);
       setIsFlyingOff(false);
@@ -256,7 +293,6 @@ function App() {
       const message = `You: ${newChatMessage}`;
       setChatMessages(prev => [...prev, message]);
 
-      // Broadcast to all in the room (including self for consistency)
       channelRef.current.send({
         type: 'broadcast',
         event: 'chat',
@@ -282,7 +318,6 @@ function App() {
     setFavoriteActors(prev => prev.filter(a => a !== actor));
   };
 
-  // Auth functions (unchanged)
   const handleAuth = async () => {
     setIsLoading(true);
     try {
@@ -449,6 +484,22 @@ function App() {
             <button className={matchesSubTab === 'mutual' ? 'active' : ''} onClick={() => setMatchesSubTab('mutual')}>Mutual Matches</button>
             <button className={matchesSubTab === 'my-likes' ? 'active' : ''} onClick={() => setMatchesSubTab('my-likes')}>My Likes</button>
           </div>
+
+          {matchesSubTab === 'mutual' && (
+            <div className="matches-grid">
+              {mutualMatches.length > 0 ? (
+                mutualMatches.map(movie => (
+                  <div key={movie.id} className="match-card">
+                    <img className="match-img" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
+                    <div className="match-overlay">{movie.title}</div>
+                  </div>
+                ))
+              ) : (
+                <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>No mutual matches yet. Both swipe right on the same movie!</p>
+              )}
+            </div>
+          )}
+
           {matchesSubTab === 'my-likes' && (
             <div className="matches-grid">
               {likedMovies.map(movie => (
