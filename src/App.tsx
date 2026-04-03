@@ -44,7 +44,7 @@ function App() {
   // Realtime channel
   const channelRef = useRef<any>(null);
 
-  // Preferences (unchanged)
+  // Preferences
   const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
@@ -79,17 +79,12 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Supabase auth listener + load persistent data
+  // Auth + persistent data loading
   useEffect(() => {
-    const loadUserData = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        await loadPersistentCoupleCode(session.user);
-      }
-    };
-
-    loadUserData();
+      if (session?.user) loadPersistentCoupleCode(session.user);
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
@@ -110,39 +105,34 @@ function App() {
     if (!currentUser) return;
     const { data } = await supabase.auth.getUser();
     let code = data.user?.user_metadata?.couple_code;
-
     if (!code) {
       code = Math.floor(100000 + Math.random() * 900000).toString();
-      await supabase.auth.updateUser({
-        data: { couple_code: code }
-      });
+      await supabase.auth.updateUser({ data: { couple_code: code } });
     }
-
     setCoupleCode(code);
-    // Load likes after coupleCode is set
-    loadLikes(code);
   };
 
-  const loadLikes = async (code: string | null) => {
-    if (!code || !user) return;
+  // Load likes whenever coupleCode is ready
+  useEffect(() => {
+    if (coupleCode && user) {
+      loadLikes();
+    }
+  }, [coupleCode, user]);
 
+  const loadLikes = async () => {
+    if (!coupleCode) return;
     const { data, error } = await supabase
       .from('likes')
       .select('movie')
-      .eq('couple_code', code);
-
-    if (error) {
-      console.error('Load likes error:', error);
-      return;
-    }
-
+      .eq('couple_code', coupleCode);
+    if (error) console.error('Load likes error:', error);
     if (data) {
       const loaded = data.map((item: any) => item.movie);
       setLikedMovies(loaded);
     }
   };
 
-  // Realtime channel (unchanged from previous working version)
+  // Realtime channel (unchanged)
   useEffect(() => {
     if (!isInRoom || !roomCode) {
       if (channelRef.current) {
@@ -256,7 +246,6 @@ function App() {
         setLikedMovies(prev => [...prev, currentMovie]);
         setLastLiked(currentMovie);
 
-        // Save to Supabase
         if (coupleCode && user) {
           supabase
             .from('likes')
@@ -268,7 +257,6 @@ function App() {
             });
         }
 
-        // Broadcast realtime
         if (isInRoom && roomCode && channelRef.current) {
           channelRef.current.send({
             type: 'broadcast',
@@ -388,15 +376,15 @@ function App() {
       setPassword('');
     } catch (err) {
       alert('Something went wrong');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
-  // Landing page (unchanged)
   if (showLanding) {
     return (
       <div className="app" style={{ 
@@ -672,7 +660,6 @@ function App() {
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
 
-      {/* Auth Modal */}
       {showAuthModal && (
         <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
