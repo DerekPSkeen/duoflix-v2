@@ -251,7 +251,7 @@ function App() {
         setLikedMovies(prev => [...prev, currentMovie]);
         setLastLiked(currentMovie);
 
-        // Save to Supabase if we have a coupleCode
+        // Save to Supabase
         if (coupleCode && user) {
           supabase
             .from('likes')
@@ -260,9 +260,6 @@ function App() {
               couple_code: coupleCode,
               movie_id: currentMovie.id,
               movie: currentMovie
-            })
-            .then(({ error }) => {
-              if (error) console.error('Save like error:', error);
             });
         }
 
@@ -684,4 +681,38 @@ function App() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#111', border: '1px solid #444', borderRadius
+              style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }}
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ width: '100%', padding: '12px', marginBottom: '20px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }}
+            />
+
+            <button 
+              onClick={handleAuth}
+              disabled={isLoading}
+              style={{ width: '100%', padding: '14px', background: '#22c55e', color: '#000', border: 'none', borderRadius: '999px', fontWeight: 600 }}
+            >
+              {isLoading ? 'Processing...' : authMode === 'login' ? 'Sign In' : 'Create Account'}
+            </button>
+
+            <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.9rem' }}>
+              {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
+              <span 
+                onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
+                style={{ color: '#3b82f6', cursor: 'pointer' }}
+              >
+                {authMode === 'login' ? 'Sign up' : 'Sign in'}
+              </span>
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
