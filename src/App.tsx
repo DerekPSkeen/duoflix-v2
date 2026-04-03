@@ -79,7 +79,7 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Auth + persistent data loading
+  // Auth listener + persistent data loading
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -112,7 +112,7 @@ function App() {
     setCoupleCode(code);
   };
 
-  // Load likes whenever coupleCode is ready
+  // Load likes once coupleCode and user are both ready
   useEffect(() => {
     if (coupleCode && user) {
       loadLikes();
@@ -120,7 +120,7 @@ function App() {
   }, [coupleCode, user]);
 
   const loadLikes = async () => {
-    if (!coupleCode) return;
+    if (!coupleCode || !user) return;
     const { data, error } = await supabase
       .from('likes')
       .select('movie')
@@ -132,7 +132,7 @@ function App() {
     }
   };
 
-  // Realtime channel (unchanged)
+  // Realtime channel (chat + likes) - unchanged
   useEffect(() => {
     if (!isInRoom || !roomCode) {
       if (channelRef.current) {
@@ -660,6 +660,7 @@ function App() {
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
 
+      {/* Auth Modal */}
       {showAuthModal && (
         <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
