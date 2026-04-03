@@ -79,7 +79,7 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Auth listener + persistent data loading
+  // Auth listener
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -112,7 +112,7 @@ function App() {
     setCoupleCode(code);
   };
 
-  // Load likes once coupleCode and user are both ready
+  // Load likes once coupleCode is set
   useEffect(() => {
     if (coupleCode && user) {
       loadLikes();
@@ -132,7 +132,7 @@ function App() {
     }
   };
 
-  // Realtime channel (chat + likes) - unchanged
+  // Realtime channel (unchanged)
   useEffect(() => {
     if (!isInRoom || !roomCode) {
       if (channelRef.current) {
@@ -660,7 +660,6 @@ function App() {
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
 
-      {/* Auth Modal */}
       {showAuthModal && (
         <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
