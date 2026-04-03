@@ -29,7 +29,7 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together
+  // Watch Together + Persistent Room
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
@@ -38,7 +38,7 @@ function App() {
   const [isInRoom, setIsInRoom] = useState(false);
   const [partnerJoined, setPartnerJoined] = useState(false);
 
-  // Persistent Couple Code
+  // Persistent Couple Code (used as permanent room identifier)
   const [coupleCode, setCoupleCode] = useState<string | null>(null);
 
   // Realtime channel
@@ -79,7 +79,7 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Auth listener
+  // Auth listener + persistent data loading
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -112,7 +112,7 @@ function App() {
     setCoupleCode(code);
   };
 
-  // Load likes once coupleCode is set
+  // Load likes once coupleCode is ready
   useEffect(() => {
     if (coupleCode && user) {
       loadLikes();
