@@ -18,9 +18,9 @@ interface Actor {
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [likedMovies, setLikedMovies] = useState<Movie[]>([]);           // My likes
-  const [sharedLikes, setSharedLikes] = useState<Movie[]>([]);           // Partner's likes (received via broadcast)
-  const [mutualMatches, setMutualMatches] = useState<Movie[]>([]);       // Movies both liked
+  const [likedMovies, setLikedMovies] = useState<Movie[]>([]);
+  const [sharedLikes, setSharedLikes] = useState<Movie[]>([]);
+  const [mutualMatches, setMutualMatches] = useState<Movie[]>([]);
   const [lastLiked, setLastLiked] = useState<Movie | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
@@ -38,10 +38,13 @@ function App() {
   const [isInRoom, setIsInRoom] = useState(false);
   const [partnerJoined, setPartnerJoined] = useState(false);
 
+  // Persistent Couple Code
+  const [coupleCode, setCoupleCode] = useState<string | null>(null);
+
   // Realtime channel
   const channelRef = useRef<any>(null);
 
-  // Preferences (unchanged)
+  // Preferences
   const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
@@ -76,20 +79,60 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Supabase auth listener (unchanged)
+  // Supabase auth listener + load persistent coupleCode + likes
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        loadPersistentCoupleCode(session.user);
+        loadLikes(session.user);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        loadPersistentCoupleCode(session.user);
+        loadLikes(session.user);
+      } else {
+        setCoupleCode(null);
+        setLikedMovies([]);
+        setSharedLikes([]);
+        setMutualMatches([]);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Realtime channel for chat + likes (only when in room)
+  const loadPersistentCoupleCode = async (currentUser: any) => {
+    if (!currentUser) return;
+    const { data } = await supabase.auth.getUser();
+    const existingCode = data.user?.user_metadata?.couple_code;
+    if (existingCode) {
+      setCoupleCode(existingCode);
+    } else {
+      const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+      await supabase.auth.updateUser({
+        data: { couple_code: newCode }
+      });
+      setCoupleCode(newCode);
+    }
+  };
+
+  const loadLikes = async (currentUser: any) => {
+    if (!currentUser || !coupleCode) return;
+    const { data } = await supabase
+      .from('likes')
+      .select('movie')
+      .eq('couple_code', coupleCode);
+    if (data) {
+      const loaded = data.map((item: any) => item.movie);
+      setLikedMovies(loaded);
+    }
+  };
+
+  // Realtime channel for chat + likes
   useEffect(() => {
     if (!isInRoom || !roomCode) {
       if (channelRef.current) {
@@ -102,20 +145,17 @@ function App() {
     const channelName = `room-${roomCode}`;
     const channel = supabase.channel(channelName);
 
-    // Chat broadcast (existing)
     channel.on('broadcast', { event: 'chat' }, ({ payload }) => {
       if (payload.message) {
         setChatMessages(prev => [...prev, payload.message]);
       }
     });
 
-    // New: Like broadcast from partner
     channel.on('broadcast', { event: 'like' }, ({ payload }) => {
       if (payload.movie) {
         setSharedLikes(prev => {
-          const alreadyExists = prev.some(m => m.id === payload.movie.id);
-          if (alreadyExists) return prev;
-          return [...prev, payload.movie];
+          const exists = prev.some(m => m.id === payload.movie.id);
+          return exists ? prev : [...prev, payload.movie];
         });
       }
     });
@@ -131,10 +171,10 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Calculate mutual matches whenever likes change
+  // Calculate mutual matches
   useEffect(() => {
-    const mutual = likedMovies.filter(myMovie => 
-      sharedLikes.some(partnerMovie => partnerMovie.id === myMovie.id)
+    const mutual = likedMovies.filter(my => 
+      sharedLikes.some(partner => partner.id === my.id)
     );
     setMutualMatches(mutual);
   }, [likedMovies, sharedLikes]);
@@ -206,27 +246,39 @@ function App() {
     if (!currentMovie || !cardRef.current) return;
 
     if (liked) {
-      setLikedMovies(prev => {
-        const alreadyLiked = prev.some(m => m.id === currentMovie.id);
-        if (alreadyLiked) return prev;
-        return [...prev, currentMovie];
-      });
-      setLastLiked(currentMovie);
+      const alreadyLiked = likedMovies.some(m => m.id === currentMovie.id);
+      if (!alreadyLiked) {
+        setLikedMovies(prev => [...prev, currentMovie]);
+        setLastLiked(currentMovie);
 
-      // Broadcast my like to partner (only if in room)
-      if (isInRoom && roomCode && channelRef.current) {
-        channelRef.current.send({
-          type: 'broadcast',
-          event: 'like',
-          payload: { movie: currentMovie }
-        });
+        // Save to Supabase if we have a coupleCode
+        if (coupleCode && user) {
+          supabase
+            .from('likes')
+            .insert({
+              user_id: user.id,
+              couple_code: coupleCode,
+              movie_id: currentMovie.id,
+              movie: currentMovie
+            })
+            .then(({ error }) => {
+              if (error) console.error('Save like error:', error);
+            });
+        }
+
+        // Broadcast for realtime
+        if (isInRoom && roomCode && channelRef.current) {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'like',
+            payload: { movie: currentMovie }
+          });
+        }
       }
     }
 
-    const card = cardRef.current;
     setIsFlyingOff(true);
     setFlyDirection(liked ? 'right' : 'left');
-
     setTimeout(() => {
       setCurrentIndex(prev => (prev + 1) % movies.length);
       setIsFlyingOff(false);
@@ -342,7 +394,7 @@ function App() {
     await supabase.auth.signOut();
   };
 
-  // Landing page (unchanged)
+  // Landing page
   if (showLanding) {
     return (
       <div className="app" style={{ 
@@ -484,7 +536,6 @@ function App() {
             <button className={matchesSubTab === 'mutual' ? 'active' : ''} onClick={() => setMatchesSubTab('mutual')}>Mutual Matches</button>
             <button className={matchesSubTab === 'my-likes' ? 'active' : ''} onClick={() => setMatchesSubTab('my-likes')}>My Likes</button>
           </div>
-
           {matchesSubTab === 'mutual' && (
             <div className="matches-grid">
               {mutualMatches.length > 0 ? (
@@ -499,7 +550,6 @@ function App() {
               )}
             </div>
           )}
-
           {matchesSubTab === 'my-likes' && (
             <div className="matches-grid">
               {likedMovies.map(movie => (
@@ -620,7 +670,7 @@ function App() {
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
 
-      {/* Auth Modal (unchanged) */}
+      {/* Auth Modal */}
       {showAuthModal && (
         <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -634,38 +684,4 @@ function App() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ width: '100%', padding: '12px', marginBottom: '20px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }}
-            />
-
-            <button 
-              onClick={handleAuth}
-              disabled={isLoading}
-              style={{ width: '100%', padding: '14px', background: '#22c55e', color: '#000', border: 'none', borderRadius: '999px', fontWeight: 600 }}
-            >
-              {isLoading ? 'Processing...' : authMode === 'login' ? 'Sign In' : 'Create Account'}
-            </button>
-
-            <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.9rem' }}>
-              {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
-              <span 
-                onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-                style={{ color: '#3b82f6', cursor: 'pointer' }}
-              >
-                {authMode === 'login' ? 'Sign up' : 'Sign in'}
-              </span>
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default App;
+              style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#111', border: '1px solid #444', borderRadius
