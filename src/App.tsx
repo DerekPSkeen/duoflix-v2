@@ -29,7 +29,7 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together + Persistent Room
+  // Watch Together
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
@@ -38,7 +38,7 @@ function App() {
   const [isInRoom, setIsInRoom] = useState(false);
   const [partnerJoined, setPartnerJoined] = useState(false);
 
-  // Persistent Couple Code (used as permanent room identifier)
+  // Persistent Couple Code - temporarily disabled to restore working login
   const [coupleCode, setCoupleCode] = useState<string | null>(null);
 
   // Realtime channel
@@ -79,58 +79,18 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Auth listener + persistent data loading
+  // Auth listener - simplified to prevent stuck processing
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) loadPersistentCoupleCode(session.user);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        await loadPersistentCoupleCode(session.user);
-      } else {
-        setCoupleCode(null);
-        setLikedMovies([]);
-        setSharedLikes([]);
-        setMutualMatches([]);
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const loadPersistentCoupleCode = async (currentUser: any) => {
-    if (!currentUser) return;
-    const { data } = await supabase.auth.getUser();
-    let code = data.user?.user_metadata?.couple_code;
-    if (!code) {
-      code = Math.floor(100000 + Math.random() * 900000).toString();
-      await supabase.auth.updateUser({ data: { couple_code: code } });
-    }
-    setCoupleCode(code);
-  };
-
-  // Load likes once coupleCode is ready
-  useEffect(() => {
-    if (coupleCode && user) {
-      loadLikes();
-    }
-  }, [coupleCode, user]);
-
-  const loadLikes = async () => {
-    if (!coupleCode || !user) return;
-    const { data, error } = await supabase
-      .from('likes')
-      .select('movie')
-      .eq('couple_code', coupleCode);
-    if (error) console.error('Load likes error:', error);
-    if (data) {
-      const loaded = data.map((item: any) => item.movie);
-      setLikedMovies(loaded);
-    }
-  };
 
   // Realtime channel (unchanged)
   useEffect(() => {
@@ -245,17 +205,6 @@ function App() {
       if (!alreadyLiked) {
         setLikedMovies(prev => [...prev, currentMovie]);
         setLastLiked(currentMovie);
-
-        if (coupleCode && user) {
-          supabase
-            .from('likes')
-            .insert({
-              user_id: user.id,
-              couple_code: coupleCode,
-              movie_id: currentMovie.id,
-              movie: currentMovie
-            });
-        }
 
         if (isInRoom && roomCode && channelRef.current) {
           channelRef.current.send({
