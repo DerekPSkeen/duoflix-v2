@@ -29,8 +29,9 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together
+  // Watch Together + Persistent Couple Code
   const [roomCode, setRoomCode] = useState<string | null>(null);
+  const [coupleCode, setCoupleCode] = useState<string | null>(null);   // permanent couple code
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
   const [chatMessages, setChatMessages] = useState<string[]>([]);
@@ -128,6 +129,30 @@ function App() {
     setMutualMatches(mutual);
   }, [likedMovies, sharedLikes]);
 
+  // Load persistent likes from Supabase when coupleCode is available
+  useEffect(() => {
+    if (!coupleCode) return;
+
+    supabase
+      .from('couple_likes')
+      .select('movie_data')
+      .eq('couple_code', coupleCode)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Failed to load persistent likes:', error);
+          return;
+        }
+        if (data && data.length > 0) {
+          const loadedMovies: Movie[] = data.map((item: any) => item.movie_data as Movie);
+          setLikedMovies(prev => {
+            const existingIds = new Set(prev.map(m => m.id));
+            const newOnes = loadedMovies.filter((m: Movie) => !existingIds.has(m.id));
+            return [...prev, ...newOnes];
+          });
+        }
+      });
+  }, [coupleCode]);
+
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
@@ -196,10 +221,25 @@ function App() {
 
     if (liked) {
       const alreadyLiked = likedMovies.some(m => m.id === currentMovie.id);
-      if (!alreadyLiked) {
+      if (!alreadyLiked && currentMovie) {
         setLikedMovies(prev => [...prev, currentMovie]);
         setLastLiked(currentMovie);
 
+        // Save to Supabase (works for guests + logged-in users)
+        if (coupleCode) {
+          supabase
+            .from('couple_likes')
+            .upsert({
+              couple_code: coupleCode,
+              movie_id: currentMovie.id,
+              movie_data: currentMovie
+            }, { onConflict: 'couple_code,movie_id' })
+            .then(({ error }) => {
+              if (error) console.error('Failed to save persistent like:', error);
+            });
+        }
+
+        // Realtime broadcast for instant mutual match
         if (isInRoom && roomCode && channelRef.current) {
           channelRef.current.send({
             type: 'broadcast',
@@ -256,7 +296,9 @@ function App() {
   const createRoom = () => {
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
     setRoomCode(newCode);
-    setRoomStatus(`Room created! Code: ${newCode}`);
+    setCoupleCode(newCode);
+    localStorage.setItem('duoflix_couple_code', newCode);
+    setRoomStatus(`Room created! Code: ${newCode} (permanent couple code)`);
     setIsInRoom(true);
     setChatMessages([`Room ${newCode} created. Share this code with your partner.`]);
   };
@@ -264,7 +306,9 @@ function App() {
   const joinRoom = () => {
     if (joinedCode.length === 6) {
       setRoomCode(joinedCode);
-      setRoomStatus(`Joined room ${joinedCode}`);
+      setCoupleCode(joinedCode);
+      localStorage.setItem('duoflix_couple_code', joinedCode);
+      setRoomStatus(`Joined room ${joinedCode} (couple code saved)`);
       setIsInRoom(true);
       setChatMessages([`Joined room ${joinedCode}. Say hello!`]);
     } else {
