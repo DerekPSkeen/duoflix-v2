@@ -73,7 +73,7 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Clean auth listener - no persistence calls
+  // Clean auth listener
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -325,53 +325,14 @@ function App() {
 
   if (showLanding) {
     return (
-      <div className="app" style={{ 
-        height: '100dvh', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        textAlign: 'center', 
-        background: 'linear-gradient(180deg, #111 0%, #000 100%)' 
-      }}>
-        <div style={{ 
-          fontSize: '2.4rem', 
-          lineHeight: 1.1, 
-          fontWeight: 700, 
-          letterSpacing: '-0.03em', 
-          maxWidth: '320px', 
-          marginBottom: '48px' 
-        }}>
+      <div className="app" style={{ height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', background: 'linear-gradient(180deg, #111 0%, #000 100%)' }}>
+        <div style={{ fontSize: '2.4rem', lineHeight: 1.1, fontWeight: 700, letterSpacing: '-0.03em', maxWidth: '320px', marginBottom: '48px' }}>
           Stop arguing.<br />Start watching together.
         </div>
-        <button
-          onClick={() => setShowLanding(false)}
-          style={{
-            background: '#fff',
-            color: '#000',
-            fontWeight: 600,
-            fontSize: '1.25rem',
-            padding: '18px 48px',
-            borderRadius: '9999px',
-            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)',
-            border: 'none',
-            marginBottom: '20px'
-          }}
-        >
+        <button onClick={() => setShowLanding(false)} style={{ background: '#fff', color: '#000', fontWeight: 600, fontSize: '1.25rem', padding: '18px 48px', borderRadius: '9999px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)', border: 'none', marginBottom: '20px' }}>
           Open DuoFlix Now
         </button>
-
-        <button
-          onClick={() => { setShowLanding(false); setShowAuthModal(true); setAuthMode('login'); }}
-          style={{
-            background: 'transparent',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.5)',
-            padding: '12px 32px',
-            borderRadius: '9999px',
-            fontSize: '1rem'
-          }}
-        >
+        <button onClick={() => { setShowLanding(false); setShowAuthModal(true); setAuthMode('login'); }} style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.5)', padding: '12px 32px', borderRadius: '9999px', fontSize: '1rem' }}>
           Sign In / Create Account
         </button>
       </div>
@@ -396,10 +357,7 @@ function App() {
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
-                style={{ 
-                  transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)`,
-                  touchAction: 'none' 
-                }}
+                style={{ transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)`, touchAction: 'none' }}
               >
                 <img
                   className="poster-img"
@@ -482,63 +440,24 @@ function App() {
       {currentTab === 'watch' && (
         <div className="watch-page">
           <h2>Watch Together</h2>
-          
           {!isInRoom ? (
             <>
               <p>{roomStatus}</p>
-              
-              <input 
-                type="text" 
-                className="room-input" 
-                value={joinedCode} 
-                onChange={e => setJoinedCode(e.target.value)} 
-                placeholder="Enter 6-digit room code" 
-                maxLength={6}
-              />
-              
-              <button className="watch-btn join" onClick={joinRoom}>
-                Join Room
-              </button>
-              
-              <button className="watch-btn create" onClick={createRoom}>
-                Create New Room
-              </button>
+              <input type="text" className="room-input" value={joinedCode} onChange={e => setJoinedCode(e.target.value)} placeholder="Enter 6-digit room code" maxLength={6} />
+              <button className="watch-btn join" onClick={joinRoom}>Join Room</button>
+              <button className="watch-btn create" onClick={createRoom}>Create New Room</button>
             </>
           ) : (
             <>
               <p>Room Code: <strong>{roomCode}</strong></p>
               <div style={{ margin: '2rem 0', padding: '1rem', background: '#111', borderRadius: '12px', maxHeight: '300px', overflowY: 'auto' }}>
-                {chatMessages.map((msg, i) => (
-                  <div key={i} style={{ marginBottom: '0.8rem', textAlign: 'left' }}>{msg}</div>
-                ))}
+                {chatMessages.map((msg, i) => <div key={i} style={{ marginBottom: '0.8rem', textAlign: 'left' }}>{msg}</div>)}
               </div>
-              
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input 
-                  type="text" 
-                  value={newChatMessage} 
-                  onChange={e => setNewChatMessage(e.target.value)}
-                  onKeyPress={e => e.key === 'Enter' && sendChatMessage()}
-                  placeholder="Type a message..." 
-                  style={{ flex: 1, padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white' }}
-                />
-                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '12px' }}>
-                  Send
-                </button>
+                <input type="text" value={newChatMessage} onChange={e => setNewChatMessage(e.target.value)} onKeyPress={e => e.key === 'Enter' && sendChatMessage()} placeholder="Type a message..." style={{ flex: 1, padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white' }} />
+                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '12px' }}>Send</button>
               </div>
-              
-              <button 
-                style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white' }}
-                className="watch-btn" 
-                onClick={() => { 
-                  setIsInRoom(false); 
-                  setRoomCode(null); 
-                  setChatMessages([]); 
-                  setRoomStatus('Create or join a room to watch together!'); 
-                }}
-              >
-                Leave Room
-              </button>
+              <button style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white' }} className="watch-btn" onClick={() => { setIsInRoom(false); setRoomCode(null); setChatMessages([]); setRoomStatus('Create or join a room to watch together!'); }}>Leave Room</button>
             </>
           )}
         </div>
@@ -590,41 +509,15 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <button className="close-btn" onClick={() => setShowAuthModal(false)}>×</button>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>
-              {authMode === 'login' ? 'Sign In' : 'Create Account'}
-            </h2>
-            
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ width: '100%', padding: '12px', marginBottom: '20px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }}
-            />
-
-            <button 
-              onClick={handleAuth}
-              disabled={isLoading}
-              style={{ width: '100%', padding: '14px', background: '#22c55e', color: '#000', border: 'none', borderRadius: '999px', fontWeight: 600 }}
-            >
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>{authMode === 'login' ? 'Sign In' : 'Create Account'}</h2>
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }} />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: '100%', padding: '12px', marginBottom: '20px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }} />
+            <button onClick={handleAuth} disabled={isLoading} style={{ width: '100%', padding: '14px', background: '#22c55e', color: '#000', border: 'none', borderRadius: '999px', fontWeight: 600 }}>
               {isLoading ? 'Processing...' : authMode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
-
             <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.9rem' }}>
               {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
-              <span 
-                onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-                style={{ color: '#3b82f6', cursor: 'pointer' }}
-              >
-                {authMode === 'login' ? 'Sign up' : 'Sign in'}
-              </span>
+              <span onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')} style={{ color: '#3b82f6', cursor: 'pointer' }}>{authMode === 'login' ? 'Sign up' : 'Sign in'}</span>
             </p>
           </div>
         </div>
