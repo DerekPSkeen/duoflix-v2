@@ -36,10 +36,6 @@ function App() {
   const [chatMessages, setChatMessages] = useState<string[]>([]);
   const [newChatMessage, setNewChatMessage] = useState('');
   const [isInRoom, setIsInRoom] = useState(false);
-  const [partnerJoined, setPartnerJoined] = useState(false);
-
-  // Persistent Couple Code
-  const [coupleCode, setCoupleCode] = useState<string | null>(null);
 
   // Realtime channel
   const channelRef = useRef<any>(null);
@@ -60,10 +56,8 @@ function App() {
   const [favoriteActors, setFavoriteActors] = useState<string[]>([]);
   const [newActor, setNewActor] = useState('');
 
-  // Landing page
+  // Landing + Auth
   const [showLanding, setShowLanding] = useState(true);
-
-  // Auth state
   const [user, setUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
@@ -79,60 +73,20 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Auth listener
+  // Clean auth listener - no persistence calls
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) loadPersistentCoupleCode(session.user);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        await loadPersistentCoupleCode(session.user);
-      } else {
-        setCoupleCode(null);
-        setLikedMovies([]);
-        setSharedLikes([]);
-        setMutualMatches([]);
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadPersistentCoupleCode = async (currentUser: any) => {
-    if (!currentUser) return;
-    const { data } = await supabase.auth.getUser();
-    let code = data.user?.user_metadata?.couple_code;
-    if (!code) {
-      code = Math.floor(100000 + Math.random() * 900000).toString();
-      await supabase.auth.updateUser({ data: { couple_code: code } });
-    }
-    setCoupleCode(code);
-  };
-
-  // Load likes once coupleCode is ready
-  useEffect(() => {
-    if (coupleCode && user) {
-      loadLikes();
-    }
-  }, [coupleCode, user]);
-
-  const loadLikes = async () => {
-    if (!coupleCode || !user) return;
-    const { data, error } = await supabase
-      .from('likes')
-      .select('movie')
-      .eq('couple_code', coupleCode);
-    if (error) console.error('Load likes error:', error);
-    if (data) {
-      const loaded = data.map((item: any) => item.movie);
-      setLikedMovies(loaded);
-    }
-  };
-
-  // Realtime channel
+  // Realtime channel for shared chat and likes
   useEffect(() => {
     if (!isInRoom || !roomCode) {
       if (channelRef.current) {
@@ -166,7 +120,7 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Calculate mutual matches
+  // Mutual matches
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
@@ -246,17 +200,6 @@ function App() {
         setLikedMovies(prev => [...prev, currentMovie]);
         setLastLiked(currentMovie);
 
-        if (coupleCode && user) {
-          supabase
-            .from('likes')
-            .insert({
-              user_id: user.id,
-              couple_code: coupleCode,
-              movie_id: currentMovie.id,
-              movie: currentMovie
-            });
-        }
-
         if (isInRoom && roomCode && channelRef.current) {
           channelRef.current.send({
             type: 'broadcast',
@@ -324,7 +267,6 @@ function App() {
       setRoomStatus(`Joined room ${joinedCode}`);
       setIsInRoom(true);
       setChatMessages([`Joined room ${joinedCode}. Say hello!`]);
-      setPartnerJoined(true);
     } else {
       setRoomStatus('Please enter a valid 6-digit code');
     }
@@ -379,10 +321,6 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
   };
 
   if (showLanding) {
@@ -443,20 +381,8 @@ function App() {
   return (
     <div className="app">
       <div className="header">
-        <div 
-          className="logo" 
-          onClick={() => setShowLanding(true)}
-          style={{ cursor: 'pointer' }}
-        >
-          DuoFlix
-        </div>
-        <div 
-          className="likes" 
-          onClick={() => setCurrentTab('matches')}
-          style={{ cursor: 'pointer' }}
-        >
-          ❤️ Matches
-        </div>
+        <div className="logo" onClick={() => setShowLanding(true)} style={{ cursor: 'pointer' }}>DuoFlix</div>
+        <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>❤️ Matches</div>
       </div>
 
       {currentTab === 'swipe' && (
