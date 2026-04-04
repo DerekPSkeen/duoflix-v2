@@ -31,7 +31,7 @@ function App() {
 
   // Watch Together + Persistent Couple Code
   const [roomCode, setRoomCode] = useState<string | null>(null);
-  const [coupleCode, setCoupleCode] = useState<string | null>(null);   // permanent couple code
+  const [coupleCode, setCoupleCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
   const [roomStatus, setRoomStatus] = useState('Create or join a room to watch together!');
   const [chatMessages, setChatMessages] = useState<string[]>([]);
@@ -86,6 +86,30 @@ function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Load coupleCode: prefer user-linked from Supabase (if logged in), then localStorage
+  useEffect(() => {
+    const loadCoupleCode = async () => {
+      if (user?.id) {
+        const { data } = await supabase
+          .from('user_couple_codes')
+          .select('couple_code')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data?.couple_code) {
+          setCoupleCode(data.couple_code);
+          localStorage.setItem('duoflix_couple_code', data.couple_code);
+          return;
+        }
+      }
+
+      const saved = localStorage.getItem('duoflix_couple_code');
+      if (saved) setCoupleCode(saved);
+    };
+
+    loadCoupleCode();
+  }, [user]);
 
   // Realtime channel for shared chat and likes
   useEffect(() => {
@@ -225,7 +249,6 @@ function App() {
         setLikedMovies(prev => [...prev, currentMovie]);
         setLastLiked(currentMovie);
 
-        // Save to Supabase (works for guests + logged-in users)
         if (coupleCode) {
           supabase
             .from('couple_likes')
@@ -239,7 +262,6 @@ function App() {
             });
         }
 
-        // Realtime broadcast for instant mutual match
         if (isInRoom && roomCode && channelRef.current) {
           channelRef.current.send({
             type: 'broadcast',
@@ -293,21 +315,35 @@ function App() {
     }
   };
 
-  const createRoom = () => {
+  const createRoom = async () => {
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
     setRoomCode(newCode);
     setCoupleCode(newCode);
     localStorage.setItem('duoflix_couple_code', newCode);
+
+    if (user?.id) {
+      await supabase
+        .from('user_couple_codes')
+        .upsert({ user_id: user.id, couple_code: newCode });
+    }
+
     setRoomStatus(`Room created! Code: ${newCode} (permanent couple code)`);
     setIsInRoom(true);
     setChatMessages([`Room ${newCode} created. Share this code with your partner.`]);
   };
 
-  const joinRoom = () => {
+  const joinRoom = async () => {
     if (joinedCode.length === 6) {
       setRoomCode(joinedCode);
       setCoupleCode(joinedCode);
       localStorage.setItem('duoflix_couple_code', joinedCode);
+
+      if (user?.id) {
+        await supabase
+          .from('user_couple_codes')
+          .upsert({ user_id: user.id, couple_code: joinedCode });
+      }
+
       setRoomStatus(`Joined room ${joinedCode} (couple code saved)`);
       setIsInRoom(true);
       setChatMessages([`Joined room ${joinedCode}. Say hello!`]);
