@@ -221,8 +221,12 @@ html, body, #root, .app {
 .watch-page, .matches-page, .prefs-page {
   padding: 85px 1rem 120px;
   overflow-y: auto;
+  overflow-x: hidden;           /* prevents horizontal scroll */
   height: 100dvh;
   text-align: center;
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
 }
 
 .watch-page h2, .matches-page h2, .prefs-page h2 {
@@ -405,8 +409,8 @@ html, body, #root, .app {
 
 .era-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.8rem 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.8rem 1rem;
   margin: 1rem 0;
 }
 
@@ -432,4 +436,7 @@ html, body, #root, .app {
 
 .prefs-container {
   max-width: 100%;
+  width: 100%;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
 }
