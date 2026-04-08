@@ -510,70 +510,62 @@ function App() {
             <button className={matchesSubTab === 'my-likes' ? 'active' : ''} onClick={() => setMatchesSubTab('my-likes')}>My Likes</button>
           </div>
           <div className="matches-grid">
-            {/* Mutual Matches block */}
-            {matchesSubTab === 'mutual' && (
-              mutualMatches.length > 0 ? (
-                mutualMatches.map(movie => (
-                  <div 
-                    key={movie.id} 
-                    className="match-card"
-                    onClick={() => { 
-                      console.log('Clicked Mutual match:', movie.title); // temporary debug
-                      setDetailMovie(movie); 
-                      setShowDetails(true); 
-                    }}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <img 
-                      className="match-img" 
-                      src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
-                      alt={movie.title} 
-                    />
-                    <div className="match-overlay">
-                      <div className="match-title">{movie.title}</div>
-                      <div className="match-meta">
-                        {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
-                      </div>
-                      <div className="match-details-btn">Details</div>
-                    </div>
+            {/* Mutual Matches */}
+            {matchesSubTab === 'mutual' && mutualMatches.map(movie => (
+              <button
+                key={movie.id}
+                className="match-card"
+                onClick={() => {
+                  console.log('Opening modal for mutual match:', movie.title);
+                  setDetailMovie(movie);
+                  setShowDetails(true);
+                }}
+              >
+                <img 
+                  className="match-img" 
+                  src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
+                  alt={movie.title} 
+                />
+                <div className="match-overlay">
+                  <div className="match-title">{movie.title}</div>
+                  <div className="match-meta">
+                    {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
                   </div>
-                ))
-              ) : (
-                <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>No mutual matches yet. Both swipe right on the same movie!</p>
-              )
+                  <div className="match-details-btn">Details</div>
+                </div>
+              </button>
+            ))}
+            {/* My Likes */}
+            {matchesSubTab === 'my-likes' && likedMovies.map(movie => (
+              <button
+                key={movie.id}
+                className="match-card"
+                onClick={() => {
+                  console.log('Opening modal for my like:', movie.title);
+                  setDetailMovie(movie);
+                  setShowDetails(true);
+                }}
+              >
+                <img 
+                  className="match-img" 
+                  src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
+                  alt={movie.title} 
+                />
+                <div className="match-overlay">
+                  <div className="match-title">{movie.title}</div>
+                  <div className="match-meta">
+                    {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
+                  </div>
+                  <div className="match-details-btn">Details</div>
+                </div>
+              </button>
+            ))}
+            {/* Empty states */}
+            {matchesSubTab === 'mutual' && mutualMatches.length === 0 && (
+              <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>No mutual matches yet. Both swipe right on the same movie!</p>
             )}
-
-            {/* My Likes block */}
-            {matchesSubTab === 'my-likes' && (
-              likedMovies.length > 0 ? (
-                likedMovies.map(movie => (
-                  <div 
-                    key={movie.id} 
-                    className="match-card"
-                    onClick={() => { 
-                      console.log('Clicked My Like:', movie.title); // temporary debug
-                      setDetailMovie(movie); 
-                      setShowDetails(true); 
-                    }}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <img 
-                      className="match-img" 
-                      src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
-                      alt={movie.title} 
-                    />
-                    <div className="match-overlay">
-                      <div className="match-title">{movie.title}</div>
-                      <div className="match-meta">
-                        {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
-                      </div>
-                      <div className="match-details-btn">Details</div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>No likes yet. Start swiping!</p>
-              )
+            {matchesSubTab === 'my-likes' && likedMovies.length === 0 && (
+              <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>No likes yet. Start swiping!</p>
             )}
           </div>
         </div>
