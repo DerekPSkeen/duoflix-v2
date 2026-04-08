@@ -510,13 +510,15 @@ function App() {
             <button className={matchesSubTab === 'my-likes' ? 'active' : ''} onClick={() => setMatchesSubTab('my-likes')}>My Likes</button>
           </div>
           <div className="matches-grid">
-            {matchesSubTab === 'mutual' ? (
+            {/* Mutual Matches block */}
+            {matchesSubTab === 'mutual' && (
               mutualMatches.length > 0 ? (
                 mutualMatches.map(movie => (
                   <div 
                     key={movie.id} 
                     className="match-card"
                     onClick={() => { 
+                      console.log('Clicked Mutual match:', movie.title); // temporary debug
                       setDetailMovie(movie); 
                       setShowDetails(true); 
                     }}
@@ -539,13 +541,17 @@ function App() {
               ) : (
                 <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>No mutual matches yet. Both swipe right on the same movie!</p>
               )
-            ) : (
+            )}
+
+            {/* My Likes block */}
+            {matchesSubTab === 'my-likes' && (
               likedMovies.length > 0 ? (
                 likedMovies.map(movie => (
                   <div 
                     key={movie.id} 
                     className="match-card"
                     onClick={() => { 
+                      console.log('Clicked My Like:', movie.title); // temporary debug
                       setDetailMovie(movie); 
                       setShowDetails(true); 
                     }}
