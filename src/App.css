@@ -279,7 +279,7 @@ html, body, #root, .app {
   transform: scale(0.96);
 }
 
-/* Matches page - sub tabs (clean bar just below header, 25% smaller) */
+/* Matches page - sub tabs (clean fixed bar directly below header, 25% smaller) */
 .matches-tabs {
   position: sticky;
   top: calc(10vh + env(safe-area-inset-top, 0px));
