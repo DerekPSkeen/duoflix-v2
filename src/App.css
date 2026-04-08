@@ -222,9 +222,9 @@ html, body, #root, .app {
   width: 100%;
 }
 
-/* Extra top padding for Matches page only so sticky tabs sit correctly below header */
+/* Matches page gets extra top space for the fixed sub-tab bar */
 .matches-page {
-  padding-top: calc(10vh + 20px);
+  padding-top: calc(10vh + 80px);
 }
 
 .watch-page h2, .matches-page h2, .prefs-page h2 {
@@ -279,7 +279,7 @@ html, body, #root, .app {
   transform: scale(0.96);
 }
 
-/* Matches page - sub tabs */
+/* Matches page - sub tabs (clean bar just below header, 25% smaller) */
 .matches-tabs {
   position: sticky;
   top: calc(10vh + env(safe-area-inset-top, 0px));
@@ -288,18 +288,27 @@ html, body, #root, .app {
   background: #111;
   border-radius: 999px;
   overflow: hidden;
-  margin: 0 1rem 1rem;
+  margin: 0 1rem 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  padding-top: 8px;
+  padding: 6px 8px;
+  height: 52px;
+  align-items: center;
 }
 
 .matches-tabs button {
   flex: 1;
-  padding: 0.85rem 1rem;
-  font-size: 1.15rem;
+  padding: 10px 12px;
+  font-size: 0.95rem;
   background: none;
   border: none;
   color: white;
+  border-radius: 999px;
+  transition: all 0.2s;
+  margin: 0 4px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .matches-tabs button.active {
