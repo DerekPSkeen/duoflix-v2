@@ -526,7 +526,6 @@ function App() {
                       className="match-img" 
                       src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
                       alt={movie.title} 
-                      onClick={(e) => e.stopPropagation()} 
                     />
                     <div className="match-overlay">
                       <div className="match-title">{movie.title}</div>
@@ -556,7 +555,6 @@ function App() {
                       className="match-img" 
                       src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
                       alt={movie.title} 
-                      onClick={(e) => e.stopPropagation()} 
                     />
                     <div className="match-overlay">
                       <div className="match-title">{movie.title}</div>
