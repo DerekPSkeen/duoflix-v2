@@ -279,16 +279,18 @@ html, body, #root, .app {
   transform: scale(0.96);
 }
 
-/* Matches page - sub tabs (clean fixed bar directly below header, 25% smaller) */
+/* Matches page - sub tabs as FIXED bar directly below header (no overlay) */
 .matches-tabs {
-  position: sticky;
+  position: fixed;
   top: calc(10vh + env(safe-area-inset-top, 0px));
+  left: 0;
+  right: 0;
   z-index: 40;
   display: flex;
   background: #111;
   border-radius: 999px;
   overflow: hidden;
-  margin: 0 1rem 12px;
+  margin: 0 1rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   padding: 6px 8px;
   height: 52px;
