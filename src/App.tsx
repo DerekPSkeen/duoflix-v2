@@ -515,10 +515,18 @@ function App() {
                 <div 
                   key={movie.id} 
                   className="match-card"
-                  onClick={() => { setDetailMovie(movie); setShowDetails(true); }}
+                  onClick={() => { 
+                    setDetailMovie(movie); 
+                    setShowDetails(true); 
+                  }}
                   style={{ cursor: 'pointer' }}
                 >
-                  <img className="match-img" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
+                  <img 
+                    className="match-img" 
+                    src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
+                    alt={movie.title} 
+                    onClick={(e) => e.stopPropagation()} 
+                  />
                   <div className="match-overlay">
                     <div className="match-title">{movie.title}</div>
                     <div className="match-meta">
