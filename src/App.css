@@ -193,13 +193,6 @@ html, body, #root, .app {
   position: relative;
 }
 
-.modal-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 8px;
-}
-
 .close-btn {
   position: absolute;
   top: 20px;
@@ -221,12 +214,17 @@ html, body, #root, .app {
 .watch-page, .matches-page, .prefs-page {
   padding: 85px 1rem 120px;
   overflow-y: auto;
-  overflow-x: hidden;           /* prevents horizontal scroll */
+  overflow-x: hidden;
   height: 100dvh;
   text-align: center;
   box-sizing: border-box;
   max-width: 100%;
   width: 100%;
+}
+
+/* Extra top padding for Matches page only so sticky tabs sit correctly below header */
+.matches-page {
+  padding-top: calc(10vh + 20px);
 }
 
 .watch-page h2, .matches-page h2, .prefs-page h2 {
@@ -281,10 +279,10 @@ html, body, #root, .app {
   transform: scale(0.96);
 }
 
-/* Matches page */
+/* Matches page - sub tabs */
 .matches-tabs {
   position: sticky;
-  top: 70px;
+  top: calc(10vh + env(safe-area-inset-top, 0px));
   z-index: 40;
   display: flex;
   background: #111;
@@ -292,6 +290,7 @@ html, body, #root, .app {
   overflow: hidden;
   margin: 0 1rem 1rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  padding-top: 8px;
 }
 
 .matches-tabs button {
