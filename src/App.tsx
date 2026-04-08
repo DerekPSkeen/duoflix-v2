@@ -527,7 +527,13 @@ function App() {
                     alt={movie.title} 
                     onClick={(e) => e.stopPropagation()} 
                   />
-                  <div className="match-overlay">
+                  <div 
+                    className="match-overlay"
+                    onClick={() => { 
+                      setDetailMovie(movie); 
+                      setShowDetails(true); 
+                    }}
+                  >
                     <div className="match-title">{movie.title}</div>
                     <div className="match-meta">
                       {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
