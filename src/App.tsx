@@ -87,7 +87,7 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load coupleCode: prefer user-linked from Supabase (if logged in), then localStorage
+  // Load coupleCode
   useEffect(() => {
     const loadCoupleCode = async () => {
       if (user?.id) {
@@ -111,13 +111,11 @@ function App() {
     loadCoupleCode();
   }, [user]);
 
-  // Realtime channel for shared chat and likes
+  // Realtime channel
   useEffect(() => {
     if (!isInRoom || !roomCode) {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
+      if (channelRef.current) supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
       return;
     }
 
@@ -153,7 +151,7 @@ function App() {
     setMutualMatches(mutual);
   }, [likedMovies, sharedLikes]);
 
-  // Load persistent likes from Supabase when coupleCode is available
+  // Load persistent likes
   useEffect(() => {
     if (!coupleCode) return;
 
@@ -512,7 +510,11 @@ function App() {
           <div className="matches-grid">
             {matchesSubTab === 'mutual' && mutualMatches.map(movie => (
               <div key={movie.id} className="match-card">
-                <img className="match-img" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
+                <img 
+                  className="match-img" 
+                  src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
+                  alt={movie.title} 
+                />
                 <div className="match-overlay">
                   <div className="match-title">{movie.title}</div>
                   <div className="match-meta">
@@ -521,16 +523,35 @@ function App() {
                 </div>
                 <button 
                   className="btn details" 
-                  onClick={() => { setDetailMovie(movie); setShowDetails(true); }}
-                  style={{ width: '100%', marginTop: '8px', fontSize: '1rem' }}
+                  onClick={() => { 
+                    setDetailMovie(movie); 
+                    setShowDetails(true); 
+                  }}
+                  style={{ 
+                    background: '#22c55e', 
+                    color: '#000', 
+                    fontWeight: 600, 
+                    fontSize: '1.05rem', 
+                    padding: '12px 24px', 
+                    borderRadius: '999px', 
+                    border: 'none', 
+                    width: '100%', 
+                    marginTop: '12px',
+                    cursor: 'pointer'
+                  }}
                 >
                   Details
                 </button>
               </div>
             ))}
+
             {matchesSubTab === 'my-likes' && likedMovies.map(movie => (
               <div key={movie.id} className="match-card">
-                <img className="match-img" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
+                <img 
+                  className="match-img" 
+                  src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} 
+                  alt={movie.title} 
+                />
                 <div className="match-overlay">
                   <div className="match-title">{movie.title}</div>
                   <div className="match-meta">
@@ -539,13 +560,28 @@ function App() {
                 </div>
                 <button 
                   className="btn details" 
-                  onClick={() => { setDetailMovie(movie); setShowDetails(true); }}
-                  style={{ width: '100%', marginTop: '8px', fontSize: '1rem' }}
+                  onClick={() => { 
+                    setDetailMovie(movie); 
+                    setShowDetails(true); 
+                  }}
+                  style={{ 
+                    background: '#22c55e', 
+                    color: '#000', 
+                    fontWeight: 600, 
+                    fontSize: '1.05rem', 
+                    padding: '12px 24px', 
+                    borderRadius: '999px', 
+                    border: 'none', 
+                    width: '100%', 
+                    marginTop: '12px',
+                    cursor: 'pointer'
+                  }}
                 >
                   Details
                 </button>
               </div>
             ))}
+
             {matchesSubTab === 'mutual' && mutualMatches.length === 0 && (
               <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>No mutual matches yet. Both swipe right on the same movie!</p>
             )}
