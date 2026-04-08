@@ -518,11 +518,14 @@ function App() {
                   <div className="match-meta">
                     {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
                   </div>
-                  <div className="match-details-btn" 
-                       onClick={() => { setDetailMovie(movie); setShowDetails(true); }}>
-                    Details
-                  </div>
                 </div>
+                <button 
+                  className="btn details" 
+                  onClick={() => { setDetailMovie(movie); setShowDetails(true); }}
+                  style={{ width: '100%', marginTop: '8px', fontSize: '1rem' }}
+                >
+                  Details
+                </button>
               </div>
             ))}
             {matchesSubTab === 'my-likes' && likedMovies.map(movie => (
@@ -533,11 +536,14 @@ function App() {
                   <div className="match-meta">
                     {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
                   </div>
-                  <div className="match-details-btn" 
-                       onClick={() => { setDetailMovie(movie); setShowDetails(true); }}>
-                    Details
-                  </div>
                 </div>
+                <button 
+                  className="btn details" 
+                  onClick={() => { setDetailMovie(movie); setShowDetails(true); }}
+                  style={{ width: '100%', marginTop: '8px', fontSize: '1rem' }}
+                >
+                  Details
+                </button>
               </div>
             ))}
             {matchesSubTab === 'mutual' && mutualMatches.length === 0 && (
