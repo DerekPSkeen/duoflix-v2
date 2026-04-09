@@ -465,16 +465,17 @@ function App() {
                   draggable={false}
                   onDragStart={(e) => e.preventDefault()}
                 />
-                {/* ONLY CHANGE: centered overlay with proper left/right margins matching the poster */}
+                {/* ONLY CHANGE: centered overlay with text-align center and consistent padding */}
                 <div className="overlay" style={{ 
                   position: 'absolute', 
                   bottom: 0, 
                   left: '12px', 
                   right: '12px', 
                   background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', 
-                  padding: '16px 12px 14px', 
+                  padding: '16px 16px 14px', 
                   color: 'white', 
                   fontSize: '0.95rem',
+                  textAlign: 'center',
                   borderBottomLeftRadius: '24px',
                   borderBottomRightRadius: '24px'
                 }}>
