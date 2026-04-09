@@ -190,14 +190,15 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Smart merged fetchMovies - ONLY CHANGE (fixed multi-era range + more forgiving)
+  // Smart merged fetchMovies - ONLY CHANGE (more forgiving + guaranteed fallback)
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
+    // Base URL
     let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
 
-    // Smart genre merging
+    // Smart genre merging - very forgiving
     const mergedGenres: Record<string, number> = {};
     Object.keys(myPrefs).forEach(g => {
       const myScore = myPrefs[g] || 50;
@@ -205,7 +206,7 @@ function App() {
       mergedGenres[g] = Math.max(myScore, partnerScore);
     });
 
-    const activeGenres = Object.keys(mergedGenres).filter(g => mergedGenres[g] > 55);
+    const activeGenres = Object.keys(mergedGenres).filter(g => mergedGenres[g] > 45); // lowered threshold
     if (activeGenres.length > 0) {
       const genreIds = activeGenres.map(g => {
         const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
@@ -214,11 +215,11 @@ function App() {
       url += `&with_genres=${genreIds}`;
     }
 
-    // Smart era merging - calculate true min/max year across ALL selected eras
+    // Smart era merging - true min/max across all selected decades
     const mergedEras = { ...myEraPrefs, ...partnerEraPrefs };
     const activeEras = Object.keys(mergedEras).filter(e => mergedEras[e]);
 
-    let minYear = 2020;
+    let minYear = 1990; // safe default
     let maxYear = 2025;
 
     if (activeEras.length > 0) {
@@ -242,14 +243,18 @@ function App() {
 
     url += `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
 
-    // Safety fallback: if filters are too strict, load popular movies
-    if (activeGenres.length === 0 && activeEras.length === 0) {
-      url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
-    }
-
+    // GUARANTEED FALLBACK: if strict filters would return nothing, load popular movies
     try {
       const res = await fetch(url);
-      const data = await res.json();
+      let data = await res.json();
+
+      if (!data.results || data.results.length === 0) {
+        // fallback to broad popular movies
+        const fallbackUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+        const fallbackRes = await fetch(fallbackUrl);
+        data = await fallbackRes.json();
+      }
+
       setMovies(data.results || []);
       setCurrentIndex(0);
     } catch (e) {
