@@ -41,8 +41,14 @@ function App() {
   // Realtime channel
   const channelRef = useRef<any>(null);
 
-  // Preferences
-  const [genrePrefs, setGenrePrefs] = useState<Record<string, number>>({
+  // Per-user Preferences (only change: added myPrefs and partnerPrefs)
+  const [myPrefs, setMyPrefs] = useState<Record<string, number>>({
+    Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
+    Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
+    SciFi: 50, Thriller: 50, War: 50, Western: 50
+  });
+
+  const [partnerPrefs, setPartnerPrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
     SciFi: 50, Thriller: 50, War: 50, Western: 50
@@ -87,7 +93,7 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load coupleCode: prefer user-linked from Supabase (if logged in), then localStorage
+  // Load coupleCode
   useEffect(() => {
     const loadCoupleCode = async () => {
       if (user?.id) {
@@ -183,7 +189,7 @@ function App() {
 
     let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
 
-    const activeGenres = Object.keys(genrePrefs).filter(g => genrePrefs[g] > 60);
+    const activeGenres = Object.keys(myPrefs).filter(g => myPrefs[g] > 60);
     if (activeGenres.length > 0) {
       const genreIds = activeGenres.map(g => {
         const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
@@ -220,7 +226,7 @@ function App() {
 
   useEffect(() => {
     fetchMovies();
-  }, [genrePrefs, eraPrefs]);
+  }, [myPrefs, eraPrefs]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -442,10 +448,7 @@ function App() {
             </button>
           </div>
         )}
-        {/* ONLY CHANGE: added mutual matches counter after "Matches" */}
-        <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>
-          ❤️ Matches ({mutualMatches.length})
-        </div>
+        <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>❤️ Matches ({mutualMatches.length})</div>
       </div>
 
       {currentTab === 'swipe' && (
@@ -581,12 +584,43 @@ function App() {
         <div className="prefs-page">
           <div className="prefs-container">
             <h2>Preferences</h2>
-            {Object.keys(genrePrefs).map(genre => (
-              <div key={genre} className="slider-row">
-                <label>{genre}</label>
-                <input type="range" min="0" max="100" value={genrePrefs[genre]} onChange={e => setGenrePrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} />
+
+            {/* My Preferences */}
+            <div style={{ marginBottom: '2rem' }}>
+              <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>My Preferences</h3>
+              {Object.keys(myPrefs).map(genre => (
+                <div key={genre} className="slider-row">
+                  <label>{genre}</label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    value={myPrefs[genre]} 
+                    onChange={e => setMyPrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} 
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Partner Preferences - only shown if coupleCode exists */}
+            {coupleCode && (
+              <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>Partner's Preferences</h3>
+                {Object.keys(partnerPrefs).map(genre => (
+                  <div key={genre} className="slider-row">
+                    <label>{genre}</label>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      value={partnerPrefs[genre]} 
+                      onChange={e => setPartnerPrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} 
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+
             <div className="actor-input">
               <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
               <button onClick={addActor}>Add</button>
@@ -619,7 +653,7 @@ function App() {
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
 
-      {/* Modal at root level - works from any tab */}
+      {/* Modal at root level */}
       {showDetails && detailMovie && (
         <div className="modal-overlay" onClick={() => setShowDetails(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
