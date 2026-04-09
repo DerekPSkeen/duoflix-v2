@@ -465,10 +465,10 @@ function App() {
                   draggable={false}
                   onDragStart={(e) => e.preventDefault()}
                 />
-                {/* Restored overlay - bottom of poster, small uniform text */}
-                <div className="overlay">
-                  <div className="title">{currentMovie.title}</div>
-                  <div className="meta">
+                {/* ONLY CHANGE: restored bottom overlay with title + date/rating on same line, small uniform text */}
+                <div className="overlay" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', padding: '16px 12px 14px', color: 'white', fontSize: '0.95rem' }}>
+                  <div style={{ fontWeight: 700, marginBottom: '4px', lineHeight: 1.2 }}>{currentMovie.title}</div>
+                  <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
                     {currentMovie.release_date?.slice(0, 4) || 'N/A'} • {currentMovie.vote_average?.toFixed(1) || '0'} ★
                   </div>
                 </div>
