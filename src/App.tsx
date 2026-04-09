@@ -442,7 +442,10 @@ function App() {
             </button>
           </div>
         )}
-        <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>❤️ Matches</div>
+        {/* ONLY CHANGE: added mutual matches counter after "Matches" */}
+        <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>
+          ❤️ Matches ({mutualMatches.length})
+        </div>
       </div>
 
       {currentTab === 'swipe' && (
@@ -465,7 +468,6 @@ function App() {
                   draggable={false}
                   onDragStart={(e) => e.preventDefault()}
                 />
-                {/* ONLY CHANGE: centered overlay with text-align center and consistent padding */}
                 <div className="overlay" style={{ 
                   position: 'absolute', 
                   bottom: 0, 
