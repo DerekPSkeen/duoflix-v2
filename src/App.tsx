@@ -483,23 +483,6 @@ function App() {
               <button className="btn like" onClick={() => triggerFlyOff(true)}>♥</button>
             </div>
           )}
-
-          {showDetails && detailMovie && (
-            <div className="modal-overlay" onClick={() => setShowDetails(false)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <button className="close-btn" onClick={() => setShowDetails(false)}>×</button>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.8rem', color: 'white' }}>{detailMovie.title}</h2>
-                <p className="modal-meta">
-                  {detailMovie.release_date?.slice(0,4) || 'N/A'} • {detailMovie.vote_average?.toFixed(1) || '0'} ★
-                </p>
-                <p className="modal-description">{detailMovie.overview}</p>
-                <h3>Top Actors</h3>
-                <ul className="actors-list">
-                  {actors.length > 0 ? actors.map((a, i) => <li key={i}>{a.name}</li>) : <li>Loading actors...</li>}
-                </ul>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -620,6 +603,24 @@ function App() {
         <button onClick={() => setCurrentTab('watch')}>Watch</button>
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
+
+      {/* Modal is now at root level — works from ANY tab */}
+      {showDetails && detailMovie && (
+        <div className="modal-overlay" onClick={() => setShowDetails(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="close-btn" onClick={() => setShowDetails(false)}>×</button>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.8rem', color: 'white' }}>{detailMovie.title}</h2>
+            <p className="modal-meta">
+              {detailMovie.release_date?.slice(0,4) || 'N/A'} • {detailMovie.vote_average?.toFixed(1) || '0'} ★
+            </p>
+            <p className="modal-description">{detailMovie.overview}</p>
+            <h3>Top Actors</h3>
+            <ul className="actors-list">
+              {actors.length > 0 ? actors.map((a, i) => <li key={i}>{a.name}</li>) : <li>Loading actors...</li>}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {showAuthModal && (
         <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
