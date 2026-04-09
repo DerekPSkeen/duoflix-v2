@@ -503,7 +503,7 @@ function App() {
         </div>
       )}
 
-      {currentTab === 'matches' && (
+            {currentTab === 'matches' && (
         <div className="matches-page">
           <div className="matches-tabs">
             <button className={matchesSubTab === 'mutual' ? 'active' : ''} onClick={() => setMatchesSubTab('mutual')}>Mutual Matches</button>
@@ -515,7 +515,10 @@ function App() {
                 <div 
                   key={movie.id} 
                   className="match-card"
-                  onClick={() => { setDetailMovie(movie); setShowDetails(true); }}
+                  onClick={() => {
+                    setDetailMovie(movie);
+                    setShowDetails(true);
+                  }}
                   style={{ cursor: 'pointer' }}
                 >
                   <img className="match-img" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
@@ -524,10 +527,29 @@ function App() {
                     <div className="match-meta">
                       {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
                     </div>
-                    <div className="match-details-btn">Details</div>
+                    <div 
+                      className="match-details-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDetailMovie(movie);
+                        setShowDetails(true);
+                      }}
+                    >
+                      Details
+                    </div>
                   </div>
                 </div>
               ))
+            ) : (
+              <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>
+                {matchesSubTab === 'mutual' 
+                  ? "No mutual matches yet. Both swipe right on the same movie!" 
+                  : "No likes yet. Start swiping!"}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
             ) : (
               <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>
                 {matchesSubTab === 'mutual' 
