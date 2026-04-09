@@ -41,7 +41,7 @@ function App() {
   // Realtime channel
   const channelRef = useRef<any>(null);
 
-  // Per-user Preferences (only change: added myPrefs and partnerPrefs)
+  // Per-user Preferences
   const [myPrefs, setMyPrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
@@ -54,13 +54,20 @@ function App() {
     SciFi: 50, Thriller: 50, War: 50, Western: 50
   });
 
-  const [eraPrefs, setEraPrefs] = useState<Record<string, boolean>>({
+  const [myEraPrefs, setMyEraPrefs] = useState<Record<string, boolean>>({
     '1920s': false, '1930s': false, '1940s': false, '1950s': false,
     '1960s': false, '1970s': false, '1980s': false, '1990s': false,
     '2000s': false, '2010s': false, '2020s': true
   });
 
-  const [favoriteActors, setFavoriteActors] = useState<string[]>([]);
+  const [partnerEraPrefs, setPartnerEraPrefs] = useState<Record<string, boolean>>({
+    '1920s': false, '1930s': false, '1940s': false, '1950s': false,
+    '1960s': false, '1970s': false, '1980s': false, '1990s': false,
+    '2000s': false, '2010s': false, '2020s': true
+  });
+
+  const [myFavoriteActors, setMyFavoriteActors] = useState<string[]>([]);
+  const [partnerFavoriteActors, setPartnerFavoriteActors] = useState<string[]>([]);
   const [newActor, setNewActor] = useState('');
 
   // Landing + Auth
@@ -198,7 +205,7 @@ function App() {
       url += `&with_genres=${genreIds}`;
     }
 
-    const activeEras = Object.keys(eraPrefs).filter(e => eraPrefs[e]);
+    const activeEras = Object.keys(myEraPrefs).filter(e => myEraPrefs[e]);
     if (activeEras.length > 0) {
       let minYear = 2020, maxYear = 2025;
       if (activeEras.includes('1920s')) { minYear = 1920; maxYear = 1929; }
@@ -226,7 +233,7 @@ function App() {
 
   useEffect(() => {
     fetchMovies();
-  }, [myPrefs, eraPrefs]);
+  }, [myPrefs, myEraPrefs]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -379,13 +386,13 @@ function App() {
 
   const addActor = () => {
     if (newActor.trim()) {
-      setFavoriteActors(prev => [...prev, newActor.trim()]);
+      setMyFavoriteActors(prev => [...prev, newActor.trim()]);
       setNewActor('');
     }
   };
 
   const removeActor = (actor: string) => {
-    setFavoriteActors(prev => prev.filter(a => a !== actor));
+    setMyFavoriteActors(prev => prev.filter(a => a !== actor));
   };
 
   const handleLogout = async () => {
@@ -586,7 +593,7 @@ function App() {
             <h2>Preferences</h2>
 
             {/* My Preferences */}
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: '2.5rem' }}>
               <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>My Preferences</h3>
               {Object.keys(myPrefs).map(genre => (
                 <div key={genre} className="slider-row">
@@ -600,11 +607,31 @@ function App() {
                   />
                 </div>
               ))}
+              <div className="actor-input">
+                <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
+                <button onClick={addActor}>Add</button>
+              </div>
+              <ul className="actor-list">
+                {myFavoriteActors.map(actor => (
+                  <li key={actor}>
+                    {actor}
+                    <button onClick={() => removeActor(actor)}>Remove</button>
+                  </li>
+                ))}
+              </ul>
+              <div className="era-grid">
+                {Object.keys(myEraPrefs).map(era => (
+                  <label key={era} className="era-label">
+                    <input type="checkbox" checked={myEraPrefs[era]} onChange={e => setMyEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
+                    {era}
+                  </label>
+                ))}
+              </div>
             </div>
 
-            {/* Partner Preferences - only shown if coupleCode exists */}
+            {/* Partner's Preferences - full set */}
             {coupleCode && (
-              <div style={{ marginBottom: '2rem' }}>
+              <div style={{ marginBottom: '2.5rem' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>Partner's Preferences</h3>
                 {Object.keys(partnerPrefs).map(genre => (
                   <div key={genre} className="slider-row">
@@ -618,29 +645,29 @@ function App() {
                     />
                   </div>
                 ))}
+                <div className="actor-input">
+                  <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor (for partner)" />
+                  <button onClick={addActor}>Add</button>
+                </div>
+                <ul className="actor-list">
+                  {partnerFavoriteActors.map(actor => (
+                    <li key={actor}>
+                      {actor}
+                      <button onClick={() => removeActor(actor)}>Remove</button>
+                    </li>
+                  ))}
+                </ul>
+                <div className="era-grid">
+                  {Object.keys(partnerEraPrefs).map(era => (
+                    <label key={era} className="era-label">
+                      <input type="checkbox" checked={partnerEraPrefs[era]} onChange={e => setPartnerEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
+                      {era}
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
 
-            <div className="actor-input">
-              <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
-              <button onClick={addActor}>Add</button>
-            </div>
-            <ul className="actor-list">
-              {favoriteActors.map(actor => (
-                <li key={actor}>
-                  {actor}
-                  <button onClick={() => removeActor(actor)}>Remove</button>
-                </li>
-              ))}
-            </ul>
-            <div className="era-grid">
-              {Object.keys(eraPrefs).map(era => (
-                <label key={era} className="era-label">
-                  <input type="checkbox" checked={eraPrefs[era]} onChange={e => setEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
-                  {era}
-                </label>
-              ))}
-            </div>
             <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
           </div>
         </div>
