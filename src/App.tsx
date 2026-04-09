@@ -190,29 +190,22 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Smart merged fetchMovies - ONLY CHANGE
+  // Smart merged fetchMovies - ONLY CHANGE (fixed multi-era range + more forgiving)
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
     let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
 
-    // Smart merging: combine myPrefs and partnerPrefs
+    // Smart genre merging
     const mergedGenres: Record<string, number> = {};
     Object.keys(myPrefs).forEach(g => {
-      const myScore = myPrefs[g];
+      const myScore = myPrefs[g] || 50;
       const partnerScore = partnerPrefs[g] || 50;
-      // High priority if both like it, average if one likes it, downweight if one dislikes
-      if (myScore > 70 && partnerScore > 70) {
-        mergedGenres[g] = 90;
-      } else if (myScore > 60 || partnerScore > 60) {
-        mergedGenres[g] = Math.max(myScore, partnerScore);
-      } else {
-        mergedGenres[g] = Math.min(myScore, partnerScore) * 0.6; // downweight strong dislikes
-      }
+      mergedGenres[g] = Math.max(myScore, partnerScore);
     });
 
-    const activeGenres = Object.keys(mergedGenres).filter(g => mergedGenres[g] > 60);
+    const activeGenres = Object.keys(mergedGenres).filter(g => mergedGenres[g] > 55);
     if (activeGenres.length > 0) {
       const genreIds = activeGenres.map(g => {
         const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
@@ -221,22 +214,37 @@ function App() {
       url += `&with_genres=${genreIds}`;
     }
 
-    // Merge eras (union of both)
+    // Smart era merging - calculate true min/max year across ALL selected eras
     const mergedEras = { ...myEraPrefs, ...partnerEraPrefs };
     const activeEras = Object.keys(mergedEras).filter(e => mergedEras[e]);
+
+    let minYear = 2020;
+    let maxYear = 2025;
+
     if (activeEras.length > 0) {
-      let minYear = 2020, maxYear = 2025;
-      if (activeEras.includes('1920s')) { minYear = 1920; maxYear = 1929; }
-      else if (activeEras.includes('1930s')) { minYear = 1930; maxYear = 1939; }
-      else if (activeEras.includes('1940s')) { minYear = 1940; maxYear = 1949; }
-      else if (activeEras.includes('1950s')) { minYear = 1950; maxYear = 1959; }
-      else if (activeEras.includes('1960s')) { minYear = 1960; maxYear = 1969; }
-      else if (activeEras.includes('1970s')) { minYear = 1970; maxYear = 1979; }
-      else if (activeEras.includes('1980s')) { minYear = 1980; maxYear = 1989; }
-      else if (activeEras.includes('1990s')) { minYear = 1990; maxYear = 1999; }
-      else if (activeEras.includes('2000s')) { minYear = 2000; maxYear = 2009; }
-      else if (activeEras.includes('2010s')) { minYear = 2010; maxYear = 2019; }
-      url += `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
+      const yearMap: Record<string, {min: number; max: number}> = {
+        '1920s': {min: 1920, max: 1929},
+        '1930s': {min: 1930, max: 1939},
+        '1940s': {min: 1940, max: 1949},
+        '1950s': {min: 1950, max: 1959},
+        '1960s': {min: 1960, max: 1969},
+        '1970s': {min: 1970, max: 1979},
+        '1980s': {min: 1980, max: 1989},
+        '1990s': {min: 1990, max: 1999},
+        '2000s': {min: 2000, max: 2009},
+        '2010s': {min: 2010, max: 2019},
+        '2020s': {min: 2020, max: 2025}
+      };
+
+      minYear = Math.min(...activeEras.map(e => yearMap[e].min));
+      maxYear = Math.max(...activeEras.map(e => yearMap[e].max));
+    }
+
+    url += `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
+
+    // Safety fallback: if filters are too strict, load popular movies
+    if (activeGenres.length === 0 && activeEras.length === 0) {
+      url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
     }
 
     try {
@@ -246,6 +254,7 @@ function App() {
       setCurrentIndex(0);
     } catch (e) {
       console.error(e);
+      setMovies([]);
     }
   };
 
@@ -306,7 +315,7 @@ function App() {
     setIsFlyingOff(true);
     setFlyDirection(liked ? 'right' : 'left');
     setTimeout(() => {
-      setCurrentIndex(prev => (prev + 1) % movies.length);
+      setCurrentIndex(prev => (prev + 1) % (movies.length || 1));
       setIsFlyingOff(false);
       setFlyDirection(null);
       setDragOffset(0);
@@ -342,7 +351,7 @@ function App() {
     if (lastLiked) {
       setLikedMovies(prev => prev.filter(m => m.id !== lastLiked.id));
       setLastLiked(null);
-      setCurrentIndex(prev => (prev - 1 + movies.length) % movies.length);
+      setCurrentIndex(prev => (prev - 1 + (movies.length || 1)) % (movies.length || 1));
     }
   };
 
@@ -686,7 +695,6 @@ function App() {
               </div>
             )}
 
-            {/* ONLY ADDED VISUAL INDICATOR */}
             <div style={{ marginTop: '1rem', padding: '12px', background: '#222', borderRadius: '12px', fontSize: '0.95rem', textAlign: 'center', color: '#22c55e' }}>
               ✅ Merged Deck Active (both partners' preferences combined)
             </div>
