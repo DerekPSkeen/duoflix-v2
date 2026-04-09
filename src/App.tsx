@@ -190,13 +190,29 @@ function App() {
       });
   }, [coupleCode]);
 
+  // Smart merged fetchMovies - ONLY CHANGE
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
     let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
 
-    const activeGenres = Object.keys(myPrefs).filter(g => myPrefs[g] > 60);
+    // Smart merging: combine myPrefs and partnerPrefs
+    const mergedGenres: Record<string, number> = {};
+    Object.keys(myPrefs).forEach(g => {
+      const myScore = myPrefs[g];
+      const partnerScore = partnerPrefs[g] || 50;
+      // High priority if both like it, average if one likes it, downweight if one dislikes
+      if (myScore > 70 && partnerScore > 70) {
+        mergedGenres[g] = 90;
+      } else if (myScore > 60 || partnerScore > 60) {
+        mergedGenres[g] = Math.max(myScore, partnerScore);
+      } else {
+        mergedGenres[g] = Math.min(myScore, partnerScore) * 0.6; // downweight strong dislikes
+      }
+    });
+
+    const activeGenres = Object.keys(mergedGenres).filter(g => mergedGenres[g] > 60);
     if (activeGenres.length > 0) {
       const genreIds = activeGenres.map(g => {
         const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
@@ -205,7 +221,9 @@ function App() {
       url += `&with_genres=${genreIds}`;
     }
 
-    const activeEras = Object.keys(myEraPrefs).filter(e => myEraPrefs[e]);
+    // Merge eras (union of both)
+    const mergedEras = { ...myEraPrefs, ...partnerEraPrefs };
+    const activeEras = Object.keys(mergedEras).filter(e => mergedEras[e]);
     if (activeEras.length > 0) {
       let minYear = 2020, maxYear = 2025;
       if (activeEras.includes('1920s')) { minYear = 1920; maxYear = 1929; }
@@ -233,7 +251,7 @@ function App() {
 
   useEffect(() => {
     fetchMovies();
-  }, [myPrefs, myEraPrefs]);
+  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -629,7 +647,7 @@ function App() {
               </div>
             </div>
 
-            {/* Partner's Preferences - full set */}
+            {/* Partner's Preferences */}
             {coupleCode && (
               <div style={{ marginBottom: '2.5rem' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>Partner's Preferences</h3>
@@ -667,6 +685,11 @@ function App() {
                 </div>
               </div>
             )}
+
+            {/* ONLY ADDED VISUAL INDICATOR */}
+            <div style={{ marginTop: '1rem', padding: '12px', background: '#222', borderRadius: '12px', fontSize: '0.95rem', textAlign: 'center', color: '#22c55e' }}>
+              ✅ Merged Deck Active (both partners' preferences combined)
+            </div>
 
             <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
           </div>
