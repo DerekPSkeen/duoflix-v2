@@ -465,10 +465,11 @@ function App() {
                   draggable={false}
                   onDragStart={(e) => e.preventDefault()}
                 />
+                {/* Restored overlay - bottom of poster, small uniform text */}
                 <div className="overlay">
                   <div className="title">{currentMovie.title}</div>
                   <div className="meta">
-                    {currentMovie.release_date?.slice(0,4) || 'N/A'} • {currentMovie.vote_average?.toFixed(1) || '0'} ★
+                    {currentMovie.release_date?.slice(0, 4) || 'N/A'} • {currentMovie.vote_average?.toFixed(1) || '0'} ★
                   </div>
                 </div>
               </div>
@@ -604,7 +605,7 @@ function App() {
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
 
-      {/* Modal is now at root level — works from ANY tab */}
+      {/* Modal at root level - works from any tab */}
       {showDetails && detailMovie && (
         <div className="modal-overlay" onClick={() => setShowDetails(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
