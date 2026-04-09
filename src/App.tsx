@@ -550,16 +550,7 @@ function App() {
           </div>
         </div>
       )}
-            ) : (
-              <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>
-                {matchesSubTab === 'mutual' 
-                  ? "No mutual matches yet. Both swipe right on the same movie!" 
-                  : "No likes yet. Start swiping!"}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+           
 
       {currentTab === 'watch' && (
         <div className="watch-page">
