@@ -503,7 +503,7 @@ function App() {
         </div>
       )}
 
-            {currentTab === 'matches' && (
+      {currentTab === 'matches' && (
         <div className="matches-page">
           <div className="matches-tabs">
             <button className={matchesSubTab === 'mutual' ? 'active' : ''} onClick={() => setMatchesSubTab('mutual')}>Mutual Matches</button>
@@ -531,9 +531,11 @@ function App() {
                       className="match-details-btn"
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         setDetailMovie(movie);
                         setShowDetails(true);
                       }}
+                      style={{ pointerEvents: 'auto', zIndex: 100, position: 'relative' }}
                     >
                       Details
                     </div>
@@ -550,7 +552,6 @@ function App() {
           </div>
         </div>
       )}
-           
 
       {currentTab === 'watch' && (
         <div className="watch-page">
