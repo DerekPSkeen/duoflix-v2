@@ -575,7 +575,7 @@ function App() {
           </div>
         </div>
 
-        {/* How It Works Section */}
+        {/* How It Works Section - rewritten cleanly */}
         <div style={{ padding: '80px 20px 100px', background: '#0a0a0a' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
@@ -635,7 +635,7 @@ function App() {
           </div>
         </div>
 
-        {/* Pricing Section */}
+        {/* Pricing Section - rewritten cleanly */}
         <div style={{ padding: '80px 20px 100px', background: '#111' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
