@@ -41,7 +41,7 @@ function App() {
   // Realtime channel
   const channelRef = useRef<any>(null);
 
-  // Per-user Preferences
+  // Per-user Preferences (now persistent)
   const [myPrefs, setMyPrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
@@ -100,7 +100,7 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load coupleCode
+  // Load coupleCode + preferences
   useEffect(() => {
     const loadCoupleCode = async () => {
       if (user?.id) {
@@ -123,6 +123,68 @@ function App() {
 
     loadCoupleCode();
   }, [user]);
+
+  // Load preferences when coupleCode changes
+  useEffect(() => {
+    if (!coupleCode) return;
+
+    const loadPrefs = async () => {
+      const { data, error } = await supabase
+        .from('couple_preferences')
+        .select('preferences')
+        .eq('couple_code', coupleCode)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
+        console.error('Failed to load preferences:', error);
+        return;
+      }
+
+      if (data?.preferences) {
+        const prefs = data.preferences;
+        if (prefs.myPrefs) setMyPrefs(prefs.myPrefs);
+        if (prefs.partnerPrefs) setPartnerPrefs(prefs.partnerPrefs);
+        if (prefs.myEraPrefs) setMyEraPrefs(prefs.myEraPrefs);
+        if (prefs.partnerEraPrefs) setPartnerEraPrefs(prefs.partnerEraPrefs);
+        if (prefs.myFavoriteActors) setMyFavoriteActors(prefs.myFavoriteActors);
+        if (prefs.partnerFavoriteActors) setPartnerFavoriteActors(prefs.partnerFavoriteActors);
+      }
+    };
+
+    loadPrefs();
+  }, [coupleCode]);
+
+  // Save preferences when Save button is clicked
+  const savePreferences = async () => {
+    if (!coupleCode) {
+      alert('Please create or join a room first to save preferences.');
+      return;
+    }
+
+    const preferencesData = {
+      myPrefs,
+      partnerPrefs,
+      myEraPrefs,
+      partnerEraPrefs,
+      myFavoriteActors,
+      partnerFavoriteActors
+    };
+
+    const { error } = await supabase
+      .from('couple_preferences')
+      .upsert({
+        couple_code: coupleCode,
+        preferences: preferencesData,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'couple_code' });
+
+    if (error) {
+      console.error('Failed to save preferences:', error);
+      alert('Failed to save preferences. Please try again.');
+    } else {
+      alert('Preferences saved successfully!');
+    }
+  };
 
   // Realtime channel for shared chat and likes
   useEffect(() => {
@@ -190,7 +252,7 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Proportional client-side blend - ONLY CHANGE
+  // Proportional client-side blend - ONLY CHANGE (kept exactly as last working version)
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
@@ -424,10 +486,6 @@ function App() {
 
       setNewChatMessage('');
     }
-  };
-
-  const savePreferences = () => {
-    alert('Preferences saved!');
   };
 
   const addActor = () => {
