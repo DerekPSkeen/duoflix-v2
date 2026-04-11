@@ -135,7 +135,7 @@ function App() {
         .eq('couple_code', coupleCode)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
+      if (error && error.code !== 'PGRST116') {
         console.error('Failed to load preferences:', error);
         return;
       }
@@ -528,21 +528,139 @@ function App() {
     }
   };
 
+  // ==================== HERO + HOW IT WORKS - ONLY THIS SECTION CHANGED ====================
   if (showLanding) {
     return (
-      <div className="app" style={{ height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', background: 'linear-gradient(180deg, #111 0%, #000 100%)' }}>
-        <div style={{ fontSize: '2.4rem', lineHeight: 1.1, fontWeight: 700, letterSpacing: '-0.03em', maxWidth: '320px', marginBottom: '48px' }}>
-          Stop arguing.<br />Start watching together.
+      <div className="app" style={{ 
+        minHeight: '100dvh', 
+        background: 'linear-gradient(180deg, #111 0%, #000 100%)',
+        color: 'white',
+        fontFamily: 'system-ui, -apple-system, sans-serif'
+      }}>
+        {/* Hero Section */}
+        <div style={{
+          height: '100dvh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          padding: '0 20px',
+          position: 'relative'
+        }}>
+          <div style={{ fontSize: '2.8rem', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.04em', maxWidth: '380px', marginBottom: '24px' }}>
+            Stop arguing.<br />Start watching together.
+          </div>
+          
+          <div style={{ fontSize: '1.25rem', opacity: 0.9, maxWidth: '320px', marginBottom: '48px' }}>
+            Tinder-style swiping for couples. Our smart blend combines both your tastes into one perfect deck.
+          </div>
+
+          <button 
+            onClick={() => setShowLanding(false)}
+            style={{
+              background: '#ef4444',
+              color: 'white',
+              fontWeight: 600,
+              fontSize: '1.3rem',
+              padding: '18px 52px',
+              borderRadius: '9999px',
+              border: 'none',
+              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)',
+              marginBottom: '20px',
+              cursor: 'pointer'
+            }}
+          >
+            Start Swiping Free (50 Movies)
+          </button>
+
+          <button 
+            onClick={() => alert('Demo video coming soon – for now just tap "Start Swiping Free"')}
+            style={{
+              background: 'transparent',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.6)',
+              padding: '12px 32px',
+              borderRadius: '9999px',
+              fontSize: '1rem',
+              cursor: 'pointer'
+            }}
+          >
+            Watch 30-second demo
+          </button>
+
+          <div style={{ position: 'absolute', bottom: '40px', fontSize: '0.9rem', opacity: 0.7 }}>
+            Join thousands of couples who finally agree on what to watch
+          </div>
         </div>
-        <button onClick={() => setShowLanding(false)} style={{ background: '#fff', color: '#000', fontWeight: 600, fontSize: '1.25rem', padding: '18px 48px', borderRadius: '9999px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)', border: 'none', marginBottom: '20px' }}>
-          Open DuoFlix Now
-        </button>
-        <button onClick={() => { setShowLanding(false); setShowAuthModal(true); setAuthMode('login'); }} style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.5)', padding: '12px 32px', borderRadius: '9999px', fontSize: '1rem' }}>
-          Sign In / Create Account
-        </button>
+
+        {/* How It Works Section */}
+        <div style={{ padding: '80px 20px 100px', background: '#0a0a0a' }}>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
+            <p style={{ fontSize: '1.15rem', opacity: 0.85, maxWidth: '420px', margin: '0 auto' }}>
+              Four simple steps to better movie nights
+            </p>
+          </div>
+
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', 
+            gap: '32px',
+            maxWidth: '1100px',
+            margin: '0 auto'
+          }}>
+            {/* Step 1 */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔑</div>
+              <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>1. Create or Join a Room</h3>
+              <p style={{ opacity: 0.8 }}>One of you creates a 6-digit room. Your partner joins instantly. Your shared movie space is ready.</p>
+            </div>
+
+            {/* Step 2 */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎛️</div>
+              <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>2. Set Your Preferences</h3>
+              <p style={{ opacity: 0.8 }}>Each of you adjusts genre sliders, favorite eras, and actors. We blend them proportionally.</p>
+            </div>
+
+            {/* Step 3 */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👆</div>
+              <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>3. Swipe Together</h3>
+              <p style={{ opacity: 0.8 }}>Swipe right on movies you might both love. The deck intelligently mixes your tastes.</p>
+            </div>
+
+            {/* Step 4 */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>❤️</div>
+              <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>4. Get Matches & Watch</h3>
+              <p style={{ opacity: 0.8 }}>See mutual matches. Jump into a shared watch room with realtime chat. Enjoy the movie.</p>
+            </div>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '70px' }}>
+            <button 
+              onClick={() => setShowLanding(false)}
+              style={{
+                background: '#ef4444',
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '1.25rem',
+                padding: '18px 48px',
+                borderRadius: '9999px',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Ready? Start Swiping Free Now
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
+  // ==================== END OF HERO + HOW IT WORKS ====================
 
   return (
     <div className="app">
