@@ -190,14 +190,14 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Smart blended fetchMovies - ONLY CHANGE
+  // Smart blended fetchMovies - ONLY CHANGE (true blend of both partners)
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
     const results: Movie[] = [];
 
-    // 1. Partner 1 prefs (30%)
+    // 1. Partner 1 prefs (~40%)
     let url1 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
     const activeGenres1 = Object.keys(myPrefs).filter(g => myPrefs[g] > 60);
     if (activeGenres1.length > 0) {
@@ -210,10 +210,10 @@ function App() {
     try {
       const res = await fetch(url1);
       const data = await res.json();
-      results.push(...(data.results || []).slice(0, 7));
+      results.push(...(data.results || []).slice(0, 10));
     } catch (e) {}
 
-    // 2. Partner 2 prefs (30%)
+    // 2. Partner 2 prefs (~40%)
     let url2 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
     const activeGenres2 = Object.keys(partnerPrefs).filter(g => partnerPrefs[g] > 60);
     if (activeGenres2.length > 0) {
@@ -226,10 +226,10 @@ function App() {
     try {
       const res = await fetch(url2);
       const data = await res.json();
-      results.push(...(data.results || []).slice(0, 7));
+      results.push(...(data.results || []).slice(0, 10));
     } catch (e) {}
 
-    // 3. Merged prefs (30%)
+    // 3. Merged prefs (~20%)
     let url3 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
     const mergedGenres: Record<string, number> = {};
     Object.keys(myPrefs).forEach(g => {
@@ -246,18 +246,10 @@ function App() {
     try {
       const res = await fetch(url3);
       const data = await res.json();
-      results.push(...(data.results || []).slice(0, 7));
+      results.push(...(data.results || []).slice(0, 5));
     } catch (e) {}
 
-    // 4. Random popular (10%)
-    try {
-      const randomUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
-      const res = await fetch(randomUrl);
-      const data = await res.json();
-      results.push(...(data.results || []).slice(0, 4));
-    } catch (e) {}
-
-    // Remove duplicates and shuffle
+    // Remove duplicates and shuffle for variety
     const unique = results.filter((movie, index, self) => 
       index === self.findIndex(m => m.id === movie.id)
     );
