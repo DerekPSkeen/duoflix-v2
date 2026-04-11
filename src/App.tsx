@@ -190,34 +190,33 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Client-side blend fetchMovies - ONLY CHANGE
+  // Proportional client-side blend - ONLY CHANGE
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
-    const allResults: Movie[] = [];
+    // 1. Calculate combined scores and percentages
+    const genreList = Object.keys(myPrefs);
+    const combined: Record<string, number> = {};
+    let totalScore = 0;
 
-    // Helper to fetch multiple pages
-    const fetchPages = async (baseUrl: string, maxPages: number = 3) => {
-      const results: Movie[] = [];
-      for (let page = 1; page <= maxPages; page++) {
-        try {
-          const url = `${baseUrl}&page=${page}`;
-          const res = await fetch(url);
-          const data = await res.json();
-          if (data.results && data.results.length > 0) {
-            results.push(...data.results);
-          } else {
-            break;
-          }
-        } catch (e) {
-          break;
-        }
+    genreList.forEach(g => {
+      const score = (myPrefs[g] || 0) + (partnerPrefs[g] || 0);
+      combined[g] = score;
+      totalScore += score;
+    });
+
+    // 2. Build proportional targets (target ~150 movies total)
+    const targetTotal = 150;
+    const targets: Record<string, number> = {};
+    genreList.forEach(g => {
+      if (combined[g] > 0) {
+        const percent = combined[g] / totalScore;
+        targets[g] = Math.max(8, Math.round(targetTotal * percent)); // minimum 8 movies per genre
       }
-      return results;
-    };
+    });
 
-    // Calculate year range from eras (wide if none selected)
+    // 3. Year range from eras
     const mergedEras = { ...myEraPrefs, ...partnerEraPrefs };
     const activeEras = Object.keys(mergedEras).filter(e => mergedEras[e]);
     let minYear = 1990;
@@ -239,53 +238,36 @@ function App() {
       minYear = Math.min(...activeEras.map(e => yearMap[e].min));
       maxYear = Math.max(...activeEras.map(e => yearMap[e].max));
     }
-
     const dateFilter = `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
 
-    // 1. Partner 1 prefs (broader pool)
-    let url1 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc${dateFilter}`;
-    const activeGenres1 = Object.keys(myPrefs).filter(g => myPrefs[g] > 60);
-    if (activeGenres1.length > 0) {
-      const genreIds = activeGenres1.map(g => {
-        const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
-        return map[g];
-      }).join(',');
-      url1 += `&with_genres=${genreIds}`;
-    }
-    const p1Results = await fetchPages(url1, 4);
-    allResults.push(...p1Results);
+    const allResults: Movie[] = [];
+    const genreIdMap: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
 
-    // 2. Partner 2 prefs (broader pool)
-    let url2 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc${dateFilter}`;
-    const activeGenres2 = Object.keys(partnerPrefs).filter(g => partnerPrefs[g] > 60);
-    if (activeGenres2.length > 0) {
-      const genreIds = activeGenres2.map(g => {
-        const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
-        return map[g];
-      }).join(',');
-      url2 += `&with_genres=${genreIds}`;
-    }
-    const p2Results = await fetchPages(url2, 4);
-    allResults.push(...p2Results);
+    // 4. Fetch proportional movies per genre (single-genre calls = very loose)
+    for (const [genre, count] of Object.entries(targets)) {
+      const genreId = genreIdMap[genre];
+      if (!genreId) continue;
 
-    // 3. Loose merged / popular fallback for variety
-    let url3 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc${dateFilter}`;
-    const mergedGenres: Record<string, number> = {};
-    Object.keys(myPrefs).forEach(g => {
-      mergedGenres[g] = Math.max(myPrefs[g] || 50, partnerPrefs[g] || 50);
-    });
-    const activeMerged = Object.keys(mergedGenres).filter(g => mergedGenres[g] > 55);
-    if (activeMerged.length > 0) {
-      const genreIds = activeMerged.map(g => {
-        const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
-        return map[g];
-      }).join(',');
-      url3 += `&with_genres=${genreIds}`;
-    }
-    const mergedResults = await fetchPages(url3, 3);
-    allResults.push(...mergedResults);
+      const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}`;
 
-    // Remove duplicates and shuffle heavily for true blend
+      let fetched = 0;
+      let page = 1;
+      while (fetched < count && page <= 8) {
+        try {
+          const res = await fetch(`${baseUrl}&page=${page}`);
+          const data = await res.json();
+          if (data.results && data.results.length > 0) {
+            allResults.push(...data.results);
+            fetched += data.results.length;
+          } else break;
+          page++;
+        } catch (e) {
+          break;
+        }
+      }
+    }
+
+    // 5. Heavy deduplicate + shuffle for true proportional blend
     const unique = allResults.filter((movie, index, self) =>
       index === self.findIndex(m => m.id === movie.id)
     );
