@@ -190,75 +190,81 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Smart merged fetchMovies - ONLY CHANGE (fixed multi-era range + stronger fallback)
+  // Smart blended fetchMovies - ONLY CHANGE
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
-    let url = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+    const results: Movie[] = [];
 
-    // Smart genre merging (forgiving)
-    const mergedGenres: Record<string, number> = {};
-    Object.keys(myPrefs).forEach(g => {
-      const myScore = myPrefs[g] || 50;
-      const partnerScore = partnerPrefs[g] || 50;
-      mergedGenres[g] = Math.max(myScore, partnerScore);
-    });
-
-    const activeGenres = Object.keys(mergedGenres).filter(g => mergedGenres[g] > 45);
-    if (activeGenres.length > 0) {
-      const genreIds = activeGenres.map(g => {
+    // 1. Partner 1 prefs (30%)
+    let url1 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+    const activeGenres1 = Object.keys(myPrefs).filter(g => myPrefs[g] > 60);
+    if (activeGenres1.length > 0) {
+      const genreIds = activeGenres1.map(g => {
         const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
         return map[g];
       }).join(',');
-      url += `&with_genres=${genreIds}`;
+      url1 += `&with_genres=${genreIds}`;
     }
-
-    // Smart era merging - true min/max across ALL selected decades
-    const mergedEras = { ...myEraPrefs, ...partnerEraPrefs };
-    const activeEras = Object.keys(mergedEras).filter(e => mergedEras[e]);
-
-    let minYear = 1990;
-    let maxYear = 2025;
-
-    if (activeEras.length > 0) {
-      const yearMap: Record<string, {min: number; max: number}> = {
-        '1920s': {min: 1920, max: 1929},
-        '1930s': {min: 1930, max: 1939},
-        '1940s': {min: 1940, max: 1949},
-        '1950s': {min: 1950, max: 1959},
-        '1960s': {min: 1960, max: 1969},
-        '1970s': {min: 1970, max: 1979},
-        '1980s': {min: 1980, max: 1989},
-        '1990s': {min: 1990, max: 1999},
-        '2000s': {min: 2000, max: 2009},
-        '2010s': {min: 2010, max: 2019},
-        '2020s': {min: 2020, max: 2025}
-      };
-
-      minYear = Math.min(...activeEras.map(e => yearMap[e].min));
-      maxYear = Math.max(...activeEras.map(e => yearMap[e].max));
-    }
-
-    url += `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
-
-    // Strong fallback: if merged filters return nothing, load popular movies
     try {
-      let res = await fetch(url);
-      let data = await res.json();
+      const res = await fetch(url1);
+      const data = await res.json();
+      results.push(...(data.results || []).slice(0, 7));
+    } catch (e) {}
 
-      if (!data.results || data.results.length === 0) {
-        const fallbackUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
-        res = await fetch(fallbackUrl);
-        data = await res.json();
-      }
-
-      setMovies(data.results || []);
-      setCurrentIndex(0);
-    } catch (e) {
-      console.error(e);
-      setMovies([]);
+    // 2. Partner 2 prefs (30%)
+    let url2 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+    const activeGenres2 = Object.keys(partnerPrefs).filter(g => partnerPrefs[g] > 60);
+    if (activeGenres2.length > 0) {
+      const genreIds = activeGenres2.map(g => {
+        const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
+        return map[g];
+      }).join(',');
+      url2 += `&with_genres=${genreIds}`;
     }
+    try {
+      const res = await fetch(url2);
+      const data = await res.json();
+      results.push(...(data.results || []).slice(0, 7));
+    } catch (e) {}
+
+    // 3. Merged prefs (30%)
+    let url3 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+    const mergedGenres: Record<string, number> = {};
+    Object.keys(myPrefs).forEach(g => {
+      mergedGenres[g] = Math.max(myPrefs[g] || 50, partnerPrefs[g] || 50);
+    });
+    const activeMerged = Object.keys(mergedGenres).filter(g => mergedGenres[g] > 55);
+    if (activeMerged.length > 0) {
+      const genreIds = activeMerged.map(g => {
+        const map: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
+        return map[g];
+      }).join(',');
+      url3 += `&with_genres=${genreIds}`;
+    }
+    try {
+      const res = await fetch(url3);
+      const data = await res.json();
+      results.push(...(data.results || []).slice(0, 7));
+    } catch (e) {}
+
+    // 4. Random popular (10%)
+    try {
+      const randomUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+      const res = await fetch(randomUrl);
+      const data = await res.json();
+      results.push(...(data.results || []).slice(0, 4));
+    } catch (e) {}
+
+    // Remove duplicates and shuffle
+    const unique = results.filter((movie, index, self) => 
+      index === self.findIndex(m => m.id === movie.id)
+    );
+    const shuffled = unique.sort(() => Math.random() - 0.5);
+
+    setMovies(shuffled);
+    setCurrentIndex(0);
   };
 
   useEffect(() => {
