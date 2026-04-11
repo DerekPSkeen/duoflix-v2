@@ -528,7 +528,7 @@ function App() {
     }
   };
 
-  // ==================== HERO + HOW IT WORKS - ONLY THIS SECTION CHANGED ====================
+  // ==================== HERO + HOW IT WORKS + PRICING - ONLY THIS LANDING SECTION CHANGED ====================
   if (showLanding) {
     return (
       <div className="app" style={{ 
@@ -657,10 +657,132 @@ function App() {
             </button>
           </div>
         </div>
+
+        {/* Pricing Section - ONLY THIS NEW SECTION ADDED */}
+        <div style={{ padding: '80px 20px 100px', background: '#111' }}>
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
+            <p style={{ fontSize: '1.15rem', opacity: 0.85, maxWidth: '420px', margin: '0 auto' }}>
+              Start free. Upgrade when you're ready for unlimited swipes.
+            </p>
+          </div>
+
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+            gap: '32px',
+            maxWidth: '1100px',
+            margin: '0 auto'
+          }}>
+            {/* Free Tier */}
+            <div style={{ 
+              background: '#1a1a1a', 
+              borderRadius: '20px', 
+              padding: '32px', 
+              textAlign: 'center',
+              border: '1px solid #333'
+            }}>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Free</h3>
+              <div style={{ fontSize: '2.8rem', fontWeight: 700, marginBottom: '8px' }}>0</div>
+              <p style={{ opacity: 0.8, marginBottom: '24px' }}>$ / month</p>
+              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9 }}>
+                <li style={{ marginBottom: '12px' }}>✅ 50 swipes to try the blend</li>
+                <li style={{ marginBottom: '12px' }}>✅ Basic matching</li>
+                <li style={{ marginBottom: '12px' }}>❌ Unlimited swipes</li>
+              </ul>
+              <button 
+                onClick={() => setShowLanding(false)}
+                style={{
+                  width: '100%',
+                  background: '#444',
+                  color: 'white',
+                  padding: '14px',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Try Free
+              </button>
+            </div>
+
+            {/* Monthly */}
+            <div style={{ 
+              background: '#1a1a1a', 
+              borderRadius: '20px', 
+              padding: '32px', 
+              textAlign: 'center',
+              border: '2px solid #ef4444',
+              position: 'relative'
+            }}>
+              <div style={{ position: 'absolute', top: '-12px', right: '24px', background: '#ef4444', color: 'white', padding: '4px 16px', borderRadius: '9999px', fontSize: '0.85rem', fontWeight: 600 }}>Popular</div>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Monthly</h3>
+              <div style={{ fontSize: '2.8rem', fontWeight: 700, marginBottom: '8px' }}>$3.99</div>
+              <p style={{ opacity: 0.8, marginBottom: '24px' }}>/ month</p>
+              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9 }}>
+                <li style={{ marginBottom: '12px' }}>✅ Unlimited swipes</li>
+                <li style={{ marginBottom: '12px' }}>✅ Full smart blend</li>
+                <li style={{ marginBottom: '12px' }}>✅ Shared watch room + chat</li>
+                <li style={{ marginBottom: '12px' }}>✅ Mutual matches forever</li>
+              </ul>
+              <button 
+                style={{
+                  width: '100%',
+                  background: '#ef4444',
+                  color: 'white',
+                  padding: '14px',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Subscribe Monthly
+              </button>
+            </div>
+
+            {/* Yearly */}
+            <div style={{ 
+              background: '#1a1a1a', 
+              borderRadius: '20px', 
+              padding: '32px', 
+              textAlign: 'center',
+              border: '1px solid #333'
+            }}>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Yearly</h3>
+              <div style={{ fontSize: '2.8rem', fontWeight: 700, marginBottom: '8px' }}>$39</div>
+              <p style={{ opacity: 0.8, marginBottom: '8px' }}>/ year</p>
+              <p style={{ fontSize: '0.95rem', color: '#22c55e', marginBottom: '24px' }}>(save ~18% • $3.25/mo)</p>
+              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9 }}>
+                <li style={{ marginBottom: '12px' }}>✅ Everything in Monthly</li>
+                <li style={{ marginBottom: '12px' }}>✅ Best value for couples</li>
+              </ul>
+              <button 
+                style={{
+                  width: '100%',
+                  background: '#444',
+                  color: 'white',
+                  padding: '14px',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Subscribe Yearly
+              </button>
+            </div>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '40px', opacity: 0.8, fontSize: '0.95rem' }}>
+            Cancel anytime • No ads • Your couple code stays forever
+          </div>
+        </div>
       </div>
     );
   }
-  // ==================== END OF HERO + HOW IT WORKS ====================
+  // ==================== END OF LANDING WITH PRICING ====================
 
   return (
     <div className="app">
