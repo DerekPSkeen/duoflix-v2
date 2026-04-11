@@ -190,15 +190,60 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Smart blended fetchMovies - ONLY CHANGE (true blend of both partners)
+  // Client-side blend fetchMovies - ONLY CHANGE
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
-    const results: Movie[] = [];
+    const allResults: Movie[] = [];
 
-    // 1. Partner 1 prefs (~40%)
-    let url1 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+    // Helper to fetch multiple pages
+    const fetchPages = async (baseUrl: string, maxPages: number = 3) => {
+      const results: Movie[] = [];
+      for (let page = 1; page <= maxPages; page++) {
+        try {
+          const url = `${baseUrl}&page=${page}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.results && data.results.length > 0) {
+            results.push(...data.results);
+          } else {
+            break;
+          }
+        } catch (e) {
+          break;
+        }
+      }
+      return results;
+    };
+
+    // Calculate year range from eras (wide if none selected)
+    const mergedEras = { ...myEraPrefs, ...partnerEraPrefs };
+    const activeEras = Object.keys(mergedEras).filter(e => mergedEras[e]);
+    let minYear = 1990;
+    let maxYear = 2026;
+    if (activeEras.length > 0) {
+      const yearMap: Record<string, {min: number; max: number}> = {
+        '1920s': {min: 1920, max: 1929},
+        '1930s': {min: 1930, max: 1939},
+        '1940s': {min: 1940, max: 1949},
+        '1950s': {min: 1950, max: 1959},
+        '1960s': {min: 1960, max: 1969},
+        '1970s': {min: 1970, max: 1979},
+        '1980s': {min: 1980, max: 1989},
+        '1990s': {min: 1990, max: 1999},
+        '2000s': {min: 2000, max: 2009},
+        '2010s': {min: 2010, max: 2019},
+        '2020s': {min: 2020, max: 2026}
+      };
+      minYear = Math.min(...activeEras.map(e => yearMap[e].min));
+      maxYear = Math.max(...activeEras.map(e => yearMap[e].max));
+    }
+
+    const dateFilter = `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
+
+    // 1. Partner 1 prefs (broader pool)
+    let url1 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc${dateFilter}`;
     const activeGenres1 = Object.keys(myPrefs).filter(g => myPrefs[g] > 60);
     if (activeGenres1.length > 0) {
       const genreIds = activeGenres1.map(g => {
@@ -207,14 +252,11 @@ function App() {
       }).join(',');
       url1 += `&with_genres=${genreIds}`;
     }
-    try {
-      const res = await fetch(url1);
-      const data = await res.json();
-      results.push(...(data.results || []).slice(0, 10));
-    } catch (e) {}
+    const p1Results = await fetchPages(url1, 4);
+    allResults.push(...p1Results);
 
-    // 2. Partner 2 prefs (~40%)
-    let url2 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+    // 2. Partner 2 prefs (broader pool)
+    let url2 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc${dateFilter}`;
     const activeGenres2 = Object.keys(partnerPrefs).filter(g => partnerPrefs[g] > 60);
     if (activeGenres2.length > 0) {
       const genreIds = activeGenres2.map(g => {
@@ -223,14 +265,11 @@ function App() {
       }).join(',');
       url2 += `&with_genres=${genreIds}`;
     }
-    try {
-      const res = await fetch(url2);
-      const data = await res.json();
-      results.push(...(data.results || []).slice(0, 10));
-    } catch (e) {}
+    const p2Results = await fetchPages(url2, 4);
+    allResults.push(...p2Results);
 
-    // 3. Merged prefs (~20%)
-    let url3 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc`;
+    // 3. Loose merged / popular fallback for variety
+    let url3 = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc${dateFilter}`;
     const mergedGenres: Record<string, number> = {};
     Object.keys(myPrefs).forEach(g => {
       mergedGenres[g] = Math.max(myPrefs[g] || 50, partnerPrefs[g] || 50);
@@ -243,14 +282,11 @@ function App() {
       }).join(',');
       url3 += `&with_genres=${genreIds}`;
     }
-    try {
-      const res = await fetch(url3);
-      const data = await res.json();
-      results.push(...(data.results || []).slice(0, 5));
-    } catch (e) {}
+    const mergedResults = await fetchPages(url3, 3);
+    allResults.push(...mergedResults);
 
-    // Remove duplicates and shuffle for variety
-    const unique = results.filter((movie, index, self) => 
+    // Remove duplicates and shuffle heavily for true blend
+    const unique = allResults.filter((movie, index, self) =>
       index === self.findIndex(m => m.id === movie.id)
     );
     const shuffled = unique.sort(() => Math.random() - 0.5);
