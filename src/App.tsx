@@ -252,12 +252,11 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Proportional client-side blend - ONLY CHANGE (kept exactly as last working version)
+  // Proportional client-side blend
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
-    // 1. Calculate combined scores and percentages
     const genreList = Object.keys(myPrefs);
     const combined: Record<string, number> = {};
     let totalScore = 0;
@@ -268,17 +267,15 @@ function App() {
       totalScore += score;
     });
 
-    // 2. Build proportional targets (target ~150 movies total)
     const targetTotal = 150;
     const targets: Record<string, number> = {};
     genreList.forEach(g => {
       if (combined[g] > 0) {
         const percent = combined[g] / totalScore;
-        targets[g] = Math.max(8, Math.round(targetTotal * percent)); // minimum 8 movies per genre
+        targets[g] = Math.max(8, Math.round(targetTotal * percent));
       }
     });
 
-    // 3. Year range from eras
     const mergedEras = { ...myEraPrefs, ...partnerEraPrefs };
     const activeEras = Object.keys(mergedEras).filter(e => mergedEras[e]);
     let minYear = 1990;
@@ -305,7 +302,6 @@ function App() {
     const allResults: Movie[] = [];
     const genreIdMap: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
 
-    // 4. Fetch proportional movies per genre (single-genre calls = very loose)
     for (const [genre, count] of Object.entries(targets)) {
       const genreId = genreIdMap[genre];
       if (!genreId) continue;
@@ -329,7 +325,6 @@ function App() {
       }
     }
 
-    // 5. Heavy deduplicate + shuffle for true proportional blend
     const unique = allResults.filter((movie, index, self) =>
       index === self.findIndex(m => m.id === movie.id)
     );
@@ -528,7 +523,6 @@ function App() {
     }
   };
 
-  // ==================== HERO + HOW IT WORKS + PRICING - ONLY THIS LANDING SECTION CHANGED ====================
   if (showLanding) {
     return (
       <div className="app" style={{ 
@@ -610,28 +604,24 @@ function App() {
             maxWidth: '1100px',
             margin: '0 auto'
           }}>
-            {/* Step 1 */}
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔑</div>
               <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>1. Create or Join a Room</h3>
               <p style={{ opacity: 0.8 }}>One of you creates a 6-digit room. Your partner joins instantly. Your shared movie space is ready.</p>
             </div>
 
-            {/* Step 2 */}
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎛️</div>
               <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>2. Set Your Preferences</h3>
               <p style={{ opacity: 0.8 }}>Each of you adjusts genre sliders, favorite eras, and actors. We blend them proportionally.</p>
             </div>
 
-            {/* Step 3 */}
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👆</div>
               <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>3. Swipe Together</h3>
               <p style={{ opacity: 0.8 }}>Swipe right on movies you might both love. The deck intelligently mixes your tastes.</p>
             </div>
 
-            {/* Step 4 */}
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '3rem', marginBottom: '16px' }}>❤️</div>
               <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>4. Get Matches & Watch</h3>
@@ -658,7 +648,7 @@ function App() {
           </div>
         </div>
 
-        {/* Pricing Section - ONLY THIS NEW SECTION ADDED */}
+        {/* Pricing Section */}
         <div style={{ padding: '80px 20px 100px', background: '#111' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
@@ -674,7 +664,6 @@ function App() {
             maxWidth: '1100px',
             margin: '0 auto'
           }}>
-            {/* Free Tier */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
@@ -707,7 +696,6 @@ function App() {
               </button>
             </div>
 
-            {/* Monthly */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
@@ -742,7 +730,6 @@ function App() {
               </button>
             </div>
 
-            {/* Yearly */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
@@ -782,7 +769,6 @@ function App() {
       </div>
     );
   }
-  // ==================== END OF LANDING WITH PRICING ====================
 
   return (
     <div className="app">
@@ -936,7 +922,6 @@ function App() {
           <div className="prefs-container">
             <h2>Preferences</h2>
 
-            {/* My Preferences */}
             <div style={{ marginBottom: '2.5rem' }}>
               <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>My Preferences</h3>
               {Object.keys(myPrefs).map(genre => (
@@ -973,7 +958,6 @@ function App() {
               </div>
             </div>
 
-            {/* Partner's Preferences */}
             {coupleCode && (
               <div style={{ marginBottom: '2.5rem' }}>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>Partner's Preferences</h3>
@@ -1028,7 +1012,6 @@ function App() {
         <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
       </nav>
 
-      {/* Modal at root level */}
       {showDetails && detailMovie && (
         <div className="modal-overlay" onClick={() => setShowDetails(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
