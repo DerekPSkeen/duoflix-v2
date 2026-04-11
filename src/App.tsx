@@ -588,7 +588,7 @@ function App() {
           </div>
         </div>
 
-        {/* How It Works Section */}
+        {/* How It Works Section - Fixed for reliable rendering */}
         <div style={{ padding: '80px 20px 100px', background: '#0a0a0a' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
@@ -605,27 +605,27 @@ function App() {
             margin: '0 auto'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔑</div>
+              <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>🔑</div>
               <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>1. Create or Join a Room</h3>
-              <p style={{ opacity: 0.8 }}>One of you creates a 6-digit room. Your partner joins instantly. Your shared movie space is ready.</p>
+              <p style={{ opacity: 0.8, lineHeight: 1.5 }}>One of you creates a 6-digit room. Your partner joins instantly. Your shared movie space is ready.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎛️</div>
+              <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>🎛️</div>
               <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>2. Set Your Preferences</h3>
-              <p style={{ opacity: 0.8 }}>Each of you adjusts genre sliders, favorite eras, and actors. We blend them proportionally.</p>
+              <p style={{ opacity: 0.8, lineHeight: 1.5 }}>Each of you adjusts genre sliders, favorite eras, and actors. We blend them proportionally.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👆</div>
+              <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>👆</div>
               <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>3. Swipe Together</h3>
-              <p style={{ opacity: 0.8 }}>Swipe right on movies you might both love. The deck intelligently mixes your tastes.</p>
+              <p style={{ opacity: 0.8, lineHeight: 1.5 }}>Swipe right on movies you might both love. The deck intelligently mixes your tastes.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>❤️</div>
+              <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>❤️</div>
               <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>4. Get Matches & Watch</h3>
-              <p style={{ opacity: 0.8 }}>See mutual matches. Jump into a shared watch room with realtime chat. Enjoy the movie.</p>
+              <p style={{ opacity: 0.8, lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Enjoy the movie.</p>
             </div>
           </div>
 
@@ -674,7 +674,7 @@ function App() {
               <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Free</h3>
               <div style={{ fontSize: '2.8rem', fontWeight: 700, marginBottom: '8px' }}>0</div>
               <p style={{ opacity: 0.8, marginBottom: '24px' }}>$ / month</p>
-              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9 }}>
+              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9, listStyle: 'none', padding: 0 }}>
                 <li style={{ marginBottom: '12px' }}>✅ 50 swipes to try the blend</li>
                 <li style={{ marginBottom: '12px' }}>✅ Basic matching</li>
                 <li style={{ marginBottom: '12px' }}>❌ Unlimited swipes</li>
@@ -708,7 +708,7 @@ function App() {
               <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Monthly</h3>
               <div style={{ fontSize: '2.8rem', fontWeight: 700, marginBottom: '8px' }}>$3.99</div>
               <p style={{ opacity: 0.8, marginBottom: '24px' }}>/ month</p>
-              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9 }}>
+              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9, listStyle: 'none', padding: 0 }}>
                 <li style={{ marginBottom: '12px' }}>✅ Unlimited swipes</li>
                 <li style={{ marginBottom: '12px' }}>✅ Full smart blend</li>
                 <li style={{ marginBottom: '12px' }}>✅ Shared watch room + chat</li>
@@ -741,7 +741,7 @@ function App() {
               <div style={{ fontSize: '2.8rem', fontWeight: 700, marginBottom: '8px' }}>$39</div>
               <p style={{ opacity: 0.8, marginBottom: '8px' }}>/ year</p>
               <p style={{ fontSize: '0.95rem', color: '#22c55e', marginBottom: '24px' }}>(save ~18% • $3.25/mo)</p>
-              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9 }}>
+              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9, listStyle: 'none', padding: 0 }}>
                 <li style={{ marginBottom: '12px' }}>✅ Everything in Monthly</li>
                 <li style={{ marginBottom: '12px' }}>✅ Best value for couples</li>
               </ul>
