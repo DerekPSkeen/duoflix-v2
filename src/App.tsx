@@ -29,7 +29,6 @@ function App() {
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
 
-  // Watch Together + Persistent Couple Code
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [coupleCode, setCoupleCode] = useState<string | null>(null);
   const [joinedCode, setJoinedCode] = useState('');
@@ -38,10 +37,8 @@ function App() {
   const [newChatMessage, setNewChatMessage] = useState('');
   const [isInRoom, setIsInRoom] = useState(false);
 
-  // Realtime channel
   const channelRef = useRef<any>(null);
 
-  // Per-user Preferences (now persistent)
   const [myPrefs, setMyPrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
     Drama: 50, Fantasy: 50, Horror: 50, Mystery: 50, Romance: 50,
@@ -70,7 +67,6 @@ function App() {
   const [partnerFavoriteActors, setPartnerFavoriteActors] = useState<string[]>([]);
   const [newActor, setNewActor] = useState('');
 
-  // Landing + Auth
   const [showLanding, setShowLanding] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -87,7 +83,6 @@ function App() {
 
   const currentMovie = movies[currentIndex];
 
-  // Clean auth listener
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -100,7 +95,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load coupleCode + preferences
   useEffect(() => {
     const loadCoupleCode = async () => {
       if (user?.id) {
@@ -124,7 +118,6 @@ function App() {
     loadCoupleCode();
   }, [user]);
 
-  // Load preferences when coupleCode changes
   useEffect(() => {
     if (!coupleCode) return;
 
@@ -154,7 +147,6 @@ function App() {
     loadPrefs();
   }, [coupleCode]);
 
-  // Save preferences when Save button is clicked
   const savePreferences = async () => {
     if (!coupleCode) {
       alert('Please create or join a room first to save preferences.');
@@ -186,7 +178,6 @@ function App() {
     }
   };
 
-  // Realtime channel for shared chat and likes
   useEffect(() => {
     if (!isInRoom || !roomCode) {
       if (channelRef.current) {
@@ -220,7 +211,6 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Mutual matches
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
@@ -228,7 +218,6 @@ function App() {
     setMutualMatches(mutual);
   }, [likedMovies, sharedLikes]);
 
-  // Load persistent likes from Supabase when coupleCode is available
   useEffect(() => {
     if (!coupleCode) return;
 
@@ -252,7 +241,6 @@ function App() {
       });
   }, [coupleCode]);
 
-  // Proportional client-side blend
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
@@ -545,7 +533,6 @@ function App() {
           <div style={{ fontSize: '2.8rem', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.04em', maxWidth: '380px', marginBottom: '24px' }}>
             Stop arguing.<br />Start watching together.
           </div>
-          
           <div style={{ fontSize: '1.25rem', opacity: 0.9, maxWidth: '320px', marginBottom: '48px' }}>
             Tinder-style swiping for couples. Our smart blend combines both your tastes into one perfect deck.
           </div>
