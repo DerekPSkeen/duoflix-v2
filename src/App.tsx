@@ -519,7 +519,7 @@ function App() {
         color: 'white',
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}>
-        {/* Hero Section - rewritten with sign-in button */}
+        {/* Hero Section */}
         <div style={{
           height: '100dvh',
           display: 'flex',
