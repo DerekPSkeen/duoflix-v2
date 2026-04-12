@@ -519,7 +519,7 @@ function App() {
         color: 'white',
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}>
-        {/* Hero Section - rewritten for stronger emotional impact */}
+        {/* Hero Section - rewritten with sign-in button */}
         <div style={{
           height: '100dvh',
           display: 'flex',
@@ -555,17 +555,34 @@ function App() {
             Start Swiping Free
           </button>
 
-          <div style={{ fontSize: '1rem', opacity: 0.75, maxWidth: '280px' }}>
-            50 movies to try • No account needed • Your couple code is permanent
+          <button 
+            onClick={() => setShowAuthModal(true)}
+            style={{
+              background: 'transparent',
+              color: 'white',
+              border: '2px solid rgba(255,255,255,0.7)',
+              padding: '14px 36px',
+              borderRadius: '9999px',
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              marginBottom: '32px',
+              cursor: 'pointer'
+            }}
+          >
+            Sign In
+          </button>
+
+          <div style={{ fontSize: '1rem', opacity: 0.75 }}>
+            50 movies to try • No account needed to start • Your couple code is permanent
           </div>
         </div>
 
-        {/* How It Works Section - rewritten cleanly with stronger icons and flow */}
+        {/* How It Works Section */}
         <div style={{ padding: '80px 20px 100px', background: '#0a0a0a' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '2.1rem', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
             <p style={{ fontSize: '1.2rem', opacity: 0.85, maxWidth: '440px', margin: '0 auto' }}>
-              Four steps to movie nights you both love
+              Four simple steps to better movie nights
             </p>
           </div>
 
@@ -579,7 +596,7 @@ function App() {
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>🔑</div>
               <h3 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>1. Create or Join a Room</h3>
-              <p style={{ opacity: 0.85 }}>One 6-digit code. Both of you are instantly connected in your private couple space.</p>
+              <p style={{ opacity: 0.85 }}>One 6-digit code connects you both instantly in your private couple space.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
@@ -591,7 +608,7 @@ function App() {
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>👆</div>
               <h3 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>3. Swipe Together</h3>
-              <p style={{ opacity: 0.85 }}>Tinder-style swiping on real movies. The deck is smartly mixed from both your tastes.</p>
+              <p style={{ opacity: 0.85 }}>Tinder-style swiping on real movies. The deck intelligently mixes both your tastes.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
@@ -620,7 +637,7 @@ function App() {
           </div>
         </div>
 
-        {/* Pricing Section - rewritten cleanly */}
+        {/* Pricing Section */}
         <div style={{ padding: '80px 20px 100px', background: '#111' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '2.1rem', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
@@ -636,7 +653,6 @@ function App() {
             maxWidth: '1100px',
             margin: '0 auto'
           }}>
-            {/* Free tier */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
@@ -669,7 +685,6 @@ function App() {
               </button>
             </div>
 
-            {/* Monthly tier */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
@@ -704,7 +719,6 @@ function App() {
               </button>
             </div>
 
-            {/* Yearly tier */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
