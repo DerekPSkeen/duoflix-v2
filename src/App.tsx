@@ -519,7 +519,7 @@ function App() {
         color: 'white',
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}>
-        {/* Hero Section */}
+        {/* Hero Section - rewritten for stronger emotional impact */}
         <div style={{
           height: '100dvh',
           display: 'flex',
@@ -530,11 +530,11 @@ function App() {
           padding: '0 20px',
           position: 'relative'
         }}>
-          <div style={{ fontSize: '2.8rem', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.04em', maxWidth: '380px', marginBottom: '24px' }}>
+          <div style={{ fontSize: '3rem', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.04em', maxWidth: '420px', marginBottom: '24px' }}>
             Stop arguing.<br />Start watching together.
           </div>
-          <div style={{ fontSize: '1.25rem', opacity: 0.9, maxWidth: '320px', marginBottom: '48px' }}>
-            Tinder-style swiping for couples. Our smart blend combines both your tastes into one perfect deck.
+          <div style={{ fontSize: '1.35rem', opacity: 0.9, maxWidth: '360px', marginBottom: '48px' }}>
+            The only movie app built for couples. Swipe together. Match instantly. Never fight over what to watch again.
           </div>
 
           <button 
@@ -543,44 +543,29 @@ function App() {
               background: '#ef4444',
               color: 'white',
               fontWeight: 600,
-              fontSize: '1.3rem',
-              padding: '18px 52px',
+              fontSize: '1.35rem',
+              padding: '20px 56px',
               borderRadius: '9999px',
               border: 'none',
               boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)',
-              marginBottom: '20px',
+              marginBottom: '24px',
               cursor: 'pointer'
             }}
           >
-            Start Swiping Free (50 Movies)
+            Start Swiping Free
           </button>
 
-          <button 
-            onClick={() => alert('Demo video coming soon – for now just tap "Start Swiping Free"')}
-            style={{
-              background: 'transparent',
-              color: 'white',
-              border: '1px solid rgba(255,255,255,0.6)',
-              padding: '12px 32px',
-              borderRadius: '9999px',
-              fontSize: '1rem',
-              cursor: 'pointer'
-            }}
-          >
-            Watch 30-second demo
-          </button>
-
-          <div style={{ position: 'absolute', bottom: '40px', fontSize: '0.9rem', opacity: 0.7 }}>
-            Join thousands of couples who finally agree on what to watch
+          <div style={{ fontSize: '1rem', opacity: 0.75, maxWidth: '280px' }}>
+            50 movies to try • No account needed • Your couple code is permanent
           </div>
         </div>
 
-        {/* How It Works Section - rewritten cleanly */}
+        {/* How It Works Section - rewritten cleanly with stronger icons and flow */}
         <div style={{ padding: '80px 20px 100px', background: '#0a0a0a' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
-            <p style={{ fontSize: '1.15rem', opacity: 0.85, maxWidth: '420px', margin: '0 auto' }}>
-              Four simple steps to better movie nights
+            <h2 style={{ fontSize: '2.1rem', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
+            <p style={{ fontSize: '1.2rem', opacity: 0.85, maxWidth: '440px', margin: '0 auto' }}>
+              Four steps to movie nights you both love
             </p>
           </div>
 
@@ -592,27 +577,27 @@ function App() {
             margin: '0 auto'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔑</div>
-              <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>1. Create or Join a Room</h3>
-              <p style={{ opacity: 0.8 }}>One of you creates a 6-digit room. Your partner joins instantly. Your shared movie space is ready.</p>
+              <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>🔑</div>
+              <h3 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>1. Create or Join a Room</h3>
+              <p style={{ opacity: 0.85 }}>One 6-digit code. Both of you are instantly connected in your private couple space.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🎛️</div>
-              <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>2. Set Your Preferences</h3>
-              <p style={{ opacity: 0.8 }}>Each of you adjusts genre sliders, favorite eras, and actors. We blend them proportionally.</p>
+              <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>🎛️</div>
+              <h3 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>2. Set Your Preferences</h3>
+              <p style={{ opacity: 0.85 }}>You each adjust genres, eras, and favorite actors. We blend them proportionally.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>👆</div>
-              <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>3. Swipe Together</h3>
-              <p style={{ opacity: 0.8 }}>Swipe right on movies you might both love. The deck intelligently mixes your tastes.</p>
+              <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>👆</div>
+              <h3 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>3. Swipe Together</h3>
+              <p style={{ opacity: 0.85 }}>Tinder-style swiping on real movies. The deck is smartly mixed from both your tastes.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>❤️</div>
-              <h3 style={{ fontSize: '1.35rem', marginBottom: '12px' }}>4. Get Matches & Watch</h3>
-              <p style={{ opacity: 0.8 }}>See mutual matches. Jump into a shared watch room with realtime chat. Enjoy the movie.</p>
+              <div style={{ fontSize: '3.2rem', marginBottom: '16px' }}>❤️</div>
+              <h3 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>4. Get Matches & Watch</h3>
+              <p style={{ opacity: 0.85 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
             </div>
           </div>
 
@@ -623,8 +608,8 @@ function App() {
                 background: '#ef4444',
                 color: 'white',
                 fontWeight: 600,
-                fontSize: '1.25rem',
-                padding: '18px 48px',
+                fontSize: '1.3rem',
+                padding: '20px 52px',
                 borderRadius: '9999px',
                 border: 'none',
                 cursor: 'pointer'
@@ -638,9 +623,9 @@ function App() {
         {/* Pricing Section - rewritten cleanly */}
         <div style={{ padding: '80px 20px 100px', background: '#111' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
-            <p style={{ fontSize: '1.15rem', opacity: 0.85, maxWidth: '420px', margin: '0 auto' }}>
-              Start free. Upgrade when you're ready for unlimited swipes.
+            <h2 style={{ fontSize: '2.1rem', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
+            <p style={{ fontSize: '1.2rem', opacity: 0.85, maxWidth: '440px', margin: '0 auto' }}>
+              Start free. Upgrade when you want unlimited swipes and full couple features.
             </p>
           </div>
 
@@ -651,6 +636,7 @@ function App() {
             maxWidth: '1100px',
             margin: '0 auto'
           }}>
+            {/* Free tier */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
@@ -683,6 +669,7 @@ function App() {
               </button>
             </div>
 
+            {/* Monthly tier */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
@@ -717,6 +704,7 @@ function App() {
               </button>
             </div>
 
+            {/* Yearly tier */}
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
