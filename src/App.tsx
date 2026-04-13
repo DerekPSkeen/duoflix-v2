@@ -513,11 +513,14 @@ function App() {
 
   if (showLanding) {
     return (
-      <div className="app" style={{ 
-        minHeight: '100dvh', 
+      <div style={{ 
+        minHeight: '100dvh',
         background: 'linear-gradient(180deg, #111 0%, #000 100%)',
         color: 'white',
-        fontFamily: 'system-ui, -apple-system, sans-serif'
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        width: '100%'
       }}>
         {/* Hero Section */}
         <div style={{
