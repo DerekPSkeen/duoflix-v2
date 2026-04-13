@@ -513,25 +513,25 @@ function App() {
 
   if (showLanding) {
     return (
-      <div style={{ 
-        minHeight: '100dvh',
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         background: 'linear-gradient(180deg, #111 0%, #000 100%)',
         color: 'white',
         fontFamily: 'system-ui, -apple-system, sans-serif',
         overflowY: 'auto',
         overflowX: 'hidden',
+        zIndex: 999999,
         width: '100%',
-        position: 'relative',
+        height: '100dvh',
         display: 'block'
       }}>
-        {/* Diagnostic banner */}
-        <div style={{background:'#ef4444', color:'white', padding:'20px', fontSize:'1.5rem', textAlign:'center', marginBottom:'0'}}>
-          ✅ FULL LANDING V4 LOADED – SCROLL DOWN FOR HOW IT WORKS + PRICING
-        </div>
-
         {/* Hero Section */}
         <div style={{
-          height: '100dvh',
+          minHeight: '100dvh',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -582,13 +582,13 @@ function App() {
             Sign In
           </button>
 
-          <div style={{ fontSize: '1rem', opacity: 0.75 }}>
+          <div style={{ fontSize: '1rem', opacity: 0.75, marginTop: '20px' }}>
             50 movies to try • No account needed to start • Your couple code is permanent
           </div>
         </div>
 
         {/* How It Works Section */}
-        <div style={{ padding: '80px 20px 100px', background: '#0a0a0a' }}>
+        <div style={{ padding: '80px 20px 120px', background: '#0a0a0a' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '2.1rem', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
             <p style={{ fontSize: '1.2rem', opacity: 0.85, maxWidth: '440px', margin: '0 auto' }}>
@@ -628,7 +628,7 @@ function App() {
             </div>
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: '70px' }}>
+          <div style={{ textAlign: 'center', marginTop: '80px' }}>
             <button 
               onClick={() => setShowLanding(false)}
               style={{
@@ -648,7 +648,7 @@ function App() {
         </div>
 
         {/* Pricing Section */}
-        <div style={{ padding: '80px 20px 100px', background: '#111' }}>
+        <div style={{ padding: '80px 20px 120px', background: '#111' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '2.1rem', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
             <p style={{ fontSize: '1.2rem', opacity: 0.85, maxWidth: '440px', margin: '0 auto' }}>
