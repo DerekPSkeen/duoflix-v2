@@ -522,7 +522,7 @@ function App() {
         overflowX: 'hidden',
         width: '100%',
         position: 'relative',
-        display: 'block'   // force block to break any flex clipping
+        display: 'block'
       }}>
         {/* Diagnostic banner */}
         <div style={{background:'#ef4444', color:'white', padding:'20px', fontSize:'1.5rem', textAlign:'center', marginBottom:'0'}}>
