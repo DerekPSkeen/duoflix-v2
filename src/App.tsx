@@ -511,6 +511,7 @@ function App() {
     }
   };
 
+  // === ONLY ONE showLanding BLOCK (all duplicates removed) ===
   if (showLanding) {
     return (
       <div style={{ 
@@ -522,6 +523,11 @@ function App() {
         overflowX: 'hidden',
         width: '100%'
       }}>
+        {/* Diagnostic banner - remove after confirmation */}
+        <div style={{background:'#ef4444', color:'white', padding:'20px', fontSize:'1.5rem', textAlign:'center', marginBottom:'0'}}>
+          ✅ FULL LANDING V4 LOADED – SCROLL DOWN FOR HOW IT WORKS + PRICING
+        </div>
+
         {/* Hero Section */}
         <div style={{
           height: '100dvh',
