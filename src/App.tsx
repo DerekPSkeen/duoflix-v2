@@ -511,7 +511,6 @@ function App() {
     }
   };
 
-  // === ONLY ONE showLanding BLOCK (all duplicates removed) ===
   if (showLanding) {
     return (
       <div style={{ 
@@ -521,9 +520,11 @@ function App() {
         fontFamily: 'system-ui, -apple-system, sans-serif',
         overflowY: 'auto',
         overflowX: 'hidden',
-        width: '100%'
+        width: '100%',
+        position: 'relative',
+        display: 'block'   // force block to break any flex clipping
       }}>
-        {/* Diagnostic banner - remove after confirmation */}
+        {/* Diagnostic banner */}
         <div style={{background:'#ef4444', color:'white', padding:'20px', fontSize:'1.5rem', textAlign:'center', marginBottom:'0'}}>
           ✅ FULL LANDING V4 LOADED – SCROLL DOWN FOR HOW IT WORKS + PRICING
         </div>
