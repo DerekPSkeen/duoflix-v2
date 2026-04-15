@@ -15,6 +15,12 @@ interface Actor {
   name: string;
 }
 
+interface WatchProvider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+}
+
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -25,6 +31,8 @@ function App() {
   const [showDetails, setShowDetails] = useState(false);
   const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
   const [actors, setActors] = useState<Actor[]>([]);
+  const [watchProviders, setWatchProviders] = useState<WatchProvider[]>([]);
+  const [providersLoading, setProvidersLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState<'swipe' | 'matches' | 'watch' | 'prefs'>('swipe');
 
   const [matchesSubTab, setMatchesSubTab] = useState<'mutual' | 'my-likes'>('mutual');
@@ -338,9 +346,56 @@ function App() {
     }
   };
 
+  const fetchWatchProviders = async (movieId: number) => {
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) return;
+    setProvidersLoading(true);
+    setWatchProviders([]);
+    try {
+      const res = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${apiKey}`);
+      const data = await res.json();
+      const usProviders = data.results?.US || {};
+      const allProviders: WatchProvider[] = [];
+      
+      // Combine flatrate, rent, buy (prioritize flatrate)
+      if (usProviders.flatrate) {
+        allProviders.push(...usProviders.flatrate.map((p: any) => ({
+          provider_id: p.provider_id,
+          provider_name: p.provider_name,
+          logo_path: p.logo_path
+        })));
+      }
+      if (usProviders.rent) {
+        allProviders.push(...usProviders.rent.map((p: any) => ({
+          provider_id: p.provider_id,
+          provider_name: p.provider_name,
+          logo_path: p.logo_path
+        })));
+      }
+      if (usProviders.buy) {
+        allProviders.push(...usProviders.buy.map((p: any) => ({
+          provider_id: p.provider_id,
+          provider_name: p.provider_name,
+          logo_path: p.logo_path
+        })));
+      }
+
+      // Remove duplicates
+      const uniqueProviders = Array.from(new Map(allProviders.map(p => [p.provider_id, p])).values());
+      setWatchProviders(uniqueProviders.slice(0, 8)); // Limit to top 8 for clean UI
+    } catch (e) {
+      console.error('Failed to fetch watch providers:', e);
+    } finally {
+      setProvidersLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (showDetails && detailMovie) {
       fetchActors(detailMovie.id);
+      fetchWatchProviders(detailMovie.id);
+    } else {
+      setWatchProviders([]);
     }
   }, [showDetails, detailMovie]);
 
@@ -522,8 +577,8 @@ function App() {
         background: 'linear-gradient(180deg, #111 0%, #000 100%)',
         color: 'white',
         fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: '16px',                    /* Strong base reset for iOS Dynamic Type */
-        WebkitTextSizeAdjust: 'none',        /* Disable automatic scaling */
+        fontSize: '16px',
+        WebkitTextSizeAdjust: 'none',
         textSizeAdjust: 'none',
         overflowY: 'auto',
         overflowX: 'hidden',
@@ -1050,6 +1105,78 @@ function App() {
             <ul className="actors-list">
               {actors.length > 0 ? actors.map((a, i) => <li key={i}>{a.name}</li>) : <li>Loading actors...</li>}
             </ul>
+
+            {/* Where to Watch section - only change in the entire file */}
+            <div style={{ marginTop: '2rem', borderTop: '1px solid #333', paddingTop: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem' }}>Where to Watch</h3>
+              {providersLoading ? (
+                <p style={{ opacity: 0.7 }}>Loading providers...</p>
+              ) : watchProviders.length > 0 ? (
+                <div style={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  gap: '12px',
+                  justifyContent: 'flex-start'
+                }}>
+                  {watchProviders.map(provider => (
+                    <div 
+                      key={provider.provider_id} 
+                      style={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        alignItems: 'center', 
+                        width: '70px',
+                        textAlign: 'center'
+                      }}
+                    >
+                      {provider.logo_path ? (
+                        <img 
+                          src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`} 
+                          alt={provider.provider_name}
+                          style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            borderRadius: '8px',
+                            objectFit: 'contain',
+                            background: '#222',
+                            padding: '4px'
+                          }}
+                        />
+                      ) : (
+                        <div style={{ 
+                          width: '48px', 
+                          height: '48px', 
+                          borderRadius: '8px',
+                          background: '#222',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.8rem'
+                        }}>
+                          {provider.provider_name.slice(0, 2)}
+                        </div>
+                      )}
+                      <div style={{ 
+                        fontSize: '0.75rem', 
+                        marginTop: '6px', 
+                        opacity: 0.85,
+                        maxWidth: '70px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {provider.provider_name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ opacity: 0.7 }}>No streaming providers found for this movie in your region at this time.</p>
+              )}
+              <p style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '1rem' }}>
+                Data from TMDB / JustWatch • Availability may vary by region
+              </p>
+            </div>
           </div>
         </div>
       )}
