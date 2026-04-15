@@ -522,15 +522,16 @@ function App() {
         background: 'linear-gradient(180deg, #111 0%, #000 100%)',
         color: 'white',
         fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontSize: '16px',                    /* ← iOS Dynamic Type reset */
+        WebkitTextSizeAdjust: 'none',        /* ← stops automatic scaling */
+        textSizeAdjust: 'none',
         overflowY: 'auto',
         overflowX: 'hidden',
         zIndex: 999999,
         width: '100%',
         height: '100dvh',
         display: 'block',
-        paddingBottom: 'env(safe-area-inset-bottom, 20px)',
-        WebkitTextSizeAdjust: '100%',
-        textSizeAdjust: '100%'
+        paddingBottom: 'env(safe-area-inset-bottom, 20px)'
       }}>
         {/* Hero Section */}
         <div style={{
@@ -544,7 +545,7 @@ function App() {
           position: 'relative'
         }}>
           <div style={{ 
-            fontSize: 'clamp(1.9rem, 6.5vw, 2.6rem)', 
+            fontSize: 'clamp(1.85rem, 6.2vw, 2.55rem)', 
             lineHeight: 1.1, 
             fontWeight: 700, 
             letterSpacing: '-0.03em', 
@@ -554,7 +555,7 @@ function App() {
             Stop arguing.<br />Start watching together.
           </div>
           <div style={{ 
-            fontSize: 'clamp(1rem, 4vw, 1.2rem)', 
+            fontSize: 'clamp(0.98rem, 3.9vw, 1.18rem)', 
             opacity: 0.92, 
             maxWidth: '340px', 
             marginBottom: '40px',
@@ -569,7 +570,7 @@ function App() {
               background: '#ef4444',
               color: 'white',
               fontWeight: 600,
-              fontSize: 'clamp(1.05rem, 4vw, 1.25rem)',
+              fontSize: 'clamp(1.05rem, 4.1vw, 1.25rem)',
               padding: '16px 48px',
               borderRadius: '9999px',
               border: 'none',
