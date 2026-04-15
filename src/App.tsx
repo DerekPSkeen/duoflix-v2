@@ -89,7 +89,33 @@ function App() {
   const [isFlyingOff, setIsFlyingOff] = useState(false);
   const [flyDirection, setFlyDirection] = useState<'left' | 'right' | null>(null);
 
+  // New: track previous match count to detect increases only
+  const [prevMatchCount, setPrevMatchCount] = useState(0);
+
   const currentMovie = movies[currentIndex];
+
+  // Positive dopamine coin/slot-machine style sound
+  const playMatchSound = () => {
+    try {
+      const sound = new Audio("https://assets.mixkit.co/sfx/preview/296/296-preview.mp3"); // short positive coin win sound
+      sound.volume = 0.65;
+      sound.play().catch(() => {});
+    } catch (e) {
+      // Fallback oscillator tone if audio fails
+      try {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.value = 0.35;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        setTimeout(() => osc.stop(), 160);
+      } catch {}
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -219,12 +245,21 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
+  // Mutual matches calculation + sound trigger (the only targeted change)
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
     );
+    
+    const newCount = mutual.length;
+    
+    if (newCount > prevMatchCount) {
+      playMatchSound();
+    }
+    
     setMutualMatches(mutual);
-  }, [likedMovies, sharedLikes]);
+    setPrevMatchCount(newCount);
+  }, [likedMovies, sharedLikes, prevMatchCount]);
 
   useEffect(() => {
     if (!coupleCode) return;
@@ -357,7 +392,6 @@ function App() {
       const usProviders = data.results?.US || {};
       const allProviders: WatchProvider[] = [];
       
-      // Combine flatrate, rent, buy (prioritize flatrate)
       if (usProviders.flatrate) {
         allProviders.push(...usProviders.flatrate.map((p: any) => ({
           provider_id: p.provider_id,
@@ -380,9 +414,8 @@ function App() {
         })));
       }
 
-      // Remove duplicates
       const uniqueProviders = Array.from(new Map(allProviders.map(p => [p.provider_id, p])).values());
-      setWatchProviders(uniqueProviders.slice(0, 8)); // Limit to top 8 for clean UI
+      setWatchProviders(uniqueProviders.slice(0, 8));
     } catch (e) {
       console.error('Failed to fetch watch providers:', e);
     } finally {
@@ -711,7 +744,7 @@ function App() {
                 background: '#ef4444',
                 color: 'white',
                 fontWeight: 600,
-                fontSize: 'clamp(1.05rem, 4vw, 1.2rem)',
+                fontSize: 'clamp(1.05rem, 4.1vw, 1.22rem)',
                 padding: '16px 48px',
                 borderRadius: '9999px',
                 border: 'none',
@@ -865,7 +898,9 @@ function App() {
             </button>
           </div>
         )}
-        <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>❤️ Matches ({mutualMatches.length})</div>
+        <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>
+          ❤️ Matches ({mutualMatches.length})
+        </div>
       </div>
 
       {currentTab === 'swipe' && (
@@ -1106,65 +1141,22 @@ function App() {
               {actors.length > 0 ? actors.map((a, i) => <li key={i}>{a.name}</li>) : <li>Loading actors...</li>}
             </ul>
 
-            {/* Where to Watch section - only change in the entire file */}
             <div style={{ marginTop: '2rem', borderTop: '1px solid #333', paddingTop: '1.5rem' }}>
               <h3 style={{ marginBottom: '1rem' }}>Where to Watch</h3>
               {providersLoading ? (
                 <p style={{ opacity: 0.7 }}>Loading providers...</p>
               ) : watchProviders.length > 0 ? (
-                <div style={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  gap: '12px',
-                  justifyContent: 'flex-start'
-                }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'flex-start' }}>
                   {watchProviders.map(provider => (
-                    <div 
-                      key={provider.provider_id} 
-                      style={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'center', 
-                        width: '70px',
-                        textAlign: 'center'
-                      }}
-                    >
+                    <div key={provider.provider_id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '70px', textAlign: 'center' }}>
                       {provider.logo_path ? (
-                        <img 
-                          src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`} 
-                          alt={provider.provider_name}
-                          style={{ 
-                            width: '48px', 
-                            height: '48px', 
-                            borderRadius: '8px',
-                            objectFit: 'contain',
-                            background: '#222',
-                            padding: '4px'
-                          }}
-                        />
+                        <img src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`} alt={provider.provider_name} style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'contain', background: '#222', padding: '4px' }} />
                       ) : (
-                        <div style={{ 
-                          width: '48px', 
-                          height: '48px', 
-                          borderRadius: '8px',
-                          background: '#222',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.8rem'
-                        }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>
                           {provider.provider_name.slice(0, 2)}
                         </div>
                       )}
-                      <div style={{ 
-                        fontSize: '0.75rem', 
-                        marginTop: '6px', 
-                        opacity: 0.85,
-                        maxWidth: '70px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
+                      <div style={{ fontSize: '0.75rem', marginTop: '6px', opacity: 0.85, maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {provider.provider_name}
                       </div>
                     </div>
