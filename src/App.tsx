@@ -522,8 +522,8 @@ function App() {
         background: 'linear-gradient(180deg, #111 0%, #000 100%)',
         color: 'white',
         fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: '16px',                    /* ← iOS Dynamic Type reset */
-        WebkitTextSizeAdjust: 'none',        /* ← stops automatic scaling */
+        fontSize: '16px',                    /* Strong base reset for iOS Dynamic Type */
+        WebkitTextSizeAdjust: 'none',        /* Disable automatic scaling */
         textSizeAdjust: 'none',
         overflowY: 'auto',
         overflowX: 'hidden',
@@ -545,7 +545,7 @@ function App() {
           position: 'relative'
         }}>
           <div style={{ 
-            fontSize: 'clamp(1.85rem, 6.2vw, 2.55rem)', 
+            fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', 
             lineHeight: 1.1, 
             fontWeight: 700, 
             letterSpacing: '-0.03em', 
@@ -555,7 +555,7 @@ function App() {
             Stop arguing.<br />Start watching together.
           </div>
           <div style={{ 
-            fontSize: 'clamp(0.98rem, 3.9vw, 1.18rem)', 
+            fontSize: 'clamp(0.97rem, 3.8vw, 1.15rem)', 
             opacity: 0.92, 
             maxWidth: '340px', 
             marginBottom: '40px',
@@ -570,7 +570,7 @@ function App() {
               background: '#ef4444',
               color: 'white',
               fontWeight: 600,
-              fontSize: 'clamp(1.05rem, 4.1vw, 1.25rem)',
+              fontSize: 'clamp(1.05rem, 4vw, 1.22rem)',
               padding: '16px 48px',
               borderRadius: '9999px',
               border: 'none',
@@ -603,7 +603,7 @@ function App() {
             Sign In
           </button>
 
-          <div style={{ fontSize: 'clamp(0.9rem, 3.5vw, 0.98rem)', opacity: 0.78 }}>
+          <div style={{ fontSize: 'clamp(0.9rem, 3.5vw, 0.97rem)', opacity: 0.78 }}>
             50 movies to try • No account needed to start • Your couple code is permanent
           </div>
         </div>
@@ -611,8 +611,8 @@ function App() {
         {/* How It Works Section */}
         <div style={{ padding: '60px 20px 100px', background: '#0a0a0a' }}>
           <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <h2 style={{ fontSize: 'clamp(1.65rem, 5.5vw, 1.95rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
-            <p style={{ fontSize: 'clamp(1rem, 4vw, 1.12rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
+            <p style={{ fontSize: 'clamp(0.98rem, 3.9vw, 1.1rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
               Four simple steps to better movie nights
             </p>
           </div>
@@ -625,27 +625,27 @@ function App() {
             margin: '0 auto'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.3rem, 7vw, 2.9rem)', marginBottom: '14px' }}>🔑</div>
-              <h3 style={{ fontSize: 'clamp(1.15rem, 4.5vw, 1.3rem)', marginBottom: '10px' }}>1. Create or Join a Room</h3>
-              <p style={{ opacity: 0.88, fontSize: 'clamp(0.95rem, 3.8vw, 1.02rem)', lineHeight: 1.5 }}>One 6-digit code connects you both instantly in your private couple space.</p>
+              <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>🔑</div>
+              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>1. Create or Join a Room</h3>
+              <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>One 6-digit code connects you both instantly in your private couple space.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.3rem, 7vw, 2.9rem)', marginBottom: '14px' }}>🎛️</div>
-              <h3 style={{ fontSize: 'clamp(1.15rem, 4.5vw, 1.3rem)', marginBottom: '10px' }}>2. Set Your Preferences</h3>
-              <p style={{ opacity: 0.88, fontSize: 'clamp(0.95rem, 3.8vw, 1.02rem)', lineHeight: 1.5 }}>You each adjust genres, eras, and favorite actors. We blend them proportionally.</p>
+              <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>🎛️</div>
+              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>2. Set Your Preferences</h3>
+              <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>You each adjust genres, eras, and favorite actors. We blend them proportionally.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.3rem, 7vw, 2.9rem)', marginBottom: '14px' }}>👆</div>
-              <h3 style={{ fontSize: 'clamp(1.15rem, 4.5vw, 1.3rem)', marginBottom: '10px' }}>3. Swipe Together</h3>
-              <p style={{ opacity: 0.88, fontSize: 'clamp(0.95rem, 3.8vw, 1.02rem)', lineHeight: 1.5 }}>Tinder-style swiping on real movies. The deck intelligently mixes both your tastes.</p>
+              <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>👆</div>
+              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>3. Swipe Together</h3>
+              <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>Tinder-style swiping on real movies. The deck intelligently mixes both your tastes.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.3rem, 7vw, 2.9rem)', marginBottom: '14px' }}>❤️</div>
-              <h3 style={{ fontSize: 'clamp(1.15rem, 4.5vw, 1.3rem)', marginBottom: '10px' }}>4. Get Matches & Watch</h3>
-              <p style={{ opacity: 0.88, fontSize: 'clamp(0.95rem, 3.8vw, 1.02rem)', lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
+              <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>❤️</div>
+              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches & Watch</h3>
+              <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
             </div>
           </div>
 
@@ -656,7 +656,7 @@ function App() {
                 background: '#ef4444',
                 color: 'white',
                 fontWeight: 600,
-                fontSize: 'clamp(1.05rem, 4.1vw, 1.22rem)',
+                fontSize: 'clamp(1.05rem, 4vw, 1.2rem)',
                 padding: '16px 48px',
                 borderRadius: '9999px',
                 border: 'none',
@@ -673,8 +673,8 @@ function App() {
         {/* Pricing Section */}
         <div style={{ padding: '60px 20px 100px', background: '#111' }}>
           <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <h2 style={{ fontSize: 'clamp(1.65rem, 5.5vw, 1.95rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
-            <p style={{ fontSize: 'clamp(1rem, 4vw, 1.12rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
+            <p style={{ fontSize: 'clamp(0.98rem, 3.9vw, 1.1rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
               Start free. Upgrade when you want unlimited swipes and full couple features.
             </p>
           </div>
@@ -696,7 +696,7 @@ function App() {
               <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.4rem)', marginBottom: '8px' }}>Free</h3>
               <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '6px' }}>0</div>
               <p style={{ opacity: 0.8, marginBottom: '20px' }}>$ / month</p>
-              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1.02rem)' }}>
+              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
                 <li style={{ marginBottom: '10px' }}>✅ 50 swipes to try the blend</li>
                 <li style={{ marginBottom: '10px' }}>✅ Basic matching</li>
                 <li style={{ marginBottom: '10px' }}>❌ Unlimited swipes</li>
@@ -731,7 +731,7 @@ function App() {
               <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.4rem)', marginBottom: '8px' }}>Monthly</h3>
               <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '6px' }}>$3.99</div>
               <p style={{ opacity: 0.8, marginBottom: '20px' }}>/ month</p>
-              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1.02rem)' }}>
+              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
                 <li style={{ marginBottom: '10px' }}>✅ Unlimited swipes</li>
                 <li style={{ marginBottom: '10px' }}>✅ Full smart blend</li>
                 <li style={{ marginBottom: '10px' }}>✅ Shared watch room + chat</li>
@@ -765,7 +765,7 @@ function App() {
               <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '8px' }}>$39</div>
               <p style={{ opacity: 0.8, marginBottom: '8px' }}>/ year</p>
               <p style={{ fontSize: 'clamp(0.85rem, 3.5vw, 0.92rem)', color: '#22c55e', marginBottom: '24px' }}>(save ~18% • $3.25/mo)</p>
-              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1.02rem)' }}>
+              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
                 <li style={{ marginBottom: '10px' }}>✅ Everything in Monthly</li>
                 <li style={{ marginBottom: '10px' }}>✅ Best value for couples</li>
               </ul>
