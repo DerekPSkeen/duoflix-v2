@@ -89,19 +89,18 @@ function App() {
   const [isFlyingOff, setIsFlyingOff] = useState(false);
   const [flyDirection, setFlyDirection] = useState<'left' | 'right' | null>(null);
 
-  // New: track previous match count to detect increases only
-  const [prevMatchCount, setPrevMatchCount] = useState(0);
+  // Reliable previous match count using ref (only change)
+  const prevMatchCountRef = useRef(0);
 
   const currentMovie = movies[currentIndex];
 
   // Positive dopamine coin/slot-machine style sound
   const playMatchSound = () => {
     try {
-      const sound = new Audio("https://assets.mixkit.co/sfx/preview/296/296-preview.mp3"); // short positive coin win sound
+      const sound = new Audio("https://assets.mixkit.co/sfx/preview/296/296-preview.mp3");
       sound.volume = 0.65;
       sound.play().catch(() => {});
     } catch (e) {
-      // Fallback oscillator tone if audio fails
       try {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const osc = ctx.createOscillator();
@@ -245,7 +244,7 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Mutual matches calculation + sound trigger (the only targeted change)
+  // Improved mutual matches + sound trigger (only change)
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
@@ -253,13 +252,13 @@ function App() {
     
     const newCount = mutual.length;
     
-    if (newCount > prevMatchCount) {
+    if (newCount > prevMatchCountRef.current) {
       playMatchSound();
     }
     
     setMutualMatches(mutual);
-    setPrevMatchCount(newCount);
-  }, [likedMovies, sharedLikes, prevMatchCount]);
+    prevMatchCountRef.current = newCount;
+  }, [likedMovies, sharedLikes]);
 
   useEffect(() => {
     if (!coupleCode) return;
