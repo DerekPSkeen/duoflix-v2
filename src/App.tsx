@@ -530,7 +530,7 @@ function App() {
         display: 'block',
         paddingBottom: 'env(safe-area-inset-bottom, 20px)'
       }}>
-        {/* Hero Section - mobile-optimized */}
+        {/* Hero Section - tighter mobile scaling */}
         <div style={{
           minHeight: '100dvh',
           display: 'flex',
@@ -538,25 +538,25 @@ function App() {
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
-          padding: '40px 20px 60px',
+          padding: '40px 20px 80px',
           position: 'relative'
         }}>
           <div style={{ 
-            fontSize: 'clamp(2.2rem, 8vw, 3.2rem)', 
-            lineHeight: 1.05, 
+            fontSize: 'clamp(2rem, 7.5vw, 2.8rem)', 
+            lineHeight: 1.1, 
             fontWeight: 700, 
             letterSpacing: '-0.03em', 
-            maxWidth: '420px', 
-            marginBottom: '24px' 
+            maxWidth: '380px', 
+            marginBottom: '20px' 
           }}>
             Stop arguing.<br />Start watching together.
           </div>
           <div style={{ 
-            fontSize: 'clamp(1.1rem, 4.5vw, 1.35rem)', 
-            opacity: 0.9, 
-            maxWidth: '360px', 
-            marginBottom: '48px',
-            lineHeight: 1.4
+            fontSize: 'clamp(1rem, 4vw, 1.25rem)', 
+            opacity: 0.92, 
+            maxWidth: '340px', 
+            marginBottom: '40px',
+            lineHeight: 1.45
           }}>
             The only movie app built for couples. Swipe together. Match instantly. Never fight over what to watch again.
           </div>
@@ -567,15 +567,15 @@ function App() {
               background: '#ef4444',
               color: 'white',
               fontWeight: 600,
-              fontSize: 'clamp(1.15rem, 4.5vw, 1.35rem)',
-              padding: '18px 48px',
+              fontSize: 'clamp(1.1rem, 4.2vw, 1.3rem)',
+              padding: '16px 48px',
               borderRadius: '9999px',
               border: 'none',
-              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)',
-              marginBottom: '20px',
+              boxShadow: '0 8px 12px -3px rgb(0 0 0 / 0.3)',
+              marginBottom: '16px',
               cursor: 'pointer',
               width: '100%',
-              maxWidth: '320px'
+              maxWidth: '300px'
             }}
           >
             Start Swiping Free
@@ -586,63 +586,63 @@ function App() {
             style={{
               background: 'transparent',
               color: 'white',
-              border: '2px solid rgba(255,255,255,0.7)',
-              padding: '14px 36px',
+              border: '2px solid rgba(255,255,255,0.75)',
+              padding: '13px 32px',
               borderRadius: '9999px',
-              fontSize: 'clamp(1rem, 4vw, 1.1rem)',
+              fontSize: 'clamp(0.95rem, 3.8vw, 1.1rem)',
               fontWeight: 600,
               marginBottom: '32px',
               cursor: 'pointer',
               width: '100%',
-              maxWidth: '320px'
+              maxWidth: '300px'
             }}
           >
             Sign In
           </button>
 
-          <div style={{ fontSize: 'clamp(0.95rem, 3.5vw, 1rem)', opacity: 0.75 }}>
+          <div style={{ fontSize: 'clamp(0.9rem, 3.5vw, 1rem)', opacity: 0.78 }}>
             50 movies to try • No account needed to start • Your couple code is permanent
           </div>
         </div>
 
-        {/* How It Works Section */}
+        {/* How It Works Section - mobile-friendly */}
         <div style={{ padding: '60px 20px 100px', background: '#0a0a0a' }}>
           <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 6vw, 2.1rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
-            <p style={{ fontSize: 'clamp(1.05rem, 4vw, 1.2rem)', opacity: 0.85, maxWidth: '440px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: 'clamp(1.7rem, 5.5vw, 2rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
+            <p style={{ fontSize: 'clamp(1rem, 4vw, 1.15rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
               Four simple steps to better movie nights
             </p>
           </div>
 
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-            gap: '28px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+            gap: '24px',
             maxWidth: '1100px',
             margin: '0 auto'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.5rem, 8vw, 3.2rem)', marginBottom: '16px' }}>🔑</div>
-              <h3 style={{ fontSize: 'clamp(1.25rem, 5vw, 1.4rem)', marginBottom: '12px' }}>1. Create or Join a Room</h3>
-              <p style={{ opacity: 0.85, fontSize: 'clamp(0.95rem, 3.8vw, 1rem)' }}>One 6-digit code connects you both instantly in your private couple space.</p>
+              <div style={{ fontSize: 'clamp(2.4rem, 7.5vw, 3rem)', marginBottom: '14px' }}>🔑</div>
+              <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.35rem)', marginBottom: '10px' }}>1. Create or Join a Room</h3>
+              <p style={{ opacity: 0.88, fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)', lineHeight: 1.5 }}>One 6-digit code connects you both instantly in your private couple space.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.5rem, 8vw, 3.2rem)', marginBottom: '16px' }}>🎛️</div>
-              <h3 style={{ fontSize: 'clamp(1.25rem, 5vw, 1.4rem)', marginBottom: '12px' }}>2. Set Your Preferences</h3>
-              <p style={{ opacity: 0.85, fontSize: 'clamp(0.95rem, 3.8vw, 1rem)' }}>You each adjust genres, eras, and favorite actors. We blend them proportionally.</p>
+              <div style={{ fontSize: 'clamp(2.4rem, 7.5vw, 3rem)', marginBottom: '14px' }}>🎛️</div>
+              <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.35rem)', marginBottom: '10px' }}>2. Set Your Preferences</h3>
+              <p style={{ opacity: 0.88, fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)', lineHeight: 1.5 }}>You each adjust genres, eras, and favorite actors. We blend them proportionally.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.5rem, 8vw, 3.2rem)', marginBottom: '16px' }}>👆</div>
-              <h3 style={{ fontSize: 'clamp(1.25rem, 5vw, 1.4rem)', marginBottom: '12px' }}>3. Swipe Together</h3>
-              <p style={{ opacity: 0.85, fontSize: 'clamp(0.95rem, 3.8vw, 1rem)' }}>Tinder-style swiping on real movies. The deck intelligently mixes both your tastes.</p>
+              <div style={{ fontSize: 'clamp(2.4rem, 7.5vw, 3rem)', marginBottom: '14px' }}>👆</div>
+              <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.35rem)', marginBottom: '10px' }}>3. Swipe Together</h3>
+              <p style={{ opacity: 0.88, fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)', lineHeight: 1.5 }}>Tinder-style swiping on real movies. The deck intelligently mixes both your tastes.</p>
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.5rem, 8vw, 3.2rem)', marginBottom: '16px' }}>❤️</div>
-              <h3 style={{ fontSize: 'clamp(1.25rem, 5vw, 1.4rem)', marginBottom: '12px' }}>4. Get Matches & Watch</h3>
-              <p style={{ opacity: 0.85, fontSize: 'clamp(0.95rem, 3.8vw, 1rem)' }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
+              <div style={{ fontSize: 'clamp(2.4rem, 7.5vw, 3rem)', marginBottom: '14px' }}>❤️</div>
+              <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.35rem)', marginBottom: '10px' }}>4. Get Matches & Watch</h3>
+              <p style={{ opacity: 0.88, fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)', lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
             </div>
           </div>
 
@@ -653,13 +653,13 @@ function App() {
                 background: '#ef4444',
                 color: 'white',
                 fontWeight: 600,
-                fontSize: 'clamp(1.15rem, 4.5vw, 1.3rem)',
-                padding: '18px 48px',
+                fontSize: 'clamp(1.1rem, 4.2vw, 1.25rem)',
+                padding: '16px 48px',
                 borderRadius: '9999px',
                 border: 'none',
                 cursor: 'pointer',
                 width: '100%',
-                maxWidth: '320px'
+                maxWidth: '300px'
               }}
             >
               Ready? Start Swiping Free Now
@@ -667,36 +667,36 @@ function App() {
           </div>
         </div>
 
-        {/* Pricing Section */}
+        {/* Pricing Section - mobile-friendly */}
         <div style={{ padding: '60px 20px 100px', background: '#111' }}>
           <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 6vw, 2.1rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
-            <p style={{ fontSize: 'clamp(1.05rem, 4vw, 1.2rem)', opacity: 0.85, maxWidth: '440px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: 'clamp(1.7rem, 5.5vw, 2rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
+            <p style={{ fontSize: 'clamp(1rem, 4vw, 1.15rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
               Start free. Upgrade when you want unlimited swipes and full couple features.
             </p>
           </div>
 
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-            gap: '28px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', 
+            gap: '24px',
             maxWidth: '1100px',
             margin: '0 auto'
           }}>
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
-              padding: '32px', 
+              padding: '28px', 
               textAlign: 'center',
               border: '1px solid #333'
             }}>
-              <h3 style={{ fontSize: 'clamp(1.3rem, 5vw, 1.5rem)', marginBottom: '8px' }}>Free</h3>
-              <div style={{ fontSize: 'clamp(2.2rem, 7vw, 2.8rem)', fontWeight: 700, marginBottom: '8px' }}>0</div>
-              <p style={{ opacity: 0.8, marginBottom: '24px' }}>$ / month</p>
-              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1rem)' }}>
-                <li style={{ marginBottom: '12px' }}>✅ 50 swipes to try the blend</li>
-                <li style={{ marginBottom: '12px' }}>✅ Basic matching</li>
-                <li style={{ marginBottom: '12px' }}>❌ Unlimited swipes</li>
+              <h3 style={{ fontSize: 'clamp(1.25rem, 4.8vw, 1.45rem)', marginBottom: '8px' }}>Free</h3>
+              <div style={{ fontSize: 'clamp(2rem, 6.5vw, 2.6rem)', fontWeight: 700, marginBottom: '6px' }}>0</div>
+              <p style={{ opacity: 0.8, marginBottom: '20px' }}>$ / month</p>
+              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)' }}>
+                <li style={{ marginBottom: '10px' }}>✅ 50 swipes to try the blend</li>
+                <li style={{ marginBottom: '10px' }}>✅ Basic matching</li>
+                <li style={{ marginBottom: '10px' }}>❌ Unlimited swipes</li>
               </ul>
               <button 
                 onClick={() => setShowLanding(false)}
@@ -704,7 +704,7 @@ function App() {
                   width: '100%',
                   background: '#444',
                   color: 'white',
-                  padding: '14px',
+                  padding: '13px',
                   borderRadius: '9999px',
                   border: 'none',
                   fontWeight: 600,
@@ -719,27 +719,27 @@ function App() {
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
-              padding: '32px', 
+              padding: '28px', 
               textAlign: 'center',
               border: '2px solid #ef4444',
               position: 'relative'
             }}>
-              <div style={{ position: 'absolute', top: '-12px', right: '24px', background: '#ef4444', color: 'white', padding: '4px 16px', borderRadius: '9999px', fontSize: '0.85rem', fontWeight: 600 }}>Popular</div>
-              <h3 style={{ fontSize: 'clamp(1.3rem, 5vw, 1.5rem)', marginBottom: '8px' }}>Monthly</h3>
-              <div style={{ fontSize: 'clamp(2.2rem, 7vw, 2.8rem)', fontWeight: 700, marginBottom: '8px' }}>$3.99</div>
-              <p style={{ opacity: 0.8, marginBottom: '24px' }}>/ month</p>
-              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1rem)' }}>
-                <li style={{ marginBottom: '12px' }}>✅ Unlimited swipes</li>
-                <li style={{ marginBottom: '12px' }}>✅ Full smart blend</li>
-                <li style={{ marginBottom: '12px' }}>✅ Shared watch room + chat</li>
-                <li style={{ marginBottom: '12px' }}>✅ Mutual matches forever</li>
+              <div style={{ position: 'absolute', top: '-12px', right: '20px', background: '#ef4444', color: 'white', padding: '4px 14px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 600 }}>Popular</div>
+              <h3 style={{ fontSize: 'clamp(1.25rem, 4.8vw, 1.45rem)', marginBottom: '8px' }}>Monthly</h3>
+              <div style={{ fontSize: 'clamp(2rem, 6.5vw, 2.6rem)', fontWeight: 700, marginBottom: '6px' }}>$3.99</div>
+              <p style={{ opacity: 0.8, marginBottom: '20px' }}>/ month</p>
+              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)' }}>
+                <li style={{ marginBottom: '10px' }}>✅ Unlimited swipes</li>
+                <li style={{ marginBottom: '10px' }}>✅ Full smart blend</li>
+                <li style={{ marginBottom: '10px' }}>✅ Shared watch room + chat</li>
+                <li style={{ marginBottom: '10px' }}>✅ Mutual matches forever</li>
               </ul>
               <button 
                 style={{
                   width: '100%',
                   background: '#ef4444',
                   color: 'white',
-                  padding: '14px',
+                  padding: '13px',
                   borderRadius: '9999px',
                   border: 'none',
                   fontWeight: 600,
@@ -754,24 +754,24 @@ function App() {
             <div style={{ 
               background: '#1a1a1a', 
               borderRadius: '20px', 
-              padding: '32px', 
+              padding: '28px', 
               textAlign: 'center',
               border: '1px solid #333'
             }}>
-              <h3 style={{ fontSize: 'clamp(1.3rem, 5vw, 1.5rem)', marginBottom: '8px' }}>Yearly</h3>
-              <div style={{ fontSize: 'clamp(2.2rem, 7vw, 2.8rem)', fontWeight: 700, marginBottom: '8px' }}>$39</div>
+              <h3 style={{ fontSize: 'clamp(1.25rem, 4.8vw, 1.45rem)', marginBottom: '8px' }}>Yearly</h3>
+              <div style={{ fontSize: 'clamp(2rem, 6.5vw, 2.6rem)', fontWeight: 700, marginBottom: '8px' }}>$39</div>
               <p style={{ opacity: 0.8, marginBottom: '8px' }}>/ year</p>
-              <p style={{ fontSize: 'clamp(0.9rem, 3.5vw, 0.95rem)', color: '#22c55e', marginBottom: '24px' }}>(save ~18% • $3.25/mo)</p>
-              <ul style={{ textAlign: 'left', marginBottom: '32px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1rem)' }}>
-                <li style={{ marginBottom: '12px' }}>✅ Everything in Monthly</li>
-                <li style={{ marginBottom: '12px' }}>✅ Best value for couples</li>
+              <p style={{ fontSize: 'clamp(0.85rem, 3.5vw, 0.95rem)', color: '#22c55e', marginBottom: '24px' }}>(save ~18% • $3.25/mo)</p>
+              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)' }}>
+                <li style={{ marginBottom: '10px' }}>✅ Everything in Monthly</li>
+                <li style={{ marginBottom: '10px' }}>✅ Best value for couples</li>
               </ul>
               <button 
                 style={{
                   width: '100%',
                   background: '#444',
                   color: 'white',
-                  padding: '14px',
+                  padding: '13px',
                   borderRadius: '9999px',
                   border: 'none',
                   fontWeight: 600,
