@@ -165,11 +165,14 @@ function App() {
     loadCoupleCode();
   }, [user]);
 
-  // Realtime preferences subscription
+  // Preferences persistence - strengthened load timing to coexist with likes loading
   useEffect(() => {
     if (!coupleCode) return;
 
     const loadPrefs = async () => {
+      // Small delay to let likes loading finish first
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const { data, error } = await supabase
         .from('couple_preferences')
         .select('preferences')
@@ -327,7 +330,7 @@ function App() {
     loadPersistentLikes();
   }, [coupleCode]);
 
-  // NEW targeted fix: Load persistent shared likes (partner's likes) so mutual matches register from saved data
+  // Load persistent shared likes (partner's likes) so mutual matches register from saved data
   useEffect(() => {
     if (!coupleCode) return;
 
