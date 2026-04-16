@@ -327,7 +327,33 @@ function App() {
     loadPersistentLikes();
   }, [coupleCode]);
 
-  // New: Realtime subscription to partner's likes (likes/matches only)
+  // NEW targeted fix: Load persistent shared likes (partner's likes) so mutual matches register from saved data
+  useEffect(() => {
+    if (!coupleCode) return;
+
+    const loadPersistentSharedLikes = async () => {
+      const { data, error } = await supabase
+        .from('couple_likes')
+        .select('movie_data')
+        .eq('couple_code', coupleCode);
+
+      if (error) {
+        console.error('Failed to load persistent shared likes:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const loadedMovies: Movie[] = data.map((item: any) => item.movie_data as Movie);
+        setSharedLikes(loadedMovies);
+      } else {
+        setSharedLikes([]);
+      }
+    };
+
+    loadPersistentSharedLikes();
+  }, [coupleCode]);
+
+  // Realtime subscription to partner's likes (likes/matches only)
   useEffect(() => {
     if (!coupleCode) return;
 
