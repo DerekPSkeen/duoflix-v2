@@ -46,6 +46,7 @@ function App() {
   const [isInRoom, setIsInRoom] = useState(false);
 
   const channelRef = useRef<any>(null);
+  const prefsSubscriptionRef = useRef<any>(null);
 
   const [myPrefs, setMyPrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
@@ -89,12 +90,10 @@ function App() {
   const [isFlyingOff, setIsFlyingOff] = useState(false);
   const [flyDirection, setFlyDirection] = useState<'left' | 'right' | null>(null);
 
-  // Reliable previous match count using ref (only change)
   const prevMatchCountRef = useRef(0);
 
   const currentMovie = movies[currentIndex];
 
-  // Positive dopamine coin/slot-machine style sound
   const playMatchSound = () => {
     try {
       const sound = new Audio("https://assets.mixkit.co/sfx/preview/296/296-preview.mp3");
@@ -151,9 +150,11 @@ function App() {
     loadCoupleCode();
   }, [user]);
 
+  // Realtime preferences subscription (new fix)
   useEffect(() => {
     if (!coupleCode) return;
 
+    // Load initial prefs
     const loadPrefs = async () => {
       const { data, error } = await supabase
         .from('couple_preferences')
@@ -178,6 +179,33 @@ function App() {
     };
 
     loadPrefs();
+
+    // Subscribe to realtime changes
+    const subscription = supabase
+      .channel(`prefs-${coupleCode}`)
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'couple_preferences', filter: `couple_code=eq.${coupleCode}` }, 
+        (payload) => {
+          if (payload.new?.preferences) {
+            const prefs = payload.new.preferences;
+            if (prefs.myPrefs) setMyPrefs(prefs.myPrefs);
+            if (prefs.partnerPrefs) setPartnerPrefs(prefs.partnerPrefs);
+            if (prefs.myEraPrefs) setMyEraPrefs(prefs.myEraPrefs);
+            if (prefs.partnerEraPrefs) setPartnerEraPrefs(prefs.partnerEraPrefs);
+            if (prefs.myFavoriteActors) setMyFavoriteActors(prefs.myFavoriteActors);
+            if (prefs.partnerFavoriteActors) setPartnerFavoriteActors(prefs.partnerFavoriteActors);
+          }
+        }
+      )
+      .subscribe();
+
+    prefsSubscriptionRef.current = subscription;
+
+    return () => {
+      if (prefsSubscriptionRef.current) {
+        supabase.removeChannel(prefsSubscriptionRef.current);
+      }
+    };
   }, [coupleCode]);
 
   const savePreferences = async () => {
@@ -244,7 +272,7 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Improved mutual matches + sound trigger (only change)
+  // Mutual matches + sound (improved with ref)
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
