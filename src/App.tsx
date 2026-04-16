@@ -47,6 +47,7 @@ function App() {
 
   const channelRef = useRef<any>(null);
   const prefsSubscriptionRef = useRef<any>(null);
+  const likesSubscriptionRef = useRef<any>(null);
 
   const [myPrefs, setMyPrefs] = useState<Record<string, number>>({
     Action: 50, Adventure: 50, Animation: 50, Comedy: 70, Crime: 50,
@@ -284,7 +285,7 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Mutual matches + sound (reliable)
+  // Mutual matches + sound (only likes/matches related)
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
@@ -300,7 +301,7 @@ function App() {
     prevMatchCountRef.current = newCount;
   }, [likedMovies, sharedLikes]);
 
-  // Load persistent likes whenever coupleCode changes (new fix for sign-in / refresh)
+  // Load persistent likes whenever coupleCode changes (likes/matches only)
   useEffect(() => {
     if (!coupleCode) return;
 
@@ -317,11 +318,42 @@ function App() {
 
       if (data && data.length > 0) {
         const loadedMovies: Movie[] = data.map((item: any) => item.movie_data as Movie);
-        setLikedMovies(loadedMovies); // Replace instead of append to avoid duplicates
+        setLikedMovies(loadedMovies);
+      } else {
+        setLikedMovies([]);
       }
     };
 
     loadPersistentLikes();
+  }, [coupleCode]);
+
+  // New: Realtime subscription to partner's likes (likes/matches only)
+  useEffect(() => {
+    if (!coupleCode) return;
+
+    const subscription = supabase
+      .channel(`likes-${coupleCode}`)
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'couple_likes', filter: `couple_code=eq.${coupleCode}` }, 
+        (payload) => {
+          if (payload.new?.movie_data) {
+            const newMovie = payload.new.movie_data as Movie;
+            setSharedLikes(prev => {
+              const exists = prev.some(m => m.id === newMovie.id);
+              return exists ? prev : [...prev, newMovie];
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    likesSubscriptionRef.current = subscription;
+
+    return () => {
+      if (likesSubscriptionRef.current) {
+        supabase.removeChannel(likesSubscriptionRef.current);
+      }
+    };
   }, [coupleCode]);
 
   const fetchMovies = async () => {
