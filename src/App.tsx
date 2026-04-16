@@ -127,6 +127,20 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Auto-join permanent room for signed-in users
+  useEffect(() => {
+    const autoJoinPermanentRoom = async () => {
+      if (!user?.id || !coupleCode) return;
+      
+      setRoomCode(coupleCode);
+      setIsInRoom(true);
+      setRoomStatus(`Joined permanent room ${coupleCode}`);
+      setChatMessages([`Welcome back to your permanent room ${coupleCode}`]);
+    };
+
+    autoJoinPermanentRoom();
+  }, [user, coupleCode]);
+
   useEffect(() => {
     const loadCoupleCode = async () => {
       if (user?.id) {
@@ -150,11 +164,10 @@ function App() {
     loadCoupleCode();
   }, [user]);
 
-  // Realtime preferences subscription (new fix)
+  // Realtime preferences subscription
   useEffect(() => {
     if (!coupleCode) return;
 
-    // Load initial prefs
     const loadPrefs = async () => {
       const { data, error } = await supabase
         .from('couple_preferences')
@@ -180,7 +193,6 @@ function App() {
 
     loadPrefs();
 
-    // Subscribe to realtime changes
     const subscription = supabase
       .channel(`prefs-${coupleCode}`)
       .on('postgres_changes', 
@@ -272,7 +284,7 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Mutual matches + sound (improved with ref)
+  // Mutual matches + sound
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
