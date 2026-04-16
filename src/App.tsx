@@ -284,7 +284,7 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Mutual matches + sound
+  // Mutual matches + sound (reliable)
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
@@ -300,27 +300,28 @@ function App() {
     prevMatchCountRef.current = newCount;
   }, [likedMovies, sharedLikes]);
 
+  // Load persistent likes whenever coupleCode changes (new fix for sign-in / refresh)
   useEffect(() => {
     if (!coupleCode) return;
 
-    supabase
-      .from('couple_likes')
-      .select('movie_data')
-      .eq('couple_code', coupleCode)
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('Failed to load persistent likes:', error);
-          return;
-        }
-        if (data && data.length > 0) {
-          const loadedMovies: Movie[] = data.map((item: any) => item.movie_data as Movie);
-          setLikedMovies(prev => {
-            const existingIds = new Set(prev.map(m => m.id));
-            const newOnes = loadedMovies.filter((m: Movie) => !existingIds.has(m.id));
-            return [...prev, ...newOnes];
-          });
-        }
-      });
+    const loadPersistentLikes = async () => {
+      const { data, error } = await supabase
+        .from('couple_likes')
+        .select('movie_data')
+        .eq('couple_code', coupleCode);
+
+      if (error) {
+        console.error('Failed to load persistent likes:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const loadedMovies: Movie[] = data.map((item: any) => item.movie_data as Movie);
+        setLikedMovies(loadedMovies); // Replace instead of append to avoid duplicates
+      }
+    };
+
+    loadPersistentLikes();
   }, [coupleCode]);
 
   const fetchMovies = async () => {
