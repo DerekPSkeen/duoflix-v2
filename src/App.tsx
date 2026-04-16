@@ -170,7 +170,6 @@ function App() {
     if (!coupleCode) return;
 
     const loadPrefs = async () => {
-      // Small delay to let likes loading finish first
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const { data, error } = await supabase
@@ -384,6 +383,38 @@ function App() {
       }
     };
   }, [coupleCode]);
+
+  // NEW: Clear all likes and matches (only likes/matches related)
+  const clearAllLikesAndMatches = async () => {
+    if (!coupleCode) {
+      alert('No couple code found. Join or create a room first.');
+      return;
+    }
+
+    if (!window.confirm('⚠️ This will permanently delete ALL likes and matches for this couple code. This action cannot be undone. Continue?')) {
+      return;
+    }
+
+    // Delete from Supabase
+    const { error } = await supabase
+      .from('couple_likes')
+      .delete()
+      .eq('couple_code', coupleCode);
+
+    if (error) {
+      console.error('Failed to clear likes from database:', error);
+      alert('Failed to clear data from server. Please try again.');
+      return;
+    }
+
+    // Clear local state
+    setLikedMovies([]);
+    setSharedLikes([]);
+    setMutualMatches([]);
+    setLastLiked(null);
+
+    alert('All likes and matches have been cleared successfully.');
+  };
 
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -1217,6 +1248,25 @@ function App() {
             </div>
 
             <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
+
+            {/* Clear button - only likes/matches related */}
+            <button 
+              onClick={clearAllLikesAndMatches}
+              style={{
+                width: '100%',
+                marginTop: '1rem',
+                padding: '1rem',
+                background: '#991b1b',
+                color: 'white',
+                border: 'none',
+                borderRadius: '999px',
+                fontSize: '1.05rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              🗑️ Clear All Likes & Matches
+            </button>
           </div>
         </div>
       )}
