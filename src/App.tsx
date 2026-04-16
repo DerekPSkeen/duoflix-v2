@@ -303,14 +303,18 @@ function App() {
     prevMatchCountRef.current = newCount;
   }, [likedMovies, sharedLikes]);
 
-  // Load persistent likes whenever coupleCode changes (likes/matches only)
+  // Load persistent likes with per-user separation (my likes vs partner likes) - likes/matches only
+  // Primary user (signed-in): likedMovies = rows where user_id matches their ID
+  // Secondary user (guest): likedMovies = rows where user_id IS NULL
+  // sharedLikes = the opposite set in both cases
+  // This fulfills the primary/secondary separation while preserving permanent coupleCode behavior
   useEffect(() => {
     if (!coupleCode) return;
 
     const loadPersistentLikes = async () => {
       const { data, error } = await supabase
         .from('couple_likes')
-        .select('movie_data')
+        .select('movie_data, user_id')
         .eq('couple_code', coupleCode);
 
       if (error) {
@@ -319,43 +323,38 @@ function App() {
       }
 
       if (data && data.length > 0) {
-        const loadedMovies: Movie[] = data.map((item: any) => item.movie_data as Movie);
-        setLikedMovies(loadedMovies);
+        const allLoaded = data;
+
+        const isMyLike = (item: any) => {
+          const likerId = item.user_id;
+          if (user?.id) {
+            return likerId === user.id;
+          } else {
+            return likerId === null || likerId === undefined;
+          }
+        };
+
+        const myMovies: Movie[] = allLoaded
+          .filter(isMyLike)
+          .map((item: any) => item.movie_data as Movie);
+
+        const partnerMovies: Movie[] = allLoaded
+          .filter((item: any) => !isMyLike(item))
+          .map((item: any) => item.movie_data as Movie);
+
+        setLikedMovies(myMovies);
+        setSharedLikes(partnerMovies);
       } else {
         setLikedMovies([]);
-      }
-    };
-
-    loadPersistentLikes();
-  }, [coupleCode]);
-
-  // Load persistent shared likes (partner's likes) so mutual matches register from saved data
-  useEffect(() => {
-    if (!coupleCode) return;
-
-    const loadPersistentSharedLikes = async () => {
-      const { data, error } = await supabase
-        .from('couple_likes')
-        .select('movie_data')
-        .eq('couple_code', coupleCode);
-
-      if (error) {
-        console.error('Failed to load persistent shared likes:', error);
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const loadedMovies: Movie[] = data.map((item: any) => item.movie_data as Movie);
-        setSharedLikes(loadedMovies);
-      } else {
         setSharedLikes([]);
       }
     };
 
-    loadPersistentSharedLikes();
-  }, [coupleCode]);
+    loadPersistentLikes();
+  }, [coupleCode, user]);
 
   // Realtime subscription to partner's likes (likes/matches only)
+  // Now respects user_id to route new INSERTs to the correct local state (my or partner)
   useEffect(() => {
     if (!coupleCode) return;
 
@@ -366,10 +365,23 @@ function App() {
         (payload) => {
           if (payload.new?.movie_data) {
             const newMovie = payload.new.movie_data as Movie;
-            setSharedLikes(prev => {
-              const exists = prev.some(m => m.id === newMovie.id);
-              return exists ? prev : [...prev, newMovie];
-            });
+            const newUserId = payload.new.user_id;
+
+            const isMine = user?.id 
+              ? newUserId === user.id 
+              : newUserId === null || newUserId === undefined;
+
+            if (isMine) {
+              setLikedMovies(prev => {
+                const exists = prev.some(m => m.id === newMovie.id);
+                return exists ? prev : [...prev, newMovie];
+              });
+            } else {
+              setSharedLikes(prev => {
+                const exists = prev.some(m => m.id === newMovie.id);
+                return exists ? prev : [...prev, newMovie];
+              });
+            }
           }
         }
       )
@@ -382,7 +394,7 @@ function App() {
         supabase.removeChannel(likesSubscriptionRef.current);
       }
     };
-  }, [coupleCode]);
+  }, [coupleCode, user]);
 
   // NEW: Clear all likes and matches (only likes/matches related)
   const clearAllLikesAndMatches = async () => {
@@ -579,8 +591,9 @@ function App() {
             .upsert({
               couple_code: coupleCode,
               movie_id: currentMovie.id,
-              movie_data: currentMovie
-            }, { onConflict: 'couple_code,movie_id' })
+              movie_data: currentMovie,
+              user_id: user?.id ?? null
+            }, { onConflict: 'couple_code,movie_id,user_id' })
             .then(({ error }) => {
               if (error) console.error('Failed to save persistent like:', error);
             });
