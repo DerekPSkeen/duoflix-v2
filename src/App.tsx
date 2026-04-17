@@ -1374,7 +1374,7 @@ function App() {
         </div>
       )}
 
-      {/* AUTH MODAL – ALWAYS mounted via portal (this is the fix) */}
+      {/* AUTH MODAL – always mounted via portal (the fix) */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay" 
