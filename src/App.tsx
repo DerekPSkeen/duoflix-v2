@@ -754,11 +754,15 @@ function App() {
     }
   };
 
+  // LANDING PAGE - improved structure (no early return, modal always in tree)
   if (showLanding) {
     return (
       <div style={{
         position: 'fixed',
-        inset: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         background: 'linear-gradient(180deg, #111 0%, #000 100%)',
         color: 'white',
         fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -766,9 +770,11 @@ function App() {
         WebkitTextSizeAdjust: 'none',
         textSizeAdjust: 'none',
         overflowY: 'auto',
+        overflowX: 'hidden',
         zIndex: 999999,
         width: '100%',
         height: '100dvh',
+        display: 'block',
         paddingBottom: 'env(safe-area-inset-bottom, 20px)'
       }}>
         {/* Hero Section */}
