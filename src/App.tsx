@@ -398,7 +398,7 @@ function App() {
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
-  // Clear Only My Likes - allows secondary user to reset their own likes
+  // Clear Only My Likes - improved for guest users (secondary)
   const clearMyLikesOnly = async () => {
     if (!coupleCode) {
       alert('No couple code found.');
@@ -411,17 +411,22 @@ function App() {
 
     if (!window.confirm(confirmText)) return;
 
-    const userIdFilter = user?.id ? user.id : null;
-
-    const { error } = await supabase
+    let query = supabase
       .from('couple_likes')
       .delete()
-      .eq('couple_code', coupleCode)
-      .eq('user_id', userIdFilter);
+      .eq('couple_code', coupleCode);
+
+    if (user?.id) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+
+    const { error } = await query;
 
     if (error) {
       console.error('Failed to clear my likes:', error);
-      alert('Failed to clear your likes. Please try again.');
+      alert('Failed to clear your likes. Please try again. Error: ' + (error.message || 'Unknown error'));
       return;
     }
 
@@ -1267,7 +1272,7 @@ function App() {
 
             <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
 
-            {/* Clear Only My Likes - allows secondary to reset their own likes */}
+            {/* Clear Only My Likes */}
             <button 
               onClick={clearMyLikesOnly}
               style={{
@@ -1286,7 +1291,7 @@ function App() {
               🧹 Clear Only My Likes
             </button>
 
-            {/* Original locked Clear All button */}
+            {/* Clear All Likes & Matches (both users) - locked requirement */}
             <button 
               onClick={clearAllLikesAndMatches}
               style={{
