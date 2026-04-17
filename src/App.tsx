@@ -1272,7 +1272,6 @@ function App() {
 
             <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
 
-            {/* Clear Only My Likes */}
             <button 
               onClick={clearMyLikesOnly}
               style={{
@@ -1291,7 +1290,6 @@ function App() {
               🧹 Clear Only My Likes
             </button>
 
-            {/* Clear All Likes & Matches (both users) - locked requirement */}
             <button 
               onClick={clearAllLikesAndMatches}
               style={{
