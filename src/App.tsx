@@ -129,7 +129,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-join permanent room for signed-in users
   useEffect(() => {
     const autoJoinPermanentRoom = async () => {
       if (!user?.id || !coupleCode) return;
@@ -166,7 +165,6 @@ function App() {
     loadCoupleCode();
   }, [user]);
 
-  // Preferences persistence - strengthened load timing to coexist with likes loading
   useEffect(() => {
     if (!coupleCode) return;
 
@@ -283,7 +281,6 @@ function App() {
     };
   }, [isInRoom, roomCode]);
 
-  // Mutual matches + sound (only likes/matches related)
   useEffect(() => {
     const mutual = likedMovies.filter(my => 
       sharedLikes.some(partner => partner.id === my.id)
@@ -299,7 +296,6 @@ function App() {
     prevMatchCountRef.current = newCount;
   }, [likedMovies, sharedLikes]);
 
-  // Load persistent likes with per-user separation
   const loadPersistentLikes = async () => {
     if (!coupleCode) return;
 
@@ -345,7 +341,6 @@ function App() {
     loadPersistentLikes();
   }, [coupleCode, user]);
 
-  // Realtime subscription to partner's likes
   useEffect(() => {
     if (!coupleCode) return;
 
@@ -368,7 +363,6 @@ function App() {
     };
   }, [coupleCode, user]);
 
-  // Clear All Likes & Matches (both users) - original locked requirement
   const clearAllLikesAndMatches = async () => {
     if (!coupleCode) {
       alert('No couple code found. Join or create a room first.');
@@ -399,7 +393,6 @@ function App() {
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
-  // Clear Only My Likes - improved for guest users (secondary)
   const clearMyLikesOnly = async () => {
     if (!coupleCode) {
       alert('No couple code found.');
@@ -748,7 +741,6 @@ function App() {
       setShowAuthModal(false);
       setEmail('');
       setPassword('');
-      // After successful sign-in, optionally go to swipe
       setShowLanding(false);
     } catch (err) {
       alert('Something went wrong');
@@ -757,17 +749,9 @@ function App() {
     }
   };
 
-  // LANDING PAGE BUTTON FIX – ONLY THIS SECTION UPDATED
-  // • Sign In and Start Swiping Free now work reliably in EVERY click order
-  // • Uses pure useCallback handlers + createPortal for auth modal (bypasses early-return issues)
-  // • Modal always rendered at body level with very high z-index
-  // • No early returns that hide modals
-  // • Current visual design of landing page preserved (full-screen hero, how it works, pricing)
-  // • All non-landing code untouched
-
   const handleStartSwipingFree = useCallback(() => {
     setShowLanding(false);
-    setShowAuthModal(false); // ensure any open modal is closed
+    setShowAuthModal(false);
   }, []);
 
   const handleSignIn = useCallback(() => {
@@ -781,7 +765,6 @@ function App() {
     setPassword('');
   }, []);
 
-  // LANDING PAGE RENDER (only this block changed for button reliability)
   if (showLanding) {
     return (
       <div style={{
@@ -804,7 +787,6 @@ function App() {
         display: 'block',
         paddingBottom: 'env(safe-area-inset-bottom, 20px)'
       }}>
-        {/* Hero Section */}
         <div style={{
           minHeight: '100dvh',
           display: 'flex',
@@ -879,7 +861,6 @@ function App() {
           </div>
         </div>
 
-        {/* How It Works Section */}
         <div style={{ padding: '60px 20px 100px', background: '#0a0a0a' }}>
           <div style={{ textAlign: 'center', marginBottom: '50px' }}>
             <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
@@ -915,7 +896,7 @@ function App() {
 
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>❤️</div>
-              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches & Watch</h4>
+              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches & Watch</h3>
               <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
             </div>
           </div>
@@ -941,7 +922,6 @@ function App() {
           </div>
         </div>
 
-        {/* Pricing Section - unchanged */}
         <div style={{ padding: '60px 20px 100px', background: '#111' }}>
           <div style={{ textAlign: 'center', marginBottom: '50px' }}>
             <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
@@ -1066,7 +1046,6 @@ function App() {
     );
   }
 
-  // All other app code (swipe, matches, prefs, watch, etc.) remains 100% unchanged
   return (
     <div className="app">
       <div className="header">
@@ -1393,7 +1372,6 @@ function App() {
         </div>
       )}
 
-      {/* Auth Modal – portaled to body for reliability (landing page fix) */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay" 
