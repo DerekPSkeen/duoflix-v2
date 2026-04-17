@@ -270,14 +270,8 @@ function App() {
       if (payload.message) setChatMessages(prev => [...prev, payload.message]);
     });
 
-    // Improved broadcast listener for likes - triggers refresh for both users
-    channel.on('broadcast', { event: 'like' }, ({ payload }) => {
-      if (payload.movie) {
-        // Small delay to allow DB insert to settle, then reload likes
-        setTimeout(() => {
-          loadPersistentLikes(); // reuse the load function below
-        }, 300);
-      }
+    channel.on('broadcast', { event: 'like' }, () => {
+      setTimeout(() => loadPersistentLikes(), 300);
     });
 
     channel.subscribe();
@@ -304,7 +298,7 @@ function App() {
     prevMatchCountRef.current = newCount;
   }, [likedMovies, sharedLikes]);
 
-  // Load persistent likes with per-user separation - improved robustness
+  // Load persistent likes with per-user separation
   const loadPersistentLikes = async () => {
     if (!coupleCode) return;
 
@@ -346,12 +340,11 @@ function App() {
     }
   };
 
-  // Load on coupleCode or user change
   useEffect(() => {
     loadPersistentLikes();
   }, [coupleCode, user]);
 
-  // Realtime subscription to partner's likes via DB changes
+  // Realtime subscription to partner's likes
   useEffect(() => {
     if (!coupleCode) return;
 
@@ -359,13 +352,8 @@ function App() {
       .channel(`likes-${coupleCode}`)
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'couple_likes', filter: `couple_code=eq.${coupleCode}` }, 
-        (payload) => {
-          if (payload.new?.movie_data) {
-            // On any INSERT, refresh both states to ensure sync
-            setTimeout(() => {
-              loadPersistentLikes();
-            }, 200);
-          }
+        () => {
+          setTimeout(() => loadPersistentLikes(), 200);
         }
       )
       .subscribe();
@@ -379,14 +367,14 @@ function App() {
     };
   }, [coupleCode, user]);
 
-  // Clear all likes and matches
+  // Clear All Likes & Matches (both users) - original locked requirement
   const clearAllLikesAndMatches = async () => {
     if (!coupleCode) {
       alert('No couple code found. Join or create a room first.');
       return;
     }
 
-    if (!window.confirm('⚠️ This will permanently delete ALL likes and matches for this couple code. This action cannot be undone. Continue?')) {
+    if (!window.confirm('⚠️ This will permanently delete ALL likes and matches for BOTH users. This action cannot be undone. Continue?')) {
       return;
     }
 
@@ -406,7 +394,43 @@ function App() {
     setMutualMatches([]);
     setLastLiked(null);
 
-    alert('All likes and matches have been cleared successfully.');
+    alert('All likes and matches have been cleared for both users.');
+    setTimeout(() => loadPersistentLikes(), 300);
+  };
+
+  // Clear Only My Likes - allows secondary user to reset their own likes
+  const clearMyLikesOnly = async () => {
+    if (!coupleCode) {
+      alert('No couple code found.');
+      return;
+    }
+
+    const confirmText = user?.id 
+      ? '⚠️ This will permanently delete ONLY YOUR likes. Your partner’s likes will stay. Continue?'
+      : '⚠️ This will permanently delete ONLY YOUR (guest) likes. Your partner’s likes will stay. Continue?';
+
+    if (!window.confirm(confirmText)) return;
+
+    const userIdFilter = user?.id ? user.id : null;
+
+    const { error } = await supabase
+      .from('couple_likes')
+      .delete()
+      .eq('couple_code', coupleCode)
+      .eq('user_id', userIdFilter);
+
+    if (error) {
+      console.error('Failed to clear my likes:', error);
+      alert('Failed to clear your likes. Please try again.');
+      return;
+    }
+
+    setLikedMovies([]);
+    setMutualMatches([]);
+    setLastLiked(null);
+
+    alert('Only your likes have been cleared. Your partner’s likes remain.');
+    setTimeout(() => loadPersistentLikes(), 300);
   };
 
   const fetchMovies = async () => {
@@ -1243,11 +1267,31 @@ function App() {
 
             <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
 
+            {/* Clear Only My Likes - allows secondary to reset their own likes */}
+            <button 
+              onClick={clearMyLikesOnly}
+              style={{
+                width: '100%',
+                marginTop: '1rem',
+                padding: '1rem',
+                background: '#444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '999px',
+                fontSize: '1.05rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              🧹 Clear Only My Likes
+            </button>
+
+            {/* Original locked Clear All button */}
             <button 
               onClick={clearAllLikesAndMatches}
               style={{
                 width: '100%',
-                marginTop: '1rem',
+                marginTop: '0.75rem',
                 padding: '1rem',
                 background: '#991b1b',
                 color: 'white',
@@ -1258,7 +1302,7 @@ function App() {
                 cursor: 'pointer'
               }}
             >
-              🗑️ Clear All Likes & Matches
+              🗑️ Clear All Likes & Matches (both users)
             </button>
           </div>
         </div>
