@@ -1374,7 +1374,7 @@ function App() {
         </div>
       )}
 
-      {/* AUTH MODAL - FIXED: unconditionally at root level with inline styles */}
+      {/* AUTH MODAL - THE FIX: unconditionally at root level, always mounted, inline styles */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay" 
@@ -1389,7 +1389,7 @@ function App() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 1000000
+            zIndex: 10000000
           }}
         >
           <div 
