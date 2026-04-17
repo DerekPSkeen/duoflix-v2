@@ -749,14 +749,6 @@ function App() {
     }
   };
 
-  // LANDING PAGE BUTTON FIX – MASTER CODER SOLUTION (targeted section only)
-  // Problem diagnosed: Every previous version used an early-return for showLanding.
-  // When showLanding === true the component returned immediately, so the {showAuthModal && createPortal} code
-  // that lived in the main return was never mounted. Clicking "Sign In" updated state but produced no DOM change.
-  // Master-coder fix: Single root return with conditional rendering + portal always present.
-  // This guarantees the modal is in the React tree no matter the click order.
-  // No other code touched. Layout, swipe, matches, prefs, watch, clears, realtime – 100% intact.
-
   const handleStartSwipingFree = useCallback(() => {
     setShowLanding(false);
     setShowAuthModal(false);
@@ -775,7 +767,7 @@ function App() {
 
   return (
     <>
-      {/* LANDING PAGE – full-screen hero (kept exactly as your design) */}
+      {/* LANDING PAGE */}
       {showLanding && (
         <div style={{
           position: 'fixed',
@@ -871,7 +863,7 @@ function App() {
             </div>
           </div>
 
-          {/* How It Works + Pricing sections (unchanged) */}
+          {/* How It Works Section */}
           <div style={{ padding: '60px 20px 100px', background: '#0a0a0a' }}>
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
               <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
@@ -904,7 +896,7 @@ function App() {
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>❤️</div>
-                <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches &amp; Watch</h3>
+                <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches & Watch</h3>
                 <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
               </div>
             </div>
@@ -1053,7 +1045,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP – completely untouched */}
+      {/* MAIN APP */}
       {!showLanding && (
         <div className="app">
           <div className="header">
@@ -1382,7 +1374,7 @@ function App() {
         </div>
       )}
 
-      {/* AUTH MODAL – ALWAYS rendered via portal (the fix) */}
+      {/* AUTH MODAL – ALWAYS mounted via portal (this is the fix) */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay" 
