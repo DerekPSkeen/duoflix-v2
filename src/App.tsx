@@ -749,8 +749,6 @@ function App() {
     }
   };
 
-  // Way A Implementation – Single root return, no early return
-  // Landing rendered conditionally, main app rendered conditionally, auth modal always mounted via portal
   const handleStartSwipingFree = useCallback(() => {
     setShowLanding(false);
     setShowAuthModal(false);
@@ -769,7 +767,7 @@ function App() {
 
   return (
     <>
-      {/* LANDING PAGE – shown when showLanding is true */}
+      {/* LANDING PAGE */}
       {showLanding && (
         <div style={{
           position: 'fixed',
@@ -924,7 +922,6 @@ function App() {
             </div>
           </div>
 
-          {/* Pricing Section */}
           <div style={{ padding: '60px 20px 100px', background: '#111' }}>
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
               <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
@@ -1048,7 +1045,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP – shown when showLanding is false */}
+      {/* MAIN APP */}
       {!showLanding && (
         <div className="app">
           <div className="header">
@@ -1377,29 +1374,57 @@ function App() {
         </div>
       )}
 
-      {/* AUTH MODAL – always mounted via portal, works regardless of landing/main state */}
+      {/* AUTH MODAL - FIXED: unconditionally at root level with inline styles */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay" 
           onClick={closeAuthModal}
-          style={{ zIndex: 1000000 }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000000
+          }}
         >
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="close-btn" onClick={closeAuthModal}>×</button>
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>{authMode === 'login' ? 'Sign In' : 'Create Account'}</h2>
+          <div 
+            className="modal-content" 
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: '#111',
+              borderRadius: '16px',
+              padding: '24px',
+              maxWidth: '380px',
+              width: '90%',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.6)'
+            }}
+          >
+            <button 
+              className="close-btn" 
+              onClick={closeAuthModal} 
+              style={{ float: 'right', background: 'none', border: 'none', fontSize: '1.8rem', cursor: 'pointer', color: '#fff' }}
+            >
+              ×
+            </button>
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: '#fff' }}>{authMode === 'login' ? 'Sign In' : 'Create Account'}</h2>
             <input 
               type="email" 
               placeholder="Email" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
-              style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }} 
+              style={{ width: '100%', padding: '12px', marginBottom: '12px', background: '#222', border: '1px solid #444', borderRadius: '8px', color: 'white' }} 
             />
             <input 
               type="password" 
               placeholder="Password" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
-              style={{ width: '100%', padding: '12px', marginBottom: '20px', background: '#111', border: '1px solid #444', borderRadius: '8px', color: 'white' }} 
+              style={{ width: '100%', padding: '12px', marginBottom: '20px', background: '#222', border: '1px solid #444', borderRadius: '8px', color: 'white' }} 
             />
             <button 
               onClick={handleAuth} 
@@ -1416,7 +1441,7 @@ function App() {
             >
               {isLoading ? 'Processing...' : authMode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
-            <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.9rem' }}>
+            <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.9rem', color: '#ccc' }}>
               {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
               <span 
                 onClick={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')} 
