@@ -749,6 +749,14 @@ function App() {
     }
   };
 
+  // LANDING PAGE BUTTON FIX – MASTER CODER SOLUTION (targeted section only)
+  // Problem diagnosed: Every previous version used an early-return for showLanding.
+  // When showLanding === true the component returned immediately, so the {showAuthModal && createPortal} code
+  // that lived in the main return was never mounted. Clicking "Sign In" updated state but produced no DOM change.
+  // Master-coder fix: Single root return with conditional rendering + portal always present.
+  // This guarantees the modal is in the React tree no matter the click order.
+  // No other code touched. Layout, swipe, matches, prefs, watch, clears, realtime – 100% intact.
+
   const handleStartSwipingFree = useCallback(() => {
     setShowLanding(false);
     setShowAuthModal(false);
@@ -765,613 +773,616 @@ function App() {
     setPassword('');
   }, []);
 
-  if (showLanding) {
-    return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(180deg, #111 0%, #000 100%)',
-        color: 'white',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: '16px',
-        WebkitTextSizeAdjust: 'none',
-        textSizeAdjust: 'none',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        zIndex: 999999,
-        width: '100%',
-        height: '100dvh',
-        display: 'block',
-        paddingBottom: 'env(safe-area-inset-bottom, 20px)'
-      }}>
+  return (
+    <>
+      {/* LANDING PAGE – full-screen hero (kept exactly as your design) */}
+      {showLanding && (
         <div style={{
-          minHeight: '100dvh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          padding: '40px 20px 80px',
-          position: 'relative'
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(180deg, #111 0%, #000 100%)',
+          color: 'white',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize: '16px',
+          WebkitTextSizeAdjust: 'none',
+          textSizeAdjust: 'none',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          zIndex: 999999,
+          width: '100%',
+          height: '100dvh',
+          display: 'block',
+          paddingBottom: 'env(safe-area-inset-bottom, 20px)'
         }}>
-          <div style={{ 
-            fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', 
-            lineHeight: 1.1, 
-            fontWeight: 700, 
-            letterSpacing: '-0.03em', 
-            maxWidth: '380px', 
-            marginBottom: '20px' 
+          <div style={{
+            minHeight: '100dvh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '40px 20px 80px',
+            position: 'relative'
           }}>
-            Stop arguing.<br />Start watching together.
-          </div>
-          <div style={{ 
-            fontSize: 'clamp(0.97rem, 3.8vw, 1.15rem)', 
-            opacity: 0.92, 
-            maxWidth: '340px', 
-            marginBottom: '40px',
-            lineHeight: 1.45
-          }}>
-            The only movie app built for couples. Swipe together. Match instantly. Never fight over what to watch again.
-          </div>
-
-          <button 
-            onClick={handleStartSwipingFree}
-            style={{
-              background: '#ef4444',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: 'clamp(1.05rem, 4vw, 1.22rem)',
-              padding: '16px 48px',
-              borderRadius: '9999px',
-              border: 'none',
-              boxShadow: '0 8px 12px -3px rgb(0 0 0 / 0.3)',
-              marginBottom: '16px',
-              cursor: 'pointer',
-              width: '100%',
-              maxWidth: '300px'
-            }}
-          >
-            Start Swiping Free
-          </button>
-
-          <button 
-            onClick={handleSignIn}
-            style={{
-              background: 'transparent',
-              color: 'white',
-              border: '2px solid rgba(255,255,255,0.75)',
-              padding: '13px 32px',
-              borderRadius: '9999px',
-              fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)',
-              fontWeight: 600,
-              marginBottom: '32px',
-              cursor: 'pointer',
-              width: '100%',
-              maxWidth: '300px'
-            }}
-          >
-            Sign In
-          </button>
-
-          <div style={{ fontSize: 'clamp(0.9rem, 3.5vw, 0.97rem)', opacity: 0.78 }}>
-            50 movies to try • No account needed to start • Your couple code is permanent
-          </div>
-        </div>
-
-        <div style={{ padding: '60px 20px 100px', background: '#0a0a0a' }}>
-          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
-            <p style={{ fontSize: 'clamp(0.98rem, 3.9vw, 1.1rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
-              Four simple steps to better movie nights
-            </p>
-          </div>
-
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
-            gap: '24px',
-            maxWidth: '1100px',
-            margin: '0 auto'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>🔑</div>
-              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>1. Create or Join a Room</h3>
-              <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>One 6-digit code connects you both instantly in your private couple space.</p>
+            <div style={{ 
+              fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', 
+              lineHeight: 1.1, 
+              fontWeight: 700, 
+              letterSpacing: '-0.03em', 
+              maxWidth: '380px', 
+              marginBottom: '20px' 
+            }}>
+              Stop arguing.<br />Start watching together.
+            </div>
+            <div style={{ 
+              fontSize: 'clamp(0.97rem, 3.8vw, 1.15rem)', 
+              opacity: 0.92, 
+              maxWidth: '340px', 
+              marginBottom: '40px',
+              lineHeight: 1.45
+            }}>
+              The only movie app built for couples. Swipe together. Match instantly. Never fight over what to watch again.
             </div>
 
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>🎛️</div>
-              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>2. Set Your Preferences</h3>
-              <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>You each adjust genres, eras, and favorite actors. We blend them proportionally.</p>
-            </div>
-
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>👆</div>
-              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>3. Swipe Together</h3>
-              <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>Tinder-style swiping on real movies. The deck intelligently mixes both your tastes.</p>
-            </div>
-
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>❤️</div>
-              <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches & Watch</h3>
-              <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '70px' }}>
             <button 
               onClick={handleStartSwipingFree}
               style={{
                 background: '#ef4444',
                 color: 'white',
                 fontWeight: 600,
-                fontSize: 'clamp(1.05rem, 4.1vw, 1.22rem)',
+                fontSize: 'clamp(1.05rem, 4vw, 1.22rem)',
                 padding: '16px 48px',
                 borderRadius: '9999px',
                 border: 'none',
+                boxShadow: '0 8px 12px -3px rgb(0 0 0 / 0.3)',
+                marginBottom: '16px',
                 cursor: 'pointer',
                 width: '100%',
                 maxWidth: '300px'
               }}
             >
-              Ready? Start Swiping Free Now
+              Start Swiping Free
             </button>
-          </div>
-        </div>
 
-        <div style={{ padding: '60px 20px 100px', background: '#111' }}>
-          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-            <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
-            <p style={{ fontSize: 'clamp(0.98rem, 3.9vw, 1.1rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
-              Start free. Upgrade when you want unlimited swipes and full couple features.
-            </p>
+            <button 
+              onClick={handleSignIn}
+              style={{
+                background: 'transparent',
+                color: 'white',
+                border: '2px solid rgba(255,255,255,0.75)',
+                padding: '13px 32px',
+                borderRadius: '9999px',
+                fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)',
+                fontWeight: 600,
+                marginBottom: '32px',
+                cursor: 'pointer',
+                width: '100%',
+                maxWidth: '300px'
+              }}
+            >
+              Sign In
+            </button>
+
+            <div style={{ fontSize: 'clamp(0.9rem, 3.5vw, 0.97rem)', opacity: 0.78 }}>
+              50 movies to try • No account needed to start • Your couple code is permanent
+            </div>
           </div>
 
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', 
-            gap: '24px',
-            maxWidth: '1100px',
-            margin: '0 auto'
-          }}>
+          {/* How It Works + Pricing sections (unchanged) */}
+          <div style={{ padding: '60px 20px 100px', background: '#0a0a0a' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
+              <p style={{ fontSize: 'clamp(0.98rem, 3.9vw, 1.1rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
+                Four simple steps to better movie nights
+              </p>
+            </div>
+
             <div style={{ 
-              background: '#1a1a1a', 
-              borderRadius: '20px', 
-              padding: '28px', 
-              textAlign: 'center',
-              border: '1px solid #333'
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+              gap: '24px',
+              maxWidth: '1100px',
+              margin: '0 auto'
             }}>
-              <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.4rem)', marginBottom: '8px' }}>Free</h3>
-              <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '6px' }}>0</div>
-              <p style={{ opacity: 0.8, marginBottom: '20px' }}>$ / month</p>
-              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
-                <li style={{ marginBottom: '10px' }}>✅ 50 swipes to try the blend</li>
-                <li style={{ marginBottom: '10px' }}>✅ Basic matching</li>
-                <li style={{ marginBottom: '10px' }}>❌ Unlimited swipes</li>
-              </ul>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>🔑</div>
+                <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>1. Create or Join a Room</h3>
+                <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>One 6-digit code connects you both instantly in your private couple space.</p>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>🎛️</div>
+                <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>2. Set Your Preferences</h3>
+                <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>You each adjust genres, eras, and favorite actors. We blend them proportionally.</p>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>👆</div>
+                <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>3. Swipe Together</h3>
+                <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>Tinder-style swiping on real movies. The deck intelligently mixes both your tastes.</p>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>❤️</div>
+                <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches &amp; Watch</h3>
+                <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '70px' }}>
               <button 
                 onClick={handleStartSwipingFree}
                 style={{
-                  width: '100%',
-                  background: '#444',
-                  color: 'white',
-                  padding: '13px',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontSize: 'clamp(1rem, 4vw, 1.08rem)'
-                }}
-              >
-                Try Free
-              </button>
-            </div>
-
-            <div style={{ 
-              background: '#1a1a1a', 
-              borderRadius: '20px', 
-              padding: '28px', 
-              textAlign: 'center',
-              border: '2px solid #ef4444',
-              position: 'relative'
-            }}>
-              <div style={{ position: 'absolute', top: '-12px', right: '20px', background: '#ef4444', color: 'white', padding: '4px 14px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 600 }}>Popular</div>
-              <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.4rem)', marginBottom: '8px' }}>Monthly</h3>
-              <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '6px' }}>$3.99</div>
-              <p style={{ opacity: 0.8, marginBottom: '20px' }}>/ month</p>
-              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
-                <li style={{ marginBottom: '10px' }}>✅ Unlimited swipes</li>
-                <li style={{ marginBottom: '10px' }}>✅ Full smart blend</li>
-                <li style={{ marginBottom: '10px' }}>✅ Shared watch room + chat</li>
-                <li style={{ marginBottom: '10px' }}>✅ Mutual matches forever</li>
-              </ul>
-              <button 
-                style={{
-                  width: '100%',
                   background: '#ef4444',
                   color: 'white',
-                  padding: '13px',
+                  fontWeight: 600,
+                  fontSize: 'clamp(1.05rem, 4.1vw, 1.22rem)',
+                  padding: '16px 48px',
                   borderRadius: '9999px',
                   border: 'none',
-                  fontWeight: 600,
                   cursor: 'pointer',
-                  fontSize: 'clamp(1rem, 4vw, 1.08rem)'
+                  width: '100%',
+                  maxWidth: '300px'
                 }}
               >
-                Subscribe Monthly
+                Ready? Start Swiping Free Now
               </button>
+            </div>
+          </div>
+
+          <div style={{ padding: '60px 20px 100px', background: '#111' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
+              <p style={{ fontSize: 'clamp(0.98rem, 3.9vw, 1.1rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
+                Start free. Upgrade when you want unlimited swipes and full couple features.
+              </p>
             </div>
 
             <div style={{ 
-              background: '#1a1a1a', 
-              borderRadius: '20px', 
-              padding: '28px', 
-              textAlign: 'center',
-              border: '1px solid #333'
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', 
+              gap: '24px',
+              maxWidth: '1100px',
+              margin: '0 auto'
             }}>
-              <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.4rem)', marginBottom: '8px' }}>Yearly</h3>
-              <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '8px' }}>$39</div>
-              <p style={{ opacity: 0.8, marginBottom: '8px' }}>/ year</p>
-              <p style={{ fontSize: 'clamp(0.85rem, 3.5vw, 0.92rem)', color: '#22c55e', marginBottom: '24px' }}>(save ~18% • $3.25/mo)</p>
-              <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
-                <li style={{ marginBottom: '10px' }}>✅ Everything in Monthly</li>
-                <li style={{ marginBottom: '10px' }}>✅ Best value for couples</li>
-              </ul>
-              <button 
-                style={{
-                  width: '100%',
-                  background: '#444',
-                  color: 'white',
-                  padding: '13px',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontSize: 'clamp(1rem, 4vw, 1.08rem)'
-                }}
-              >
-                Subscribe Yearly
-              </button>
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '40px', opacity: 0.8, fontSize: 'clamp(0.9rem, 3.5vw, 0.95rem)' }}>
-            Cancel anytime • No ads • Your couple code stays forever
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="app">
-      <div className="header">
-        <div className="logo" onClick={() => setShowLanding(true)} style={{ cursor: 'pointer' }}>DuoFlix</div>
-        {user && (
-          <div style={{ fontSize: '0.9rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            👤 {user.email}
-            <button 
-              onClick={handleLogout}
-              style={{ background: 'transparent', border: '1px solid #666', color: '#ccc', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.8rem', cursor: 'pointer' }}
-            >
-              Logout
-            </button>
-          </div>
-        )}
-        <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>
-          ❤️ Matches ({mutualMatches.length})
-        </div>
-      </div>
-
-      {currentTab === 'swipe' && (
-        <div className="swipe-page">
-          <div className="poster-container">
-            {currentMovie && (
-              <div
-                ref={cardRef}
-                className={`poster-card ${isFlyingOff ? (flyDirection === 'right' ? 'flying-off-right' : 'flying-off-left') : ''}`}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                style={{ transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)`, touchAction: 'none' }}
-              >
-                <img
-                  className="poster-img"
-                  src={`https://image.tmdb.org/t/p/w780${currentMovie.poster_path}`}
-                  alt={currentMovie.title}
-                  draggable={false}
-                  onDragStart={(e) => e.preventDefault()}
-                />
-                <div className="overlay" style={{ 
-                  position: 'absolute', 
-                  bottom: 0, 
-                  left: '12px', 
-                  right: '12px', 
-                  background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', 
-                  padding: '16px 16px 14px', 
-                  color: 'white', 
-                  fontSize: '0.95rem',
-                  textAlign: 'center',
-                  borderBottomLeftRadius: '24px',
-                  borderBottomRightRadius: '24px'
-                }}>
-                  <div style={{ fontWeight: 700, marginBottom: '4px', lineHeight: 1.2 }}>{currentMovie.title}</div>
-                  <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
-                    {currentMovie.release_date?.slice(0, 4) || 'N/A'} • {currentMovie.vote_average?.toFixed(1) || '0'} ★
-                  </div>
-                </div>
+              <div style={{ 
+                background: '#1a1a1a', 
+                borderRadius: '20px', 
+                padding: '28px', 
+                textAlign: 'center',
+                border: '1px solid #333'
+              }}>
+                <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.4rem)', marginBottom: '8px' }}>Free</h3>
+                <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '6px' }}>0</div>
+                <p style={{ opacity: 0.8, marginBottom: '20px' }}>$ / month</p>
+                <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
+                  <li style={{ marginBottom: '10px' }}>✅ 50 swipes to try the blend</li>
+                  <li style={{ marginBottom: '10px' }}>✅ Basic matching</li>
+                  <li style={{ marginBottom: '10px' }}>❌ Unlimited swipes</li>
+                </ul>
+                <button 
+                  onClick={handleStartSwipingFree}
+                  style={{
+                    width: '100%',
+                    background: '#444',
+                    color: 'white',
+                    padding: '13px',
+                    borderRadius: '9999px',
+                    border: 'none',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: 'clamp(1rem, 4vw, 1.08rem)'
+                  }}
+                >
+                  Try Free
+                </button>
               </div>
-            )}
-          </div>
 
-          {!showDetails && (
-            <div className="button-layer">
-              <button className="btn undo" onClick={handleUndo}>↩</button>
-              <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
-              <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
-              <button className="btn like" onClick={() => triggerFlyOff(true)}>♥</button>
+              <div style={{ 
+                background: '#1a1a1a', 
+                borderRadius: '20px', 
+                padding: '28px', 
+                textAlign: 'center',
+                border: '2px solid #ef4444',
+                position: 'relative'
+              }}>
+                <div style={{ position: 'absolute', top: '-12px', right: '20px', background: '#ef4444', color: 'white', padding: '4px 14px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 600 }}>Popular</div>
+                <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.4rem)', marginBottom: '8px' }}>Monthly</h3>
+                <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '6px' }}>$3.99</div>
+                <p style={{ opacity: 0.8, marginBottom: '20px' }}>/ month</p>
+                <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
+                  <li style={{ marginBottom: '10px' }}>✅ Unlimited swipes</li>
+                  <li style={{ marginBottom: '10px' }}>✅ Full smart blend</li>
+                  <li style={{ marginBottom: '10px' }}>✅ Shared watch room + chat</li>
+                  <li style={{ marginBottom: '10px' }}>✅ Mutual matches forever</li>
+                </ul>
+                <button 
+                  style={{
+                    width: '100%',
+                    background: '#ef4444',
+                    color: 'white',
+                    padding: '13px',
+                    borderRadius: '9999px',
+                    border: 'none',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: 'clamp(1rem, 4vw, 1.08rem)'
+                  }}
+                >
+                  Subscribe Monthly
+                </button>
+              </div>
+
+              <div style={{ 
+                background: '#1a1a1a', 
+                borderRadius: '20px', 
+                padding: '28px', 
+                textAlign: 'center',
+                border: '1px solid #333'
+              }}>
+                <h3 style={{ fontSize: 'clamp(1.2rem, 4.5vw, 1.4rem)', marginBottom: '8px' }}>Yearly</h3>
+                <div style={{ fontSize: 'clamp(1.9rem, 6vw, 2.5rem)', fontWeight: 700, marginBottom: '8px' }}>$39</div>
+                <p style={{ opacity: 0.8, marginBottom: '8px' }}>/ year</p>
+                <p style={{ fontSize: 'clamp(0.85rem, 3.5vw, 0.92rem)', color: '#22c55e', marginBottom: '24px' }}>(save ~18% • $3.25/mo)</p>
+                <ul style={{ textAlign: 'left', marginBottom: '28px', opacity: 0.9, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)' }}>
+                  <li style={{ marginBottom: '10px' }}>✅ Everything in Monthly</li>
+                  <li style={{ marginBottom: '10px' }}>✅ Best value for couples</li>
+                </ul>
+                <button 
+                  style={{
+                    width: '100%',
+                    background: '#444',
+                    color: 'white',
+                    padding: '13px',
+                    borderRadius: '9999px',
+                    border: 'none',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: 'clamp(1rem, 4vw, 1.08rem)'
+                  }}
+                >
+                  Subscribe Yearly
+                </button>
+              </div>
             </div>
-          )}
+
+            <div style={{ textAlign: 'center', marginTop: '40px', opacity: 0.8, fontSize: 'clamp(0.9rem, 3.5vw, 0.95rem)' }}>
+              Cancel anytime • No ads • Your couple code stays forever
+            </div>
+          </div>
         </div>
       )}
 
-      {currentTab === 'matches' && (
-        <div className="matches-page">
-          <div className="matches-tabs">
-            <button className={matchesSubTab === 'mutual' ? 'active' : ''} onClick={() => setMatchesSubTab('mutual')}>Mutual Matches</button>
-            <button className={matchesSubTab === 'my-likes' ? 'active' : ''} onClick={() => setMatchesSubTab('my-likes')}>My Likes</button>
-          </div>
-          <div className="matches-grid">
-            {(matchesSubTab === 'mutual' ? mutualMatches : likedMovies).length > 0 ? (
-              (matchesSubTab === 'mutual' ? mutualMatches : likedMovies).map(movie => (
-                <div 
-                  key={movie.id} 
-                  className="match-card"
-                  onClick={() => {
-                    setDetailMovie(movie);
-                    setShowDetails(true);
-                  }}
-                  style={{ cursor: 'pointer' }}
+      {/* MAIN APP – completely untouched */}
+      {!showLanding && (
+        <div className="app">
+          <div className="header">
+            <div className="logo" onClick={() => setShowLanding(true)} style={{ cursor: 'pointer' }}>DuoFlix</div>
+            {user && (
+              <div style={{ fontSize: '0.9rem', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                👤 {user.email}
+                <button 
+                  onClick={handleLogout}
+                  style={{ background: 'transparent', border: '1px solid #666', color: '#ccc', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.8rem', cursor: 'pointer' }}
                 >
-                  <img className="match-img" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
-                  <div className="match-overlay">
-                    <div className="match-title">{movie.title}</div>
-                    <div className="match-meta">
-                      {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
+                  Logout
+                </button>
+              </div>
+            )}
+            <div className="likes" onClick={() => setCurrentTab('matches')} style={{ cursor: 'pointer' }}>
+              ❤️ Matches ({mutualMatches.length})
+            </div>
+          </div>
+
+          {currentTab === 'swipe' && (
+            <div className="swipe-page">
+              <div className="poster-container">
+                {currentMovie && (
+                  <div
+                    ref={cardRef}
+                    className={`poster-card ${isFlyingOff ? (flyDirection === 'right' ? 'flying-off-right' : 'flying-off-left') : ''}`}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onPointerCancel={handlePointerUp}
+                    style={{ transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)`, touchAction: 'none' }}
+                  >
+                    <img
+                      className="poster-img"
+                      src={`https://image.tmdb.org/t/p/w780${currentMovie.poster_path}`}
+                      alt={currentMovie.title}
+                      draggable={false}
+                      onDragStart={(e) => e.preventDefault()}
+                    />
+                    <div className="overlay" style={{ 
+                      position: 'absolute', 
+                      bottom: 0, 
+                      left: '12px', 
+                      right: '12px', 
+                      background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', 
+                      padding: '16px 16px 14px', 
+                      color: 'white', 
+                      fontSize: '0.95rem',
+                      textAlign: 'center',
+                      borderBottomLeftRadius: '24px',
+                      borderBottomRightRadius: '24px'
+                    }}>
+                      <div style={{ fontWeight: 700, marginBottom: '4px', lineHeight: 1.2 }}>{currentMovie.title}</div>
+                      <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
+                        {currentMovie.release_date?.slice(0, 4) || 'N/A'} • {currentMovie.vote_average?.toFixed(1) || '0'} ★
+                      </div>
                     </div>
+                  </div>
+                )}
+              </div>
+
+              {!showDetails && (
+                <div className="button-layer">
+                  <button className="btn undo" onClick={handleUndo}>↩</button>
+                  <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
+                  <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
+                  <button className="btn like" onClick={() => triggerFlyOff(true)}>♥</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {currentTab === 'matches' && (
+            <div className="matches-page">
+              <div className="matches-tabs">
+                <button className={matchesSubTab === 'mutual' ? 'active' : ''} onClick={() => setMatchesSubTab('mutual')}>Mutual Matches</button>
+                <button className={matchesSubTab === 'my-likes' ? 'active' : ''} onClick={() => setMatchesSubTab('my-likes')}>My Likes</button>
+              </div>
+              <div className="matches-grid">
+                {(matchesSubTab === 'mutual' ? mutualMatches : likedMovies).length > 0 ? (
+                  (matchesSubTab === 'mutual' ? mutualMatches : likedMovies).map(movie => (
                     <div 
-                      className="match-details-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
+                      key={movie.id} 
+                      className="match-card"
+                      onClick={() => {
                         setDetailMovie(movie);
                         setShowDetails(true);
                       }}
-                      style={{ pointerEvents: 'auto', zIndex: 100, position: 'relative' }}
+                      style={{ cursor: 'pointer' }}
                     >
-                      Details
+                      <img className="match-img" src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`} alt={movie.title} />
+                      <div className="match-overlay">
+                        <div className="match-title">{movie.title}</div>
+                        <div className="match-meta">
+                          {movie.release_date?.slice(0,4) || 'N/A'} • {movie.vote_average?.toFixed(1) || '0'} ★
+                        </div>
+                        <div 
+                          className="match-details-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setDetailMovie(movie);
+                            setShowDetails(true);
+                          }}
+                          style={{ pointerEvents: 'auto', zIndex: 100, position: 'relative' }}
+                        >
+                          Details
+                        </div>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>
+                    {matchesSubTab === 'mutual' 
+                      ? "No mutual matches yet. Both swipe right on the same movie!" 
+                      : "No likes yet. Start swiping!"}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {currentTab === 'watch' && (
+            <div className="watch-page">
+              <h2>Watch Together</h2>
+              {!isInRoom ? (
+                <>
+                  <p>{roomStatus}</p>
+                  <input type="text" className="room-input" value={joinedCode} onChange={e => setJoinedCode(e.target.value)} placeholder="Enter 6-digit room code" maxLength={6} />
+                  <button className="watch-btn join" onClick={joinRoom}>Join Room</button>
+                  <button className="watch-btn create" onClick={createRoom}>Create New Room</button>
+                </>
+              ) : (
+                <>
+                  <p>Room Code: <strong>{roomCode}</strong></p>
+                  <div style={{ margin: '2rem 0', padding: '1rem', background: '#111', borderRadius: '12px', maxHeight: '300px', overflowY: 'auto' }}>
+                    {chatMessages.map((msg, i) => <div key={i} style={{ marginBottom: '0.8rem', textAlign: 'left' }}>{msg}</div>)}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="text" value={newChatMessage} onChange={e => setNewChatMessage(e.target.value)} onKeyPress={e => e.key === 'Enter' && sendChatMessage()} placeholder="Type a message..." style={{ flex: 1, padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white' }} />
+                    <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '12px' }}>Send</button>
+                  </div>
+                  <button style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white' }} className="watch-btn" onClick={() => { setIsInRoom(false); setRoomCode(null); setChatMessages([]); setRoomStatus('Create or join a room to watch together!'); }}>Leave Room</button>
+                </>
+              )}
+            </div>
+          )}
+
+          {currentTab === 'prefs' && (
+            <div className="prefs-page">
+              <div className="prefs-container">
+                <h2>Preferences</h2>
+
+                <div style={{ marginBottom: '2.5rem' }}>
+                  <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>My Preferences</h3>
+                  {Object.keys(myPrefs).map(genre => (
+                    <div key={genre} className="slider-row">
+                      <label>{genre}</label>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        value={myPrefs[genre]} 
+                        onChange={e => setMyPrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} 
+                      />
+                    </div>
+                  ))}
+                  <div className="actor-input">
+                    <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
+                    <button onClick={addActor}>Add</button>
+                  </div>
+                  <ul className="actor-list">
+                    {myFavoriteActors.map(actor => (
+                      <li key={actor}>
+                        {actor}
+                        <button onClick={() => removeActor(actor)}>Remove</button>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="era-grid">
+                    {Object.keys(myEraPrefs).map(era => (
+                      <label key={era} className="era-label">
+                        <input type="checkbox" checked={myEraPrefs[era]} onChange={e => setMyEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
+                        {era}
+                      </label>
+                    ))}
                   </div>
                 </div>
-              ))
-            ) : (
-              <p style={{ textAlign: 'center', padding: '2rem', opacity: 0.7 }}>
-                {matchesSubTab === 'mutual' 
-                  ? "No mutual matches yet. Both swipe right on the same movie!" 
-                  : "No likes yet. Start swiping!"}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
 
-      {currentTab === 'watch' && (
-        <div className="watch-page">
-          <h2>Watch Together</h2>
-          {!isInRoom ? (
-            <>
-              <p>{roomStatus}</p>
-              <input type="text" className="room-input" value={joinedCode} onChange={e => setJoinedCode(e.target.value)} placeholder="Enter 6-digit room code" maxLength={6} />
-              <button className="watch-btn join" onClick={joinRoom}>Join Room</button>
-              <button className="watch-btn create" onClick={createRoom}>Create New Room</button>
-            </>
-          ) : (
-            <>
-              <p>Room Code: <strong>{roomCode}</strong></p>
-              <div style={{ margin: '2rem 0', padding: '1rem', background: '#111', borderRadius: '12px', maxHeight: '300px', overflowY: 'auto' }}>
-                {chatMessages.map((msg, i) => <div key={i} style={{ marginBottom: '0.8rem', textAlign: 'left' }}>{msg}</div>)}
+                {coupleCode && (
+                  <div style={{ marginBottom: '2.5rem' }}>
+                    <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>Partner's Preferences</h3>
+                    {Object.keys(partnerPrefs).map(genre => (
+                      <div key={genre} className="slider-row">
+                        <label>{genre}</label>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="100" 
+                          value={partnerPrefs[genre]} 
+                          onChange={e => setPartnerPrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} 
+                        />
+                      </div>
+                    ))}
+                    <div className="actor-input">
+                      <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor (for partner)" />
+                      <button onClick={addActor}>Add</button>
+                    </div>
+                    <ul className="actor-list">
+                      {partnerFavoriteActors.map(actor => (
+                        <li key={actor}>
+                          {actor}
+                          <button onClick={() => removeActor(actor)}>Remove</button>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="era-grid">
+                      {Object.keys(partnerEraPrefs).map(era => (
+                        <label key={era} className="era-label">
+                          <input type="checkbox" checked={partnerEraPrefs[era]} onChange={e => setPartnerEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
+                          {era}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ marginTop: '1rem', padding: '12px', background: '#222', borderRadius: '12px', fontSize: '0.95rem', textAlign: 'center', color: '#22c55e' }}>
+                  ✅ Merged Deck Active (both partners' preferences combined)
+                </div>
+
+                <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
+
+                <button 
+                  onClick={clearMyLikesOnly}
+                  style={{
+                    width: '100%',
+                    marginTop: '1rem',
+                    padding: '1rem',
+                    background: '#444',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '999px',
+                    fontSize: '1.05rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🧹 Clear Only My Likes
+                </button>
+
+                <button 
+                  onClick={clearAllLikesAndMatches}
+                  style={{
+                    width: '100%',
+                    marginTop: '0.75rem',
+                    padding: '1rem',
+                    background: '#991b1b',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '999px',
+                    fontSize: '1.05rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  🗑️ Clear All Likes & Matches (both users)
+                </button>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input type="text" value={newChatMessage} onChange={e => setNewChatMessage(e.target.value)} onKeyPress={e => e.key === 'Enter' && sendChatMessage()} placeholder="Type a message..." style={{ flex: 1, padding: '0.9rem', background: '#111', border: '1px solid #444', borderRadius: '12px', color: 'white' }} />
-                <button onClick={sendChatMessage} style={{ padding: '0 1.5rem', background: '#ef4444', color: 'white', border: 'none', borderRadius: '12px' }}>Send</button>
+            </div>
+          )}
+
+          <nav className="tab-bar">
+            <button onClick={() => setCurrentTab('swipe')}>Swipe</button>
+            <button onClick={() => setCurrentTab('matches')}>Matches</button>
+            <button onClick={() => setCurrentTab('watch')}>Watch</button>
+            <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
+          </nav>
+
+          {showDetails && detailMovie && (
+            <div className="modal-overlay" onClick={() => setShowDetails(false)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <button className="close-btn" onClick={() => setShowDetails(false)}>×</button>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.8rem', color: 'white' }}>{detailMovie.title}</h2>
+                <p className="modal-meta">
+                  {detailMovie.release_date?.slice(0,4) || 'N/A'} • {detailMovie.vote_average?.toFixed(1) || '0'} ★
+                </p>
+                <p className="modal-description">{detailMovie.overview}</p>
+                <h3>Top Actors</h3>
+                <ul className="actors-list">
+                  {actors.length > 0 ? actors.map((a, i) => <li key={i}>{a.name}</li>) : <li>Loading actors...</li>}
+                </ul>
+
+                <div style={{ marginTop: '2rem', borderTop: '1px solid #333', paddingTop: '1.5rem' }}>
+                  <h3 style={{ marginBottom: '1rem' }}>Where to Watch</h3>
+                  {providersLoading ? (
+                    <p style={{ opacity: 0.7 }}>Loading providers...</p>
+                  ) : watchProviders.length > 0 ? (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'flex-start' }}>
+                      {watchProviders.map(provider => (
+                        <div key={provider.provider_id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '70px', textAlign: 'center' }}>
+                          {provider.logo_path ? (
+                            <img src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`} alt={provider.provider_name} style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'contain', background: '#222', padding: '4px' }} />
+                          ) : (
+                            <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>
+                              {provider.provider_name.slice(0, 2)}
+                            </div>
+                          )}
+                          <div style={{ fontSize: '0.75rem', marginTop: '6px', opacity: 0.85, maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {provider.provider_name}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ opacity: 0.7 }}>No streaming providers found for this movie in your region at this time.</p>
+                  )}
+                  <p style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '1rem' }}>
+                    Data from TMDB / JustWatch • Availability may vary by region
+                  </p>
+                </div>
               </div>
-              <button style={{ marginTop: '1.5rem', background: '#ef4444', color: 'white' }} className="watch-btn" onClick={() => { setIsInRoom(false); setRoomCode(null); setChatMessages([]); setRoomStatus('Create or join a room to watch together!'); }}>Leave Room</button>
-            </>
+            </div>
           )}
         </div>
       )}
 
-      {currentTab === 'prefs' && (
-        <div className="prefs-page">
-          <div className="prefs-container">
-            <h2>Preferences</h2>
-
-            <div style={{ marginBottom: '2.5rem' }}>
-              <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>My Preferences</h3>
-              {Object.keys(myPrefs).map(genre => (
-                <div key={genre} className="slider-row">
-                  <label>{genre}</label>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    value={myPrefs[genre]} 
-                    onChange={e => setMyPrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} 
-                  />
-                </div>
-              ))}
-              <div className="actor-input">
-                <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
-                <button onClick={addActor}>Add</button>
-              </div>
-              <ul className="actor-list">
-                {myFavoriteActors.map(actor => (
-                  <li key={actor}>
-                    {actor}
-                    <button onClick={() => removeActor(actor)}>Remove</button>
-                  </li>
-                ))}
-              </ul>
-              <div className="era-grid">
-                {Object.keys(myEraPrefs).map(era => (
-                  <label key={era} className="era-label">
-                    <input type="checkbox" checked={myEraPrefs[era]} onChange={e => setMyEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
-                    {era}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {coupleCode && (
-              <div style={{ marginBottom: '2.5rem' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem' }}>Partner's Preferences</h3>
-                {Object.keys(partnerPrefs).map(genre => (
-                  <div key={genre} className="slider-row">
-                    <label>{genre}</label>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="100" 
-                      value={partnerPrefs[genre]} 
-                      onChange={e => setPartnerPrefs(prev => ({...prev, [genre]: Number(e.target.value)}))} 
-                    />
-                  </div>
-                ))}
-                <div className="actor-input">
-                  <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor (for partner)" />
-                  <button onClick={addActor}>Add</button>
-                </div>
-                <ul className="actor-list">
-                  {partnerFavoriteActors.map(actor => (
-                    <li key={actor}>
-                      {actor}
-                      <button onClick={() => removeActor(actor)}>Remove</button>
-                    </li>
-                  ))}
-                </ul>
-                <div className="era-grid">
-                  {Object.keys(partnerEraPrefs).map(era => (
-                    <label key={era} className="era-label">
-                      <input type="checkbox" checked={partnerEraPrefs[era]} onChange={e => setPartnerEraPrefs(prev => ({...prev, [era]: e.target.checked}))} />
-                      {era}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div style={{ marginTop: '1rem', padding: '12px', background: '#222', borderRadius: '12px', fontSize: '0.95rem', textAlign: 'center', color: '#22c55e' }}>
-              ✅ Merged Deck Active (both partners' preferences combined)
-            </div>
-
-            <button className="save-btn" onClick={savePreferences}>Save Preferences</button>
-
-            <button 
-              onClick={clearMyLikesOnly}
-              style={{
-                width: '100%',
-                marginTop: '1rem',
-                padding: '1rem',
-                background: '#444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '999px',
-                fontSize: '1.05rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              🧹 Clear Only My Likes
-            </button>
-
-            <button 
-              onClick={clearAllLikesAndMatches}
-              style={{
-                width: '100%',
-                marginTop: '0.75rem',
-                padding: '1rem',
-                background: '#991b1b',
-                color: 'white',
-                border: 'none',
-                borderRadius: '999px',
-                fontSize: '1.05rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              🗑️ Clear All Likes & Matches (both users)
-            </button>
-          </div>
-        </div>
-      )}
-
-      <nav className="tab-bar">
-        <button onClick={() => setCurrentTab('swipe')}>Swipe</button>
-        <button onClick={() => setCurrentTab('matches')}>Matches</button>
-        <button onClick={() => setCurrentTab('watch')}>Watch</button>
-        <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
-      </nav>
-
-      {showDetails && detailMovie && (
-        <div className="modal-overlay" onClick={() => setShowDetails(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setShowDetails(false)}>×</button>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.8rem', color: 'white' }}>{detailMovie.title}</h2>
-            <p className="modal-meta">
-              {detailMovie.release_date?.slice(0,4) || 'N/A'} • {detailMovie.vote_average?.toFixed(1) || '0'} ★
-            </p>
-            <p className="modal-description">{detailMovie.overview}</p>
-            <h3>Top Actors</h3>
-            <ul className="actors-list">
-              {actors.length > 0 ? actors.map((a, i) => <li key={i}>{a.name}</li>) : <li>Loading actors...</li>}
-            </ul>
-
-            <div style={{ marginTop: '2rem', borderTop: '1px solid #333', paddingTop: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>Where to Watch</h3>
-              {providersLoading ? (
-                <p style={{ opacity: 0.7 }}>Loading providers...</p>
-              ) : watchProviders.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'flex-start' }}>
-                  {watchProviders.map(provider => (
-                    <div key={provider.provider_id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '70px', textAlign: 'center' }}>
-                      {provider.logo_path ? (
-                        <img src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`} alt={provider.provider_name} style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'contain', background: '#222', padding: '4px' }} />
-                      ) : (
-                        <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>
-                          {provider.provider_name.slice(0, 2)}
-                        </div>
-                      )}
-                      <div style={{ fontSize: '0.75rem', marginTop: '6px', opacity: 0.85, maxWidth: '70px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {provider.provider_name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p style={{ opacity: 0.7 }}>No streaming providers found for this movie in your region at this time.</p>
-              )}
-              <p style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '1rem' }}>
-                Data from TMDB / JustWatch • Availability may vary by region
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* AUTH MODAL – ALWAYS rendered via portal (the fix) */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay" 
@@ -1423,7 +1434,7 @@ function App() {
         </div>,
         document.body
       )}
-    </div>
+    </>
   );
 }
 
