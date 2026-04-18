@@ -767,7 +767,7 @@ function App() {
 
   return (
     <>
-      {/* LANDING PAGE */}
+      {/* LANDING PAGE - Way A: always rendered but conditionally shown */}
       {showLanding && (
         <div style={{
           position: 'fixed',
@@ -1374,8 +1374,7 @@ function App() {
         </div>
       )}
 
-      {/* === AUTH-MODAL-ROOT-FIX-v3 === */}
-      {/* AUTH MODAL - THE FIX: unconditionally at root level, always mounted, inline styles */}
+      {/* AUTH MODAL - always present at root level (Way A) so Sign In button works reliably */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay" 
