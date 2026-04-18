@@ -1374,6 +1374,7 @@ function App() {
         </div>
       )}
 
+      {/* === AUTH-MODAL-ROOT-FIX-v3 === */}
       {/* AUTH MODAL - THE FIX: unconditionally at root level, always mounted, inline styles */}
       {showAuthModal && createPortal(
         <div 
