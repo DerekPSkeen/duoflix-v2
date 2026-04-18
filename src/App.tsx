@@ -767,28 +767,9 @@ function App() {
 
   return (
     <>
-      {/* LANDING PAGE - Way A: always rendered but conditionally shown */}
+      {/* LANDING PAGE - Way A with targeted CSS class only (no conflicting inline z-index) */}
       {showLanding && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'linear-gradient(180deg, #111 0%, #000 100%)',
-          color: 'white',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          fontSize: '16px',
-          WebkitTextSizeAdjust: 'none',
-          textSizeAdjust: 'none',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          zIndex: 999999,
-          width: '100%',
-          height: '100dvh',
-          display: 'block',
-          paddingBottom: 'env(safe-area-inset-bottom, 20px)'
-        }}>
+        <div className="landing-page">
           <div style={{
             minHeight: '100dvh',
             display: 'flex',
@@ -1045,7 +1026,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP */}
+      {/* MAIN APP - completely unchanged */}
       {!showLanding && (
         <div className="app">
           <div className="header">
@@ -1374,40 +1355,19 @@ function App() {
         </div>
       )}
 
-      {/* AUTH MODAL - always present at root level (Way A) so Sign In button works reliably */}
+      {/* AUTH MODAL - always mounted at root with targeted class for CSS fix */}
       {showAuthModal && createPortal(
         <div 
-          className="modal-overlay" 
+          className="modal-overlay auth-modal-portal" 
           onClick={closeAuthModal}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.85)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 10000000
-          }}
         >
           <div 
             className="modal-content" 
             onClick={e => e.stopPropagation()}
-            style={{
-              background: '#111',
-              borderRadius: '16px',
-              padding: '24px',
-              maxWidth: '380px',
-              width: '90%',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.6)'
-            }}
           >
             <button 
               className="close-btn" 
               onClick={closeAuthModal} 
-              style={{ float: 'right', background: 'none', border: 'none', fontSize: '1.8rem', cursor: 'pointer', color: '#fff' }}
             >
               ×
             </button>
