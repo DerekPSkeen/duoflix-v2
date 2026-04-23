@@ -775,9 +775,28 @@ function App() {
 
   return (
     <>
-      {/* LANDING PAGE - Launch-ready with footer and policy modals */}
+      {/* LANDING PAGE - Fixed scrolling structure + footer + modals */}
       {showLanding && (
-        <div className="landing-page">
+        <div className="landing-page" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(180deg, #111 0%, #000 100%)',
+          color: 'white',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize: '16px',
+          WebkitTextSizeAdjust: 'none',
+          textSizeAdjust: 'none',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          zIndex: 9999,
+          width: '100%',
+          height: '100dvh',
+          display: 'block',
+          paddingBottom: 'env(safe-area-inset-bottom, 20px)'
+        }}>
           <div style={{
             minHeight: '100dvh',
             display: 'flex',
@@ -1037,7 +1056,7 @@ function App() {
             </div>
           </div>
 
-          {/* Footer with legal links - only addition to landing page */}
+          {/* Footer with legal links */}
           <div style={{
             padding: '40px 20px 60px',
             background: '#0a0a0a',
@@ -1065,9 +1084,10 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - completely unchanged */}
+      {/* MAIN APP - unchanged */}
       {!showLanding && (
         <div className="app">
+          {/* ... all main app code remains exactly as in your original file ... */}
           <div className="header">
             <div className="logo" onClick={() => setShowLanding(true)} style={{ cursor: 'pointer' }}>DuoFlix</div>
             {user && (
@@ -1394,7 +1414,7 @@ function App() {
         </div>
       )}
 
-      {/* AUTH MODAL - unchanged */}
+      {/* AUTH MODAL */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay auth-modal-portal" 
@@ -1466,12 +1486,7 @@ function App() {
             onClick={e => e.stopPropagation()}
             style={{ maxHeight: '90vh', overflowY: 'auto' }}
           >
-            <button 
-              className="close-btn" 
-              onClick={closePrivacyModal} 
-            >
-              ×
-            </button>
+            <button className="close-btn" onClick={closePrivacyModal}>×</button>
             <h2 style={{ fontSize: '1.4rem', marginBottom: '1.5rem' }}>Privacy Policy</h2>
             <div style={{ lineHeight: 1.6, fontSize: '0.95rem' }}>
               <p><strong>Last updated:</strong> April 23, 2026</p>
@@ -1517,19 +1532,15 @@ function App() {
             onClick={e => e.stopPropagation()}
             style={{ maxHeight: '90vh', overflowY: 'auto' }}
           >
-            <button 
-              className="close-btn" 
-              onClick={closeTermsModal} 
-            >
-              ×
-            </button>
+            <button className="close-btn" onClick={closeTermsModal}>×</button>
             <h2 style={{ fontSize: '1.4rem', marginBottom: '1.5rem' }}>Terms and Conditions</h2>
             <div style={{ lineHeight: 1.6, fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>
-              {`Last updated: April 23, 2026
+              Last updated: April 23, 2026
 
 Please read these terms and conditions carefully before using Our Service.
 
-... (the full Terms and Conditions text from TermsFeed you provided earlier) ...`}
+[ Paste the full Terms and Conditions text from TermsFeed here ]
+
             </div>
           </div>
         </div>,
