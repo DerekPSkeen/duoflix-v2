@@ -86,6 +86,9 @@ function App() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [dragOffset, setDragOffset] = useState(0);
   const [startX, setStartX] = useState(0);
@@ -765,9 +768,14 @@ function App() {
     setPassword('');
   }, []);
 
+  const openPrivacyModal = useCallback(() => setShowPrivacyModal(true), []);
+  const closePrivacyModal = useCallback(() => setShowPrivacyModal(false), []);
+  const openTermsModal = useCallback(() => setShowTermsModal(true), []);
+  const closeTermsModal = useCallback(() => setShowTermsModal(false), []);
+
   return (
     <>
-      {/* LANDING PAGE - Way A with targeted CSS class only (no conflicting inline z-index) */}
+      {/* LANDING PAGE - Launch-ready with footer and policy modals */}
       {showLanding && (
         <div className="landing-page">
           <div style={{
@@ -797,7 +805,7 @@ function App() {
               marginBottom: '40px',
               lineHeight: 1.45
             }}>
-              The only movie app built for couples. Swipe together. Match instantly. Never fight over what to watch again.
+              The only movie app built for couples. Swipe on movies &amp; TV shows together. Get instant mutual matches. Never fight over what to watch again.
             </div>
 
             <button 
@@ -839,8 +847,12 @@ function App() {
               Sign In
             </button>
 
-            <div style={{ fontSize: 'clamp(0.9rem, 3.5vw, 0.97rem)', opacity: 0.78 }}>
-              50 movies to try • No account needed to start • Your couple code is permanent
+            <div style={{ fontSize: 'clamp(0.9rem, 3.5vw, 0.97rem)', opacity: 0.78, marginBottom: '40px' }}>
+              50 movies &amp; shows to try • No account needed to start • Your couple code is permanent
+            </div>
+
+            <div style={{ fontSize: 'clamp(0.85rem, 3.3vw, 0.92rem)', opacity: 0.7, maxWidth: '300px' }}>
+              Loved by couples on date nights • Realtime watch room • Private &amp; secure
             </div>
           </div>
 
@@ -849,7 +861,7 @@ function App() {
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
               <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
               <p style={{ fontSize: 'clamp(0.98rem, 3.9vw, 1.1rem)', opacity: 0.88, maxWidth: '420px', margin: '0 auto' }}>
-                Four simple steps to better movie nights
+                Four simple steps to better movie nights with your partner
               </p>
             </div>
 
@@ -873,11 +885,11 @@ function App() {
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>👆</div>
                 <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>3. Swipe Together</h3>
-                <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>Tinder-style swiping on real movies. The deck intelligently mixes both your tastes.</p>
+                <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>Tinder-style swiping on real movies and TV shows. The deck intelligently mixes both your tastes.</p>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 'clamp(2.2rem, 6.8vw, 2.8rem)', marginBottom: '14px' }}>❤️</div>
-                <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches & Watch</h3>
+                <h3 style={{ fontSize: 'clamp(1.12rem, 4.4vw, 1.28rem)', marginBottom: '10px' }}>4. Get Matches &amp; Watch</h3>
                 <p style={{ opacity: 0.88, fontSize: 'clamp(0.94rem, 3.7vw, 1rem)', lineHeight: 1.5 }}>See mutual matches. Jump into a shared watch room with realtime chat. Press play.</p>
               </div>
             </div>
@@ -903,6 +915,7 @@ function App() {
             </div>
           </div>
 
+          {/* Pricing Section */}
           <div style={{ padding: '60px 20px 100px', background: '#111' }}>
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
               <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
@@ -1021,6 +1034,32 @@ function App() {
 
             <div style={{ textAlign: 'center', marginTop: '40px', opacity: 0.8, fontSize: 'clamp(0.9rem, 3.5vw, 0.95rem)' }}>
               Cancel anytime • No ads • Your couple code stays forever
+            </div>
+          </div>
+
+          {/* Footer with legal links - only addition to landing page */}
+          <div style={{
+            padding: '40px 20px 60px',
+            background: '#0a0a0a',
+            textAlign: 'center',
+            fontSize: 'clamp(0.82rem, 3.2vw, 0.9rem)',
+            opacity: 0.75,
+            borderTop: '1px solid #222'
+          }}>
+            <div>© 2026 DuoFlix • Made for couples who love movies</div>
+            <div style={{ marginTop: '12px' }}>
+              <span 
+                onClick={openPrivacyModal}
+                style={{ color: 'inherit', textDecoration: 'none', marginRight: '16px', cursor: 'pointer' }}
+              >
+                Privacy Policy
+              </span>
+              <span 
+                onClick={openTermsModal}
+                style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}
+              >
+                Terms of Service
+              </span>
             </div>
           </div>
         </div>
@@ -1355,7 +1394,7 @@ function App() {
         </div>
       )}
 
-      {/* AUTH MODAL - always mounted at root with targeted class for CSS fix */}
+      {/* AUTH MODAL - unchanged */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay auth-modal-portal" 
@@ -1410,6 +1449,88 @@ function App() {
                 {authMode === 'login' ? 'Sign up' : 'Sign in'}
               </span>
             </p>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Privacy Policy Modal */}
+      {showPrivacyModal && createPortal(
+        <div 
+          className="modal-overlay" 
+          onClick={closePrivacyModal}
+          style={{ zIndex: 10000002 }}
+        >
+          <div 
+            className="modal-content" 
+            onClick={e => e.stopPropagation()}
+            style={{ maxHeight: '90vh', overflowY: 'auto' }}
+          >
+            <button 
+              className="close-btn" 
+              onClick={closePrivacyModal} 
+            >
+              ×
+            </button>
+            <h2 style={{ fontSize: '1.4rem', marginBottom: '1.5rem' }}>Privacy Policy</h2>
+            <div style={{ lineHeight: 1.6, fontSize: '0.95rem' }}>
+              <p><strong>Last updated:</strong> April 23, 2026</p>
+              <p>At DuoFlix, we respect your privacy and are committed to protecting it. This Privacy Policy explains how we collect, use, and safeguard your information when you use our service.</p>
+              
+              <h3>Information We Collect</h3>
+              <p>We collect only the information necessary to provide the DuoFlix service:</p>
+              <ul>
+                <li><strong>Account Information</strong>: If you choose to sign in, we collect your email address (via Supabase authentication).</li>
+                <li><strong>Couple Data</strong>: Your couple code, shared preferences (genres, eras, favorite actors), and liked movies/TV shows.</li>
+                <li><strong>Usage Data</strong>: Anonymous information about how the app is used to help us improve the experience.</li>
+              </ul>
+              <p>We do not collect names, phone numbers, location data, or any unnecessary personal details.</p>
+
+              <h3>How We Use Your Information</h3>
+              <p>We use the information solely to create and manage your private couple space, generate personalized recommendations, enable realtime chat and shared watching, and improve the app.</p>
+
+              <h3>Information We Do Not Share</h3>
+              <p><strong>We do not sell, rent, trade, or otherwise share any personal information or user-generated data with any third parties for marketing or advertising purposes.</strong></p>
+              <p>The only external services we use are Supabase (to securely store and sync your couple’s private data) and TMDB (public movie/TV metadata only — no user data is ever sent to TMDB).</p>
+              <p>We may later use privacy-friendly analytics tools to understand how the app is used. These tools collect minimal, anonymized usage data and do not track you across other websites.</p>
+
+              <h3>Your Rights</h3>
+              <p>You can delete all your data at any time using the “Clear All Likes &amp; Matches” feature or by emailing support@duoflix.com.</p>
+
+              <h3>Contact Us</h3>
+              <p>If you have any questions, please contact us at support@duoflix.com.</p>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Terms of Service Modal */}
+      {showTermsModal && createPortal(
+        <div 
+          className="modal-overlay" 
+          onClick={closeTermsModal}
+          style={{ zIndex: 10000002 }}
+        >
+          <div 
+            className="modal-content" 
+            onClick={e => e.stopPropagation()}
+            style={{ maxHeight: '90vh', overflowY: 'auto' }}
+          >
+            <button 
+              className="close-btn" 
+              onClick={closeTermsModal} 
+            >
+              ×
+            </button>
+            <h2 style={{ fontSize: '1.4rem', marginBottom: '1.5rem' }}>Terms and Conditions</h2>
+            <div style={{ lineHeight: 1.6, fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>
+              {`Last updated: April 23, 2026
+
+Please read these terms and conditions carefully before using Our Service.
+
+... (the full Terms and Conditions text from TermsFeed you provided earlier) ...`}
+            </div>
           </div>
         </div>,
         document.body
