@@ -775,7 +775,7 @@ function App() {
 
   return (
     <>
-      {/* LANDING PAGE - Fixed scrolling + footer + modals */}
+      {/* LANDING PAGE - Polished launch-ready version */}
       {showLanding && (
         <div className="landing-page" style={{
           position: 'fixed',
@@ -808,23 +808,25 @@ function App() {
             position: 'relative'
           }}>
             <div style={{ 
-              fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', 
-              lineHeight: 1.1, 
+              fontSize: 'clamp(1.9rem, 6.5vw, 2.7rem)', 
+              lineHeight: 1.05, 
               fontWeight: 700, 
-              letterSpacing: '-0.03em', 
-              maxWidth: '380px', 
-              marginBottom: '20px' 
+              letterSpacing: '-0.04em', 
+              maxWidth: '400px', 
+              marginBottom: '24px' 
             }}>
               Stop arguing.<br />Start watching together.
             </div>
             <div style={{ 
-              fontSize: 'clamp(0.97rem, 3.8vw, 1.15rem)', 
-              opacity: 0.92, 
-              maxWidth: '340px', 
-              marginBottom: '40px',
-              lineHeight: 1.45
+              fontSize: 'clamp(1.0rem, 4vw, 1.2rem)', 
+              opacity: 0.9, 
+              maxWidth: '360px', 
+              marginBottom: '48px',
+              lineHeight: 1.5
             }}>
-              The only movie app built for couples. Swipe on movies &amp; TV shows together. Get instant mutual matches. Never fight over what to watch again.
+              Swipe on movies and TV shows with your partner.<br />
+              Get instant mutual matches.<br />
+              Watch together in a private realtime room.
             </div>
 
             <button 
@@ -833,15 +835,15 @@ function App() {
                 background: '#ef4444',
                 color: 'white',
                 fontWeight: 600,
-                fontSize: 'clamp(1.05rem, 4vw, 1.22rem)',
-                padding: '16px 48px',
+                fontSize: 'clamp(1.1rem, 4.2vw, 1.25rem)',
+                padding: '18px 52px',
                 borderRadius: '9999px',
                 border: 'none',
-                boxShadow: '0 8px 12px -3px rgb(0 0 0 / 0.3)',
-                marginBottom: '16px',
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)',
+                marginBottom: '20px',
                 cursor: 'pointer',
                 width: '100%',
-                maxWidth: '300px'
+                maxWidth: '320px'
               }}
             >
               Start Swiping Free
@@ -852,26 +854,22 @@ function App() {
               style={{
                 background: 'transparent',
                 color: 'white',
-                border: '2px solid rgba(255,255,255,0.75)',
-                padding: '13px 32px',
+                border: '2px solid rgba(255,255,255,0.8)',
+                padding: '14px 36px',
                 borderRadius: '9999px',
-                fontSize: 'clamp(0.95rem, 3.8vw, 1.05rem)',
+                fontSize: 'clamp(0.98rem, 3.9vw, 1.08rem)',
                 fontWeight: 600,
-                marginBottom: '32px',
+                marginBottom: '40px',
                 cursor: 'pointer',
                 width: '100%',
-                maxWidth: '300px'
+                maxWidth: '320px'
               }}
             >
               Sign In
             </button>
 
-            <div style={{ fontSize: 'clamp(0.9rem, 3.5vw, 0.97rem)', opacity: 0.78, marginBottom: '40px' }}>
-              50 movies &amp; shows to try • No account needed to start • Your couple code is permanent
-            </div>
-
-            <div style={{ fontSize: 'clamp(0.85rem, 3.3vw, 0.92rem)', opacity: 0.7, maxWidth: '300px' }}>
-              Loved by couples on date nights • Realtime watch room • Private &amp; secure
+            <div style={{ fontSize: 'clamp(0.92rem, 3.6vw, 0.98rem)', opacity: 0.78 }}>
+              50 titles to try • No account needed • Permanent couple code
             </div>
           </div>
 
@@ -1084,7 +1082,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - unchanged */}
+      {/* MAIN APP - completely unchanged */}
       {!showLanding && (
         <div className="app">
           <div className="header">
@@ -1519,7 +1517,7 @@ function App() {
         document.body
       )}
 
-      {/* Terms of Service Modal - FULL TEXT FROM TERMSFEED */}
+      {/* Terms of Service Modal - FULL TEXT */}
       {showTermsModal && createPortal(
         <div 
           className="modal-overlay" 
