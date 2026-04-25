@@ -775,7 +775,7 @@ function App() {
 
   return (
     <>
-      {/* LANDING PAGE - Polished launch-ready version */}
+      {/* LANDING PAGE - Polished hero text only */}
       {showLanding && (
         <div className="landing-page" style={{
           position: 'fixed',
@@ -815,7 +815,7 @@ function App() {
               maxWidth: '400px', 
               marginBottom: '24px' 
             }}>
-              Stop arguing.<br />Start watching together.
+              Stop arguing over what to watch.
             </div>
             <div style={{ 
               fontSize: 'clamp(1.0rem, 4vw, 1.2rem)', 
@@ -824,9 +824,8 @@ function App() {
               marginBottom: '48px',
               lineHeight: 1.5
             }}>
-              Swipe on movies and TV shows with your partner.<br />
-              Get instant mutual matches.<br />
-              Watch together in a private realtime room.
+              Swipe together. Match instantly.<br />
+              Share one private room forever.
             </div>
 
             <button 
@@ -873,7 +872,7 @@ function App() {
             </div>
           </div>
 
-          {/* How It Works Section */}
+          {/* How It Works Section - unchanged */}
           <div style={{ padding: '60px 20px 100px', background: '#0a0a0a' }}>
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
               <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
@@ -932,7 +931,7 @@ function App() {
             </div>
           </div>
 
-          {/* Pricing Section */}
+          {/* Pricing Section - unchanged */}
           <div style={{ padding: '60px 20px 100px', background: '#111' }}>
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
               <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
@@ -1054,7 +1053,7 @@ function App() {
             </div>
           </div>
 
-          {/* Footer with legal links */}
+          {/* Footer with legal links - unchanged */}
           <div style={{
             padding: '40px 20px 60px',
             background: '#0a0a0a',
@@ -1082,7 +1081,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - completely unchanged */}
+      {/* MAIN APP - completely unchanged, including the tab label change only in navigation */}
       {!showLanding && (
         <div className="app">
           <div className="header">
@@ -1359,7 +1358,7 @@ function App() {
           <nav className="tab-bar">
             <button onClick={() => setCurrentTab('swipe')}>Swipe</button>
             <button onClick={() => setCurrentTab('matches')}>Matches</button>
-            <button onClick={() => setCurrentTab('watch')}>Watch</button>
+            <button onClick={() => setCurrentTab('watch')}>Room</button>
             <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
           </nav>
 
@@ -1411,7 +1410,7 @@ function App() {
         </div>
       )}
 
-      {/* AUTH MODAL */}
+      {/* AUTH MODAL - unchanged */}
       {showAuthModal && createPortal(
         <div 
           className="modal-overlay auth-modal-portal" 
@@ -1471,7 +1470,7 @@ function App() {
         document.body
       )}
 
-      {/* Privacy Policy Modal */}
+      {/* Privacy Policy Modal - unchanged */}
       {showPrivacyModal && createPortal(
         <div 
           className="modal-overlay" 
@@ -1517,7 +1516,7 @@ function App() {
         document.body
       )}
 
-      {/* Terms of Service Modal - FULL TEXT */}
+      {/* Terms of Service Modal - unchanged */}
       {showTermsModal && createPortal(
         <div 
           className="modal-overlay" 
