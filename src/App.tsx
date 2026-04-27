@@ -10,7 +10,7 @@ interface Movie {
   release_date: string;
   vote_average: number;
   overview: string;
-  media_type?: 'movie' | 'tv';   // internal flag for TV handling
+  media_type?: 'movie' | 'tv';
 }
 
 interface Actor {
@@ -450,12 +450,13 @@ function App() {
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
-  // TV Shows integration - ~10% of deck, showing S1 E1
+  // Updated fetch with stronger region filter + ~10% TV shows
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
     const watchRegion = selectedRegion;
+    const monetizationFilter = "&with_watch_monetization_types=flatrate|rent|buy";
 
     const genreList = Object.keys(myPrefs);
     const combined: Record<string, number> = {};
@@ -497,14 +498,14 @@ function App() {
       minYear = Math.min(...activeEras.map(e => yearMap[e].min));
       maxYear = Math.max(...activeEras.map(e => yearMap[e].max));
     }
-    const dateFilter = `&first_air_date.gte=${minYear}-01-01&first_air_date.lte=${maxYear}-12-31`;
+    const dateFilter = `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
 
     const allResults: Movie[] = [];
     const genreIdMap: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
 
-    const watchFilter = `&watch_region=${watchRegion}`;
+    const watchFilter = `&watch_region=${watchRegion}${monetizationFilter}`;
 
-    // 1. Fetch Movies (90% of deck)
+    // 1. Fetch Movies (main portion)
     for (const [genre, count] of Object.entries(targets)) {
       const genreId = genreIdMap[genre];
       if (!genreId) continue;
@@ -529,8 +530,8 @@ function App() {
     }
 
     // 2. Fetch TV Shows (~10% of deck)
-    const tvCount = Math.max(5, Math.floor(allResults.length * 0.10));
-    if (tvCount > 0) {
+    const tvTarget = Math.max(6, Math.floor(allResults.length * 0.10));
+    if (tvTarget > 0) {
       for (const [genre, count] of Object.entries(targets)) {
         const genreId = genreIdMap[genre];
         if (!genreId) continue;
@@ -539,15 +540,15 @@ function App() {
 
         let fetched = 0;
         let page = 1;
-        while (fetched < tvCount && page <= 6) {
+        while (fetched < tvTarget && page <= 6) {
           try {
             const res = await fetch(`${baseUrl}&page=${page}`);
             const data = await res.json();
             if (data.results && data.results.length > 0) {
               allResults.push(...data.results.map((item: any) => ({
                 ...item,
-                title: item.name,
-                release_date: item.first_air_date,
+                title: item.name || item.title,
+                release_date: item.first_air_date || item.release_date,
                 media_type: 'tv' as const
               })));
               fetched += data.results.length;
@@ -557,7 +558,7 @@ function App() {
             break;
           }
         }
-        if (fetched >= tvCount) break;
+        if (fetched >= tvTarget) break;
       }
     }
 
@@ -1170,7 +1171,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - unchanged except details modal for TV */}
+      {/* MAIN APP - unchanged except details modal for TV label */}
       {!showLanding && (
         <div className="app">
           <div className="header">
