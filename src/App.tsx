@@ -89,6 +89,10 @@ function App() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
+  // NEW: Region selection for TMDB
+  const [selectedRegion, setSelectedRegion] = useState<string>("US");
+  const [showRegionModal, setShowRegionModal] = useState(false);
+
   const cardRef = useRef<HTMLDivElement>(null);
   const [dragOffset, setDragOffset] = useState(0);
   const [startX, setStartX] = useState(0);
@@ -131,6 +135,19 @@ function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Load saved region
+  useEffect(() => {
+    const savedRegion = localStorage.getItem('duoflix_region');
+    if (savedRegion) {
+      setSelectedRegion(savedRegion);
+    }
+  }, []);
+
+  // Save region when changed
+  useEffect(() => {
+    localStorage.setItem('duoflix_region', selectedRegion);
+  }, [selectedRegion]);
 
   useEffect(() => {
     const autoJoinPermanentRoom = async () => {
@@ -435,9 +452,12 @@ function App() {
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
+  // Updated fetchMovies with selectedRegion
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
+
+    const watchRegion = selectedRegion;
 
     const genreList = Object.keys(myPrefs);
     const combined: Record<string, number> = {};
@@ -484,11 +504,13 @@ function App() {
     const allResults: Movie[] = [];
     const genreIdMap: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
 
+    const watchFilter = `&watch_region=${watchRegion}`;
+
     for (const [genre, count] of Object.entries(targets)) {
       const genreId = genreIdMap[genre];
       if (!genreId) continue;
 
-      const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}`;
+      const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}`;
 
       let fetched = 0;
       let page = 1;
@@ -518,7 +540,7 @@ function App() {
 
   useEffect(() => {
     fetchMovies();
-  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs]);
+  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -752,14 +774,31 @@ function App() {
     }
   };
 
+  // Region modal handlers
+  const openRegionModal = () => setShowRegionModal(true);
+  const closeRegionModal = () => setShowRegionModal(false);
+
+  const selectRegion = (region: string) => {
+    setSelectedRegion(region);
+    closeRegionModal();
+  };
+
   const handleStartSwipingFree = useCallback(() => {
-    setShowLanding(false);
-    setShowAuthModal(false);
+    if (!localStorage.getItem('duoflix_region')) {
+      openRegionModal();
+    } else {
+      setShowLanding(false);
+      setShowAuthModal(false);
+    }
   }, []);
 
   const handleSignIn = useCallback(() => {
-    setShowAuthModal(true);
-    setAuthMode('login');
+    if (!localStorage.getItem('duoflix_region')) {
+      openRegionModal();
+    } else {
+      setShowAuthModal(true);
+      setAuthMode('login');
+    }
   }, []);
 
   const closeAuthModal = useCallback(() => {
@@ -773,9 +812,32 @@ function App() {
   const openTermsModal = useCallback(() => setShowTermsModal(true), []);
   const closeTermsModal = useCallback(() => setShowTermsModal(false), []);
 
+  // Curated short region list
+  const regions = [
+    { code: "US", name: "United States", flag: "🇺🇸" },
+    { code: "CA", name: "Canada", flag: "🇨🇦" },
+    { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
+    { code: "AU", name: "Australia", flag: "🇦🇺" },
+    { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
+    { code: "DE", name: "Germany", flag: "🇩🇪" },
+    { code: "FR", name: "France", flag: "🇫🇷" },
+    { code: "ES", name: "Spain", flag: "🇪🇸" },
+    { code: "IT", name: "Italy", flag: "🇮🇹" },
+    { code: "NL", name: "Netherlands", flag: "🇳🇱" },
+    { code: "BR", name: "Brazil", flag: "🇧🇷" },
+    { code: "MX", name: "Mexico", flag: "🇲🇽" },
+    { code: "IN", name: "India", flag: "🇮🇳" },
+    { code: "JP", name: "Japan", flag: "🇯🇵" },
+    { code: "KR", name: "South Korea", flag: "🇰🇷" },
+    { code: "SE", name: "Sweden", flag: "🇸🇪" },
+    { code: "NO", name: "Norway", flag: "🇳🇴" },
+    { code: "DK", name: "Denmark", flag: "🇩🇰" },
+    { code: "ZA", name: "South Africa", flag: "🇿🇦" },
+  ];
+
   return (
     <>
-      {/* LANDING PAGE - Polished hero text only */}
+      {/* LANDING PAGE - unchanged except region modal trigger */}
       {showLanding && (
         <div className="landing-page" style={{
           position: 'fixed',
@@ -1081,7 +1143,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - completely unchanged, including the tab label change only in navigation */}
+      {/* MAIN APP - unchanged except prefs region selector */}
       {!showLanding && (
         <div className="app">
           <div className="header">
@@ -1234,6 +1296,25 @@ function App() {
           {currentTab === 'prefs' && (
             <div className="prefs-page">
               <div className="prefs-container">
+                {/* NEW: Region selector at top of prefs */}
+                <div style={{ marginBottom: '2rem', padding: '16px', background: '#1a1a1a', borderRadius: '16px' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px' }}>Streaming Region</div>
+                  <select 
+                    value={selectedRegion} 
+                    onChange={(e) => setSelectedRegion(e.target.value)}
+                    style={{ width: '100%', padding: '12px', background: '#222', border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '1rem' }}
+                  >
+                    {regions.map(r => (
+                      <option key={r.code} value={r.code}>
+                        {r.flag} {r.name} ({r.code})
+                      </option>
+                    ))}
+                  </select>
+                  <p style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '8px' }}>
+                    Your movie deck will be filtered to titles available in this region.
+                  </p>
+                </div>
+
                 <h2>Preferences</h2>
 
                 <div style={{ marginBottom: '2.5rem' }}>
@@ -1408,6 +1489,60 @@ function App() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Region Selection Modal */}
+      {showRegionModal && createPortal(
+        <div 
+          className="modal-overlay" 
+          onClick={closeRegionModal}
+          style={{ zIndex: 10000002 }}
+        >
+          <div 
+            className="modal-content" 
+            onClick={e => e.stopPropagation()}
+            style={{ maxHeight: '85vh', overflowY: 'auto', maxWidth: '380px' }}
+          >
+            <button className="close-btn" onClick={closeRegionModal}>×</button>
+            <h2 style={{ fontSize: '1.35rem', marginBottom: '1.2rem', textAlign: 'center' }}>
+              We need to find availability in your region.
+            </h2>
+            <p style={{ textAlign: 'center', opacity: 0.85, marginBottom: '1.8rem' }}>
+              Choose your country so we can show you titles you can actually stream.
+            </p>
+
+            <div style={{ display: 'grid', gap: '8px' }}>
+              {regions.map((region) => (
+                <button
+                  key={region.code}
+                  onClick={() => selectRegion(region.code)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    padding: '14px 18px',
+                    background: '#1f1f1f',
+                    border: '1px solid #333',
+                    borderRadius: '12px',
+                    color: 'white',
+                    fontSize: '1.05rem',
+                    textAlign: 'left',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span style={{ fontSize: '1.5rem' }}>{region.flag}</span>
+                  <span>{region.name}</span>
+                  <span style={{ marginLeft: 'auto', opacity: 0.6, fontSize: '0.95rem' }}>({region.code})</span>
+                </button>
+              ))}
+            </div>
+
+            <p style={{ textAlign: 'center', fontSize: '0.85rem', opacity: 0.6, marginTop: '2rem' }}>
+              You can change this anytime in Preferences.
+            </p>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* AUTH MODAL - unchanged */}
