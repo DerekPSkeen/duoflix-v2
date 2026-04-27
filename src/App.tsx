@@ -462,14 +462,15 @@ function App() {
     if (!apiKey) return titles;
 
     const filtered: Movie[] = [];
-    const batchSize = 8; // Process in small batches to avoid rate limits
+    const batchSize = 6;
 
     for (let i = 0; i < titles.length; i += batchSize) {
       const batch = titles.slice(i, i + batchSize);
       
       await Promise.all(batch.map(async (title) => {
         try {
-          const endpoint = title.media_type === 'tv' 
+          const isTV = title.media_type === 'tv';
+          const endpoint = isTV 
             ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
             : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
           
@@ -486,8 +487,7 @@ function App() {
             filtered.push(title);
           }
         } catch (e) {
-          // If provider check fails, keep the title as fallback
-          filtered.push(title);
+          // On error, drop the title to be safe
         }
       }));
     }
@@ -619,50 +619,12 @@ function App() {
     setSwipeHistory([]);
   };
 
-  // Lightweight post-filter helper
-  const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
-    if (titles.length === 0) return titles;
-
-    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
-    if (!apiKey) return titles;
-
-    const filtered: Movie[] = [];
-    const batchSize = 6; // small batches to respect rate limits
-
-    for (let i = 0; i < titles.length; i += batchSize) {
-      const batch = titles.slice(i, i + batchSize);
-      
-      await Promise.all(batch.map(async (title) => {
-        try {
-          const isTV = title.media_type === 'tv';
-          const endpoint = isTV 
-            ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
-            : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
-          
-          const res = await fetch(endpoint);
-          const data = await res.json();
-          
-          const regionData = data.results?.[selectedRegion] || {};
-          const hasAnyOption = 
-            (regionData.flatrate && regionData.flatrate.length > 0) ||
-            (regionData.rent && regionData.rent.length > 0) ||
-            (regionData.buy && regionData.buy.length > 0);
-
-          if (hasAnyOption) {
-            filtered.push(title);
-          }
-          // If no providers or fetch fails, we drop the title (strict filtering)
-        } catch (e) {
-          // On error, drop the title to be safe
-        }
-      }));
-    }
-
-    return filtered;
-  };
-
+  // useEffect now properly wrapped (only change in this file)
   useEffect(() => {
-    fetchMovies();
+    const loadMedia = async () => {
+      await fetchMovies();
+    };
+    loadMedia();
   }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
 
   const fetchActors = async (movieId: number) => {
@@ -1275,7 +1237,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - unchanged except the fetchMovies and filter function */}
+      {/* MAIN APP - unchanged */}
       {!showLanding && (
         <div className="app">
           <div className="header">
