@@ -99,7 +99,6 @@ function App() {
   const [isFlyingOff, setIsFlyingOff] = useState(false);
   const [flyDirection, setFlyDirection] = useState<'left' | 'right' | null>(null);
 
-  // NEW: Undo history stack - allows undoing multiple swipes in any direction
   const [swipeHistory, setSwipeHistory] = useState<Movie[]>([]);
 
   const prevMatchCountRef = useRef(0);
@@ -455,6 +454,47 @@ function App() {
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
+  // Post-filter to remove titles with no providers in the region
+  const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
+    if (titles.length === 0) return titles;
+
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) return titles;
+
+    const filtered: Movie[] = [];
+    const batchSize = 8; // Process in small batches to avoid rate limits
+
+    for (let i = 0; i < titles.length; i += batchSize) {
+      const batch = titles.slice(i, i + batchSize);
+      
+      await Promise.all(batch.map(async (title) => {
+        try {
+          const endpoint = title.media_type === 'tv' 
+            ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
+            : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
+          
+          const res = await fetch(endpoint);
+          const data = await res.json();
+          
+          const regionData = data.results?.[selectedRegion] || {};
+          const hasAnyOption = 
+            (regionData.flatrate && regionData.flatrate.length > 0) ||
+            (regionData.rent && regionData.rent.length > 0) ||
+            (regionData.buy && regionData.buy.length > 0);
+
+          if (hasAnyOption) {
+            filtered.push(title);
+          }
+        } catch (e) {
+          // If provider check fails, keep the title as fallback
+          filtered.push(title);
+        }
+      }));
+    }
+
+    return filtered;
+  };
+
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
@@ -566,14 +606,59 @@ function App() {
       }
     }
 
-    const unique = allResults.filter((item, index, self) =>
+    // 3. Lightweight post-filter: remove titles with no providers
+    const filteredResults = await filterTitlesWithProviders(allResults);
+
+    const unique = filteredResults.filter((item, index, self) =>
       index === self.findIndex(m => m.id === item.id)
     );
     const shuffled = unique.sort(() => Math.random() - 0.5);
 
     setMovies(shuffled);
     setCurrentIndex(0);
-    setSwipeHistory([]); // Reset undo history on new deck
+    setSwipeHistory([]);
+  };
+
+  // Lightweight post-filter helper
+  const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
+    if (titles.length === 0) return titles;
+
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) return titles;
+
+    const filtered: Movie[] = [];
+    const batchSize = 6; // small batches to respect rate limits
+
+    for (let i = 0; i < titles.length; i += batchSize) {
+      const batch = titles.slice(i, i + batchSize);
+      
+      await Promise.all(batch.map(async (title) => {
+        try {
+          const isTV = title.media_type === 'tv';
+          const endpoint = isTV 
+            ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
+            : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
+          
+          const res = await fetch(endpoint);
+          const data = await res.json();
+          
+          const regionData = data.results?.[selectedRegion] || {};
+          const hasAnyOption = 
+            (regionData.flatrate && regionData.flatrate.length > 0) ||
+            (regionData.rent && regionData.rent.length > 0) ||
+            (regionData.buy && regionData.buy.length > 0);
+
+          if (hasAnyOption) {
+            filtered.push(title);
+          }
+          // If no providers or fetch fails, we drop the title (strict filtering)
+        } catch (e) {
+          // On error, drop the title to be safe
+        }
+      }));
+    }
+
+    return filtered;
   };
 
   useEffect(() => {
@@ -646,7 +731,6 @@ function App() {
   const triggerFlyOff = (liked: boolean) => {
     if (!currentMovie || !cardRef.current) return;
 
-    // Record the current movie in history before removing it
     setSwipeHistory(prev => [...prev, currentMovie]);
 
     if (liked) {
@@ -714,30 +798,23 @@ function App() {
     setStartX(0);
   };
 
-  // FIXED Undo function - works for both left and right swipes, supports multiple undos
   const handleUndo = () => {
     if (swipeHistory.length === 0) return;
 
-    // Get the most recent swiped movie from history
     const movieToRestore = swipeHistory[swipeHistory.length - 1];
-
-    // Remove it from history
     setSwipeHistory(prev => prev.slice(0, -1));
 
-    // Move the current index back to show the restored movie
     setCurrentIndex(prev => {
       let newIndex = prev - 1;
       if (newIndex < 0) newIndex = movies.length - 1;
       return newIndex;
     });
 
-    // If it was a liked movie, remove it from likedMovies
     if (likedMovies.some(m => m.id === movieToRestore.id)) {
       setLikedMovies(prev => prev.filter(m => m.id !== movieToRestore.id));
-      setLastLiked(null); // Clear last liked if it matches
+      setLastLiked(null);
     }
 
-    // Re-load persistent likes in case something changed
     setTimeout(() => loadPersistentLikes(), 100);
   };
 
@@ -1198,7 +1275,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - unchanged except the fixed undo handler */}
+      {/* MAIN APP - unchanged except the fetchMovies and filter function */}
       {!showLanding && (
         <div className="app">
           <div className="header">
