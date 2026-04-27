@@ -99,6 +99,9 @@ function App() {
   const [isFlyingOff, setIsFlyingOff] = useState(false);
   const [flyDirection, setFlyDirection] = useState<'left' | 'right' | null>(null);
 
+  // NEW: Undo history stack - allows undoing multiple swipes in any direction
+  const [swipeHistory, setSwipeHistory] = useState<Movie[]>([]);
+
   const prevMatchCountRef = useRef(0);
 
   const currentMovie = movies[currentIndex];
@@ -406,6 +409,7 @@ function App() {
     setSharedLikes([]);
     setMutualMatches([]);
     setLastLiked(null);
+    setSwipeHistory([]);
 
     alert('All likes and matches have been cleared for both users.');
     setTimeout(() => loadPersistentLikes(), 300);
@@ -445,12 +449,12 @@ function App() {
     setLikedMovies([]);
     setMutualMatches([]);
     setLastLiked(null);
+    setSwipeHistory([]);
 
     alert('Only your likes have been cleared. Your partner’s likes remain.');
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
-  // Updated fetch with stronger region filter + ~10% TV shows
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
@@ -569,6 +573,7 @@ function App() {
 
     setMovies(shuffled);
     setCurrentIndex(0);
+    setSwipeHistory([]); // Reset undo history on new deck
   };
 
   useEffect(() => {
@@ -641,6 +646,9 @@ function App() {
   const triggerFlyOff = (liked: boolean) => {
     if (!currentMovie || !cardRef.current) return;
 
+    // Record the current movie in history before removing it
+    setSwipeHistory(prev => [...prev, currentMovie]);
+
     if (liked) {
       const alreadyLiked = likedMovies.some(m => m.id === currentMovie.id);
       if (!alreadyLiked && currentMovie) {
@@ -706,12 +714,31 @@ function App() {
     setStartX(0);
   };
 
+  // FIXED Undo function - works for both left and right swipes, supports multiple undos
   const handleUndo = () => {
-    if (lastLiked) {
-      setLikedMovies(prev => prev.filter(m => m.id !== lastLiked.id));
-      setLastLiked(null);
-      setCurrentIndex(prev => (prev - 1 + (movies.length || 1)) % (movies.length || 1));
+    if (swipeHistory.length === 0) return;
+
+    // Get the most recent swiped movie from history
+    const movieToRestore = swipeHistory[swipeHistory.length - 1];
+
+    // Remove it from history
+    setSwipeHistory(prev => prev.slice(0, -1));
+
+    // Move the current index back to show the restored movie
+    setCurrentIndex(prev => {
+      let newIndex = prev - 1;
+      if (newIndex < 0) newIndex = movies.length - 1;
+      return newIndex;
+    });
+
+    // If it was a liked movie, remove it from likedMovies
+    if (likedMovies.some(m => m.id === movieToRestore.id)) {
+      setLikedMovies(prev => prev.filter(m => m.id !== movieToRestore.id));
+      setLastLiked(null); // Clear last liked if it matches
     }
+
+    // Re-load persistent likes in case something changed
+    setTimeout(() => loadPersistentLikes(), 100);
   };
 
   const createRoom = async () => {
@@ -1171,7 +1198,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - unchanged except details modal for TV label */}
+      {/* MAIN APP - unchanged except the fixed undo handler */}
       {!showLanding && (
         <div className="app">
           <div className="header">
