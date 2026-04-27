@@ -10,6 +10,7 @@ interface Movie {
   release_date: string;
   vote_average: number;
   overview: string;
+  media_type?: 'movie' | 'tv';   // internal flag for TV handling
 }
 
 interface Actor {
@@ -89,7 +90,6 @@ function App() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
-  // NEW: Region selection for TMDB
   const [selectedRegion, setSelectedRegion] = useState<string>("US");
   const [showRegionModal, setShowRegionModal] = useState(false);
 
@@ -136,7 +136,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load saved region
   useEffect(() => {
     const savedRegion = localStorage.getItem('duoflix_region');
     if (savedRegion) {
@@ -144,7 +143,6 @@ function App() {
     }
   }, []);
 
-  // Save region when changed
   useEffect(() => {
     localStorage.setItem('duoflix_region', selectedRegion);
   }, [selectedRegion]);
@@ -452,7 +450,7 @@ function App() {
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
-  // Updated fetchMovies with selectedRegion
+  // TV Shows integration - ~10% of deck, showing S1 E1
   const fetchMovies = async () => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
@@ -499,13 +497,14 @@ function App() {
       minYear = Math.min(...activeEras.map(e => yearMap[e].min));
       maxYear = Math.max(...activeEras.map(e => yearMap[e].max));
     }
-    const dateFilter = `&primary_release_date.gte=${minYear}-01-01&primary_release_date.lte=${maxYear}-12-31`;
+    const dateFilter = `&first_air_date.gte=${minYear}-01-01&first_air_date.lte=${maxYear}-12-31`;
 
     const allResults: Movie[] = [];
     const genreIdMap: Record<string, number> = { Action: 28, Adventure: 12, Animation: 16, Comedy: 35, Crime: 80, Drama: 18, Fantasy: 14, Horror: 27, Mystery: 9648, Romance: 10749, SciFi: 878, Thriller: 53, War: 10752, Western: 37 };
 
     const watchFilter = `&watch_region=${watchRegion}`;
 
+    // 1. Fetch Movies (90% of deck)
     for (const [genre, count] of Object.entries(targets)) {
       const genreId = genreIdMap[genre];
       if (!genreId) continue;
@@ -519,7 +518,7 @@ function App() {
           const res = await fetch(`${baseUrl}&page=${page}`);
           const data = await res.json();
           if (data.results && data.results.length > 0) {
-            allResults.push(...data.results);
+            allResults.push(...data.results.map((item: any) => ({ ...item, media_type: 'movie' as const })));
             fetched += data.results.length;
           } else break;
           page++;
@@ -529,8 +528,41 @@ function App() {
       }
     }
 
-    const unique = allResults.filter((movie, index, self) =>
-      index === self.findIndex(m => m.id === movie.id)
+    // 2. Fetch TV Shows (~10% of deck)
+    const tvCount = Math.max(5, Math.floor(allResults.length * 0.10));
+    if (tvCount > 0) {
+      for (const [genre, count] of Object.entries(targets)) {
+        const genreId = genreIdMap[genre];
+        if (!genreId) continue;
+
+        const baseUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}`;
+
+        let fetched = 0;
+        let page = 1;
+        while (fetched < tvCount && page <= 6) {
+          try {
+            const res = await fetch(`${baseUrl}&page=${page}`);
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+              allResults.push(...data.results.map((item: any) => ({
+                ...item,
+                title: item.name,
+                release_date: item.first_air_date,
+                media_type: 'tv' as const
+              })));
+              fetched += data.results.length;
+            } else break;
+            page++;
+          } catch (e) {
+            break;
+          }
+        }
+        if (fetched >= tvCount) break;
+      }
+    }
+
+    const unique = allResults.filter((item, index, self) =>
+      index === self.findIndex(m => m.id === item.id)
     );
     const shuffled = unique.sort(() => Math.random() - 0.5);
 
@@ -774,7 +806,6 @@ function App() {
     }
   };
 
-  // Region modal handlers
   const openRegionModal = () => setShowRegionModal(true);
   const closeRegionModal = () => setShowRegionModal(false);
 
@@ -812,7 +843,6 @@ function App() {
   const openTermsModal = useCallback(() => setShowTermsModal(true), []);
   const closeTermsModal = useCallback(() => setShowTermsModal(false), []);
 
-  // Curated short region list
   const regions = [
     { code: "US", name: "United States", flag: "🇺🇸" },
     { code: "CA", name: "Canada", flag: "🇨🇦" },
@@ -837,7 +867,7 @@ function App() {
 
   return (
     <>
-      {/* LANDING PAGE - unchanged except region modal trigger */}
+      {/* LANDING PAGE - unchanged */}
       {showLanding && (
         <div className="landing-page" style={{
           position: 'fixed',
@@ -934,7 +964,6 @@ function App() {
             </div>
           </div>
 
-          {/* How It Works Section - unchanged */}
           <div style={{ padding: '60px 20px 100px', background: '#0a0a0a' }}>
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
               <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '12px' }}>How DuoFlix Works</h2>
@@ -993,7 +1022,6 @@ function App() {
             </div>
           </div>
 
-          {/* Pricing Section - unchanged */}
           <div style={{ padding: '60px 20px 100px', background: '#111' }}>
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
               <h2 style={{ fontSize: 'clamp(1.6rem, 5.4vw, 1.9rem)', fontWeight: 700, marginBottom: '16px' }}>Simple Pricing</h2>
@@ -1115,7 +1143,6 @@ function App() {
             </div>
           </div>
 
-          {/* Footer with legal links - unchanged */}
           <div style={{
             padding: '40px 20px 60px',
             background: '#0a0a0a',
@@ -1143,7 +1170,7 @@ function App() {
         </div>
       )}
 
-      {/* MAIN APP - unchanged except prefs region selector */}
+      {/* MAIN APP - unchanged except details modal for TV */}
       {!showLanding && (
         <div className="app">
           <div className="header">
@@ -1296,7 +1323,6 @@ function App() {
           {currentTab === 'prefs' && (
             <div className="prefs-page">
               <div className="prefs-container">
-                {/* NEW: Region selector at top of prefs */}
                 <div style={{ marginBottom: '2rem', padding: '16px', background: '#1a1a1a', borderRadius: '16px' }}>
                   <div style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px' }}>Streaming Region</div>
                   <select 
@@ -1447,9 +1473,12 @@ function App() {
             <div className="modal-overlay" onClick={() => setShowDetails(false)}>
               <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <button className="close-btn" onClick={() => setShowDetails(false)}>×</button>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.8rem', color: 'white' }}>{detailMovie.title}</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.8rem', color: 'white' }}>
+                  {detailMovie.title}
+                  {detailMovie.media_type === 'tv' && <span style={{ fontSize: '0.85rem', opacity: 0.8, marginLeft: '8px' }}>S1 • E1</span>}
+                </h2>
                 <p className="modal-meta">
-                  {detailMovie.release_date?.slice(0,4) || 'N/A'} • {detailMovie.vote_average?.toFixed(1) || '0'} ★
+                  {detailMovie.release_date?.slice(0, 4) || 'N/A'} • {detailMovie.vote_average?.toFixed(1) || '0'} ★
                 </p>
                 <p className="modal-description">{detailMovie.overview}</p>
                 <h3>Top Actors</h3>
@@ -1479,7 +1508,7 @@ function App() {
                       ))}
                     </div>
                   ) : (
-                    <p style={{ opacity: 0.7 }}>No streaming providers found for this movie in your region at this time.</p>
+                    <p style={{ opacity: 0.7 }}>No streaming providers found for this title in your region at this time.</p>
                   )}
                   <p style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '1rem' }}>
                     Data from TMDB / JustWatch • Availability may vary by region
@@ -1491,7 +1520,7 @@ function App() {
         </div>
       )}
 
-      {/* Region Selection Modal */}
+      {/* Region Selection Modal - unchanged */}
       {showRegionModal && createPortal(
         <div 
           className="modal-overlay" 
