@@ -197,10 +197,6 @@ function App() {
     '2000s': false, '2010s': false, '2020s': true
   });
 
-  const [myFavoriteActors, setMyFavoriteActors] = useState<string[]>([]);
-  const [partnerFavoriteActors, setPartnerFavoriteActors] = useState<string[]>([]);
-  const [newActor, setNewActor] = useState('');
-
   const [showLanding, setShowLanding] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -330,8 +326,6 @@ function App() {
         if (prefs.partnerPrefs) setPartnerPrefs(prefs.partnerPrefs);
         if (prefs.myEraPrefs) setMyEraPrefs(prefs.myEraPrefs);
         if (prefs.partnerEraPrefs) setPartnerEraPrefs(prefs.partnerEraPrefs);
-        if (prefs.myFavoriteActors) setMyFavoriteActors(prefs.myFavoriteActors);
-        if (prefs.partnerFavoriteActors) setPartnerFavoriteActors(prefs.partnerFavoriteActors);
       }
     };
 
@@ -348,8 +342,6 @@ function App() {
             if (prefs.partnerPrefs) setPartnerPrefs(prefs.partnerPrefs);
             if (prefs.myEraPrefs) setMyEraPrefs(prefs.myEraPrefs);
             if (prefs.partnerEraPrefs) setPartnerEraPrefs(prefs.partnerEraPrefs);
-            if (prefs.myFavoriteActors) setMyFavoriteActors(prefs.myFavoriteActors);
-            if (prefs.partnerFavoriteActors) setPartnerFavoriteActors(prefs.partnerFavoriteActors);
           }
         }
       )
@@ -374,9 +366,7 @@ function App() {
       myPrefs,
       partnerPrefs,
       myEraPrefs,
-      partnerEraPrefs,
-      myFavoriteActors,
-      partnerFavoriteActors
+      partnerEraPrefs
     };
 
     const { error } = await supabase
@@ -597,7 +587,6 @@ function App() {
           
           const res = await fetch(endpoint);
           if (!res.ok) {
-            // Keep the title if provider check fails
             filtered.push(title);
             return;
           }
@@ -613,11 +602,9 @@ function App() {
           if (hasAnyOption) {
             filtered.push(title);
           } else {
-            // Keep borderline titles instead of aggressively dropping
             filtered.push(title);
           }
         } catch (e) {
-          // On any error, keep the title to avoid empty deck
           filtered.push(title);
         }
       }));
@@ -961,17 +948,6 @@ function App() {
 
       setNewChatMessage('');
     }
-  };
-
-  const addActor = () => {
-    if (newActor.trim()) {
-      setMyFavoriteActors(prev => [...prev, newActor.trim()]);
-      setNewActor('');
-    }
-  };
-
-  const removeActor = (actor: string) => {
-    setMyFavoriteActors(prev => prev.filter(a => a !== actor));
   };
 
   const handleLogout = async () => {
@@ -1562,18 +1538,6 @@ function App() {
                         />
                       </div>
                     ))}
-                    <div className="actor-input">
-                      <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor" />
-                      <button onClick={addActor}>Add</button>
-                    </div>
-                    <ul className="actor-list">
-                      {myFavoriteActors.map(actor => (
-                        <li key={actor}>
-                          {actor}
-                          <button onClick={() => removeActor(actor)}>Remove</button>
-                        </li>
-                      ))}
-                    </ul>
                     <div className="era-grid">
                       {Object.keys(myEraPrefs).map(era => (
                         <label key={era} className="era-label">
@@ -1599,18 +1563,6 @@ function App() {
                           />
                         </div>
                       ))}
-                      <div className="actor-input">
-                        <input value={newActor} onChange={e => setNewActor(e.target.value)} placeholder="Add favorite actor (for partner)" />
-                        <button onClick={addActor}>Add</button>
-                      </div>
-                      <ul className="actor-list">
-                        {partnerFavoriteActors.map(actor => (
-                          <li key={actor}>
-                            {actor}
-                            <button onClick={() => removeActor(actor)}>Remove</button>
-                          </li>
-                        ))}
-                      </ul>
                       <div className="era-grid">
                         {Object.keys(partnerEraPrefs).map(era => (
                           <label key={era} className="era-label">
