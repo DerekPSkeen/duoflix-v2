@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import './App.css';
 import { supabase } from './supabaseClient';
-import React from 'react';
 
 interface Movie {
   id: number;
@@ -31,7 +30,7 @@ class ErrorBoundary extends React.Component<
 > {
   constructor(props: any) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: boolean };
   }
 
   static getDerivedStateFromError() {
