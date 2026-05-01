@@ -167,7 +167,7 @@ function App() {
   const [newChatMessage, setNewChatMessage] = useState('');
   const [isInRoom, setIsInRoom] = useState(false);
 
-  const [isLoadingDeck, setIsLoadingDeck] = useState(true);   // Changed: start as true for initial load
+  const [isLoadingDeck, setIsLoadingDeck] = useState(true);
 
   const channelRef = useRef<any>(null);
   const prefsSubscriptionRef = useRef<any>(null);
@@ -738,6 +738,8 @@ function App() {
   };
 
   useEffect(() => {
+    setIsLoadingDeck(true);   // Reset loading state before starting new fetch
+
     const timeoutId = setTimeout(() => {
       fetchMovies();
     }, 300);
@@ -993,7 +995,6 @@ function App() {
       openRegionModal();
     } else {
       setShowLanding(false);
-      // isLoadingDeck remains true until first fetch completes
     }
   }, []);
 
