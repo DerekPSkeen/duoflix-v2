@@ -646,27 +646,6 @@ function App() {
 
     const allResults: Movie[] = [];
 
-    // Controlled concurrency helper
-    const concurrentFetch = async (promises: (() => Promise<any>)[], limit = 3) => {
-      const results: any[] = [];
-      const executing: Promise<any>[] = [];
-      
-      for (const promiseFn of promises) {
-        const p = promiseFn().then(result => {
-          executing.splice(executing.indexOf(p), 1);
-          return result;
-        });
-        executing.push(p);
-        results.push(p);
-        
-        if (executing.length >= limit) {
-          await Promise.race(executing);
-        }
-      }
-      
-      return Promise.all(results);
-    };
-
     for (const era of activeEras) {
       const { min, max } = yearMap[era];
       const dateFilter = `&primary_release_date.gte=${min}-01-01&primary_release_date.lte=${max}-12-31`;
@@ -692,8 +671,7 @@ function App() {
 
       const watchFilter = `&watch_region=${watchRegion}${monetizationFilter}`;
 
-      // Movie fetches with concurrency control
-      const moviePromises: (() => Promise<void>)[] = [];
+      // Movie fetches
       for (const [genre, count] of Object.entries(targets)) {
         const genreId = genreIdMap[genre];
         if (!genreId) continue;
@@ -703,25 +681,23 @@ function App() {
         let fetched = 0;
         let page = 1;
         while (fetched < count && page <= 5) {
-          const currentPage = page;
-          moviePromises.push(async () => {
-            try {
-              const res = await fetch(`${baseUrl}&page=${currentPage}`);
-              const data = await res.json();
-              if (data.results && data.results.length > 0) {
-                allResults.push(...data.results.map((item: any) => ({ ...item, media_type: 'movie' as const })));
-              }
-            } catch (e) {}
-          });
-          page++;
+          try {
+            const res = await fetch(`${baseUrl}&page=${page}`);
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+              allResults.push(...data.results.map((item: any) => ({ ...item, media_type: 'movie' as const })));
+              fetched += data.results.length;
+            } else break;
+            page++;
+            if (page % 2 === 0) await new Promise(r => setTimeout(r, 50)); // light rate limit breathing
+          } catch (e) {
+            break;
+          }
         }
       }
 
-      await concurrentFetch(moviePromises, 3);
-
-      // TV fetches
+      // TV fetches (~10%)
       const tvTarget = 4;
-      const tvPromises: (() => Promise<void>)[] = [];
       for (const [genre, count] of Object.entries(targets)) {
         const genreId = genreIdMap[genre];
         if (!genreId) continue;
@@ -731,27 +707,26 @@ function App() {
         let fetched = 0;
         let page = 1;
         while (fetched < tvTarget && page <= 4) {
-          const currentPage = page;
-          tvPromises.push(async () => {
-            try {
-              const res = await fetch(`${baseUrl}&page=${currentPage}`);
-              const data = await res.json();
-              if (data.results && data.results.length > 0) {
-                allResults.push(...data.results.map((item: any) => ({
-                  ...item,
-                  title: item.name || item.title,
-                  release_date: item.first_air_date || item.release_date,
-                  media_type: 'tv' as const
-                })));
-              }
-            } catch (e) {}
-          });
-          page++;
+          try {
+            const res = await fetch(`${baseUrl}&page=${page}`);
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+              allResults.push(...data.results.map((item: any) => ({
+                ...item,
+                title: item.name || item.title,
+                release_date: item.first_air_date || item.release_date,
+                media_type: 'tv' as const
+              })));
+              fetched += data.results.length;
+            } else break;
+            page++;
+            if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
+          } catch (e) {
+            break;
+          }
         }
-        if (fetched >= tvTarget) break; // approximate
+        if (fetched >= tvTarget) break;
       }
-
-      await concurrentFetch(tvPromises, 3);
     }
 
     const filteredResults = await filterTitlesWithProviders(allResults);
