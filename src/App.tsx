@@ -167,6 +167,8 @@ function App() {
   const [newChatMessage, setNewChatMessage] = useState('');
   const [isInRoom, setIsInRoom] = useState(false);
 
+  const [isLoadingDeck, setIsLoadingDeck] = useState(false);
+
   const channelRef = useRef<any>(null);
   const prefsSubscriptionRef = useRef<any>(null);
   const likesSubscriptionRef = useRef<any>(null);
@@ -627,6 +629,8 @@ function App() {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
 
+    setIsLoadingDeck(true);
+
     const watchRegion = selectedRegion;
     const monetizationFilter = "&with_watch_monetization_types=flatrate|rent|buy";
 
@@ -745,13 +749,16 @@ function App() {
     setMovies(shuffled);
     setCurrentIndex(0);
     setSwipeHistory([]);
+    setIsLoadingDeck(false);
   };
 
+  // Debounced fetch to prevent excessive calls when adjusting sliders
   useEffect(() => {
-    const loadMedia = async () => {
-      await fetchMovies();
-    };
-    loadMedia();
+    const timeoutId = setTimeout(() => {
+      fetchMovies();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
 
   const fetchActors = async (movieId: number) => {
@@ -1388,7 +1395,9 @@ function App() {
               <div className="swipe-page">
                 <Suspense fallback={<SwipeSkeleton />}>
                   <div className="poster-container">
-                    {currentMovie && (
+                    {isLoadingDeck ? (
+                      <SwipeSkeleton />
+                    ) : currentMovie ? (
                       <div
                         ref={cardRef}
                         className={`poster-card ${isFlyingOff ? (flyDirection === 'right' ? 'flying-off-right' : 'flying-off-left') : ''}`}
@@ -1424,11 +1433,13 @@ function App() {
                           </div>
                         </div>
                       </div>
+                    ) : (
+                      <SwipeSkeleton />
                     )}
                   </div>
                 </Suspense>
 
-                {!showDetails && (
+                {!showDetails && !isLoadingDeck && (
                   <div className="button-layer">
                     <button className="btn undo" onClick={handleUndo}>↩</button>
                     <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
