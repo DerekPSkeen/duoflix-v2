@@ -699,7 +699,7 @@ function App() {
         }
 
         // TV fetches
-        const tvTarget = 4;
+        const tvTarget = 8;
         for (const [genre, count] of Object.entries(targets)) {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
