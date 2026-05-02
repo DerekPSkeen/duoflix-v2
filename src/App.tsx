@@ -587,8 +587,7 @@ function App() {
           
           const res = await fetch(endpoint);
           if (!res.ok) {
-            filtered.push(title);
-            return;
+            return; // skip unavailable titles
           }
           
           const data = await res.json();
@@ -601,11 +600,10 @@ function App() {
 
           if (hasAnyOption) {
             filtered.push(title);
-          } else {
-            filtered.push(title);
           }
+          // unavailable titles are now correctly dropped
         } catch (e) {
-          filtered.push(title);
+          // skip on error
         }
       }));
 
