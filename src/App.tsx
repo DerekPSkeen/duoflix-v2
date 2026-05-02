@@ -620,7 +620,6 @@ function App() {
   const fetchMovies = async (retryCount = 0) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) {
-      console.error("TMDB API key is missing");
       setIsLoadingDeck(false);
       return;
     }
@@ -648,13 +647,11 @@ function App() {
       '2020s': {min: 2020, max: 2026}
     };
 
-    let allResults: Movie[] = [];
+    const allResults: Movie[] = [];
 
     try {
-      const erasToUse = activeEras.length > 0 ? activeEras : ['2020s'];
-
-      for (const era of erasToUse) {
-        const { min, max } = yearMap[era] || yearMap['2020s'];
+      for (const era of activeEras) {
+        const { min, max } = yearMap[era];
         const dateFilter = `&primary_release_date.gte=${min}-01-01&primary_release_date.lte=${max}-12-31`;
 
         const genreList = Object.keys(myPrefs);
@@ -690,16 +687,14 @@ function App() {
           while (fetched < count && page <= 5) {
             try {
               const res = await fetch(`${baseUrl}&page=${page}`);
-              if (!res.ok) throw new Error(`HTTP ${res.status}`);
               const data = await res.json();
               if (data.results && data.results.length > 0) {
-                const newMovies = data.results.map((item: any) => ({ ...item, media_type: 'movie' as const }));
-                allResults = [...allResults, ...newMovies];
+                allResults.push(...data.results.map((item: any) => ({ ...item, media_type: 'movie' as const })));
+                fetched += data.results.length;
               } else break;
               page++;
               if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
             } catch (e) {
-              console.error(`Movie fetch error for ${genre}:`, e);
               break;
             }
           }
@@ -718,24 +713,23 @@ function App() {
           while (fetched < tvTarget && page <= 4) {
             try {
               const res = await fetch(`${baseUrl}&page=${page}`);
-              if (!res.ok) throw new Error(`HTTP ${res.status}`);
               const data = await res.json();
               if (data.results && data.results.length > 0) {
-                const newTV = data.results.map((item: any) => ({
+                allResults.push(...data.results.map((item: any) => ({
                   ...item,
                   title: item.name || item.title,
                   release_date: item.first_air_date || item.release_date,
                   media_type: 'tv' as const
-                }));
-                allResults = [...allResults, ...newTV];
+                })));
+                fetched += data.results.length;
               } else break;
               page++;
               if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
             } catch (e) {
-              console.error(`TV fetch error for ${genre}:`, e);
               break;
             }
           }
+          if (fetched >= tvTarget) break;
         }
       }
 
@@ -743,33 +737,10 @@ function App() {
       const unique = filteredResults.filter((item, index, self) =>
         index === self.findIndex(m => m.id === item.id)
       );
-      let shuffled = unique.sort(() => Math.random() - 0.5);
-
-      if (shuffled.length === 0) {
-        console.warn("No titles after filtering - using fallback");
-        shuffled = [
-          { 
-            id: 550, 
-            title: "Fight Club", 
-            poster_path: "/pB8BM7pdSp6B7kQv6Q6w2kQv6Q6.jpg", 
-            release_date: "1999", 
-            vote_average: 8.4, 
-            overview: "An insomniac office worker and a devil-may-care soap maker form an underground fight club.", 
-            media_type: 'movie' 
-          },
-          { 
-            id: 27205, 
-            title: "Inception", 
-            poster_path: "/9gk7adHYe7T1g2k5j6z2z2z2z2z2.jpg", 
-            release_date: "2010", 
-            vote_average: 8.8, 
-            overview: "A thief who steals corporate secrets through the use of dream-sharing technology.", 
-            media_type: 'movie' 
-          }
-        ];
-      }
+      const shuffled = unique.sort(() => Math.random() - 0.5);
 
       if (shuffled.length === 0 && retryCount < 2) {
+        // Retry with slight delay
         setTimeout(() => fetchMovies(retryCount + 1), 800);
         return;
       }
@@ -783,17 +754,6 @@ function App() {
         setTimeout(() => fetchMovies(retryCount + 1), 1000);
         return;
       }
-      setMovies([
-        { 
-          id: 550, 
-          title: "Fight Club", 
-          poster_path: "/pB8BM7pdSp6B7kQv6Q6w2kQv6Q6.jpg", 
-          release_date: "1999", 
-          vote_average: 8.4, 
-          overview: "An insomniac office worker...", 
-          media_type: 'movie' 
-        }
-      ]);
     } finally {
       setIsLoadingDeck(false);
     }
@@ -808,17 +768,6 @@ function App() {
 
     return () => clearTimeout(timeoutId);
   }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
-
-  // Strong post-landing trigger
-  useEffect(() => {
-    if (!showLanding && currentTab === 'swipe' && user) {
-      const timer = setTimeout(() => {
-        setIsLoadingDeck(true);
-        fetchMovies();
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [showLanding, currentTab, user]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -1443,23 +1392,7 @@ function App() {
                 <Suspense fallback={<SwipeSkeleton />}>
                   <div className="poster-container">
                     {isLoadingDeck ? (
-                      <>
-                        <SwipeSkeleton />
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '120px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          color: '#fff',
-                          fontSize: '0.95rem',
-                          opacity: 0.8,
-                          textAlign: 'center',
-                          zIndex: 10,
-                          whiteSpace: 'nowrap'
-                        }}>
-                          Building your personalized deck...
-                        </div>
-                      </>
+                      <SwipeSkeleton />
                     ) : currentMovie ? (
                       <div
                         ref={cardRef}
@@ -1476,9 +1409,6 @@ function App() {
                           alt={currentMovie.title}
                           draggable={false}
                           onDragStart={(e) => e.preventDefault()}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/780x1170/1a1a1a/ffffff?text=No+Poster';
-                          }}
                         />
                         <div className="overlay" style={{ 
                           position: 'absolute', 
