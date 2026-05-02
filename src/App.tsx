@@ -809,14 +809,16 @@ function App() {
     return () => clearTimeout(timeoutId);
   }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
 
+  // Strong post-landing trigger
   useEffect(() => {
-    if (!showLanding && movies.length === 0 && currentTab === 'swipe') {
+    if (!showLanding && currentTab === 'swipe') {
       const timer = setTimeout(() => {
+        setIsLoadingDeck(true);
         fetchMovies();
-      }, 100);
+      }, 150);
       return () => clearTimeout(timer);
     }
-  }, [showLanding, currentTab, movies.length]);
+  }, [showLanding, currentTab]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
