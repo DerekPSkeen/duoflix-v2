@@ -700,7 +700,6 @@ function App() {
               if (data.results && data.results.length > 0) {
                 const newMovies = data.results.map((item: any) => ({ ...item, media_type: 'movie' as const }));
                 allResults = [...allResults, ...newMovies];
-                setMovies([...allResults].sort(() => Math.random() - 0.5));
               } else break;
               page++;
               if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
@@ -734,7 +733,6 @@ function App() {
                   media_type: 'tv' as const
                 }));
                 allResults = [...allResults, ...newTV];
-                setMovies([...allResults].sort(() => Math.random() - 0.5));
               } else break;
               page++;
               if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
