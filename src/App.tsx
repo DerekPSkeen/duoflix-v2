@@ -792,6 +792,16 @@ function App() {
     return () => clearTimeout(timeoutId);
   }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
 
+  // Targeted fix: Ensure fetch runs immediately after landing -> swipe transition
+  useEffect(() => {
+    if (!showLanding && movies.length === 0 && currentTab === 'swipe') {
+      const timer = setTimeout(() => {
+        fetchMovies();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [showLanding, currentTab, movies.length]);
+
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) return;
