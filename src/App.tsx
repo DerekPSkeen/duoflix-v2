@@ -755,8 +755,24 @@ function App() {
       if (shuffled.length === 0) {
         console.warn("No titles after filtering - using fallback");
         shuffled = [
-          { id: 550, title: "Fight Club", poster_path: "/pB8BM7pdSp6B7kQv6Q6w2kQv6Q6.jpg", release_date: "1999", vote_average: 8.4, overview: "An insomniac office worker and a devil-may-care soap maker form an underground fight club.", media_type: 'movie' },
-          { id: 27205, title: "Inception", poster_path: "/9gk7adHYe7T1g2k5j6z2z2z2z2z2.jpg", release_date: "2010", vote_average: 8.8, overview: "A thief who steals corporate secrets through the use of dream-sharing technology.", media_type: 'movie' }
+          { 
+            id: 550, 
+            title: "Fight Club", 
+            poster_path: "/pB8BM7pdSp6B7kQv6Q6w2kQv6Q6.jpg", 
+            release_date: "1999", 
+            vote_average: 8.4, 
+            overview: "An insomniac office worker and a devil-may-care soap maker form an underground fight club.", 
+            media_type: 'movie' 
+          },
+          { 
+            id: 27205, 
+            title: "Inception", 
+            poster_path: "/9gk7adHYe7T1g2k5j6z2z2z2z2z2.jpg", 
+            release_date: "2010", 
+            vote_average: 8.8, 
+            overview: "A thief who steals corporate secrets through the use of dream-sharing technology.", 
+            media_type: 'movie' 
+          }
         ];
       }
 
@@ -775,7 +791,15 @@ function App() {
         return;
       }
       setMovies([
-        { id: 550, title: "Fight Club", poster_path: "/pB8BM7pdSp6B7kQv6Q6w2kQv6Q6.jpg", release_date: "1999", vote_average: 8.4, overview: "An insomniac office worker...", media_type: 'movie' }
+        { 
+          id: 550, 
+          title: "Fight Club", 
+          poster_path: "/pB8BM7pdSp6B7kQv6Q6w2kQv6Q6.jpg", 
+          release_date: "1999", 
+          vote_average: 8.4, 
+          overview: "An insomniac office worker...", 
+          media_type: 'movie' 
+        }
       ]);
     } finally {
       setIsLoadingDeck(false);
@@ -792,7 +816,6 @@ function App() {
     return () => clearTimeout(timeoutId);
   }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
 
-  // Targeted fix: Ensure fetch runs immediately after landing -> swipe transition
   useEffect(() => {
     if (!showLanding && movies.length === 0 && currentTab === 'swipe') {
       const timer = setTimeout(() => {
@@ -1458,6 +1481,9 @@ function App() {
                           alt={currentMovie.title}
                           draggable={false}
                           onDragStart={(e) => e.preventDefault()}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/780x1170/1a1a1a/ffffff?text=No+Poster';
+                          }}
                         />
                         <div className="overlay" style={{ 
                           position: 'absolute', 
