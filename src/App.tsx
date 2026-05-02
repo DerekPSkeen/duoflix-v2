@@ -622,7 +622,6 @@ function App() {
     if (!apiKey) {
       console.error("TMDB API key is missing");
       setIsLoadingDeck(false);
-      setMovies([]); 
       return;
     }
 
@@ -634,10 +633,6 @@ function App() {
 
     const mergedEras = { ...myEraPrefs, ...partnerEraPrefs };
     const activeEras = Object.keys(mergedEras).filter(e => mergedEras[e]);
-
-    if (activeEras.length === 0) {
-      console.warn("No eras selected - using 2020s as fallback");
-    }
 
     const yearMap: Record<string, {min: number; max: number}> = {
       '1920s': {min: 1920, max: 1929},
@@ -821,7 +816,7 @@ function App() {
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [showLanding, currentTab, movies.length]);
+  }, [showLanding, currentTab]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
