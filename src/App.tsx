@@ -1392,7 +1392,23 @@ function App() {
                 <Suspense fallback={<SwipeSkeleton />}>
                   <div className="poster-container">
                     {isLoadingDeck ? (
-                      <SwipeSkeleton />
+                      <>
+                        <SwipeSkeleton />
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '120px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          color: '#fff',
+                          fontSize: '0.95rem',
+                          opacity: 0.8,
+                          textAlign: 'center',
+                          zIndex: 10,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          Building your personalized deck...
+                        </div>
+                      </>
                     ) : currentMovie ? (
                       <div
                         ref={cardRef}
