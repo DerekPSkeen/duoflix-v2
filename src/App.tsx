@@ -811,14 +811,14 @@ function App() {
 
   // Strong post-landing trigger
   useEffect(() => {
-    if (!showLanding && currentTab === 'swipe') {
+    if (!showLanding && currentTab === 'swipe' && user) {
       const timer = setTimeout(() => {
         setIsLoadingDeck(true);
         fetchMovies();
-      }, 150);
+      }, 200);
       return () => clearTimeout(timer);
     }
-  }, [showLanding, currentTab]);
+  }, [showLanding, currentTab, user]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
