@@ -647,7 +647,7 @@ function App() {
       '2020s': {min: 2020, max: 2026}
     };
 
-    const allResults: Movie[] = [];
+    let allResults: Movie[] = [];
 
     try {
       for (const era of activeEras) {
@@ -689,8 +689,9 @@ function App() {
               const res = await fetch(`${baseUrl}&page=${page}`);
               const data = await res.json();
               if (data.results && data.results.length > 0) {
-                allResults.push(...data.results.map((item: any) => ({ ...item, media_type: 'movie' as const })));
-                fetched += data.results.length;
+                const newMovies = data.results.map((item: any) => ({ ...item, media_type: 'movie' as const }));
+                allResults = [...allResults, ...newMovies];
+                setMovies([...allResults].sort(() => Math.random() - 0.5)); // incremental update
               } else break;
               page++;
               if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
@@ -715,13 +716,14 @@ function App() {
               const res = await fetch(`${baseUrl}&page=${page}`);
               const data = await res.json();
               if (data.results && data.results.length > 0) {
-                allResults.push(...data.results.map((item: any) => ({
+                const newTV = data.results.map((item: any) => ({
                   ...item,
                   title: item.name || item.title,
                   release_date: item.first_air_date || item.release_date,
                   media_type: 'tv' as const
-                })));
-                fetched += data.results.length;
+                }));
+                allResults = [...allResults, ...newTV];
+                setMovies([...allResults].sort(() => Math.random() - 0.5)); // incremental
               } else break;
               page++;
               if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
@@ -740,7 +742,6 @@ function App() {
       const shuffled = unique.sort(() => Math.random() - 0.5);
 
       if (shuffled.length === 0 && retryCount < 2) {
-        // Retry with slight delay
         setTimeout(() => fetchMovies(retryCount + 1), 800);
         return;
       }
@@ -1392,7 +1393,23 @@ function App() {
                 <Suspense fallback={<SwipeSkeleton />}>
                   <div className="poster-container">
                     {isLoadingDeck ? (
-                      <SwipeSkeleton />
+                      <>
+                        <SwipeSkeleton />
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '120px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          color: '#fff',
+                          fontSize: '0.95rem',
+                          opacity: 0.8,
+                          textAlign: 'center',
+                          zIndex: 10,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          Building your personalized deck...
+                        </div>
+                      </>
                     ) : currentMovie ? (
                       <div
                         ref={cardRef}
