@@ -573,7 +573,7 @@ function App() {
     if (!apiKey) return titles;
 
     const filtered: Movie[] = [];
-    const batchSize = 12; // larger batch for better performance
+    const batchSize = 12;
 
     for (let i = 0; i < titles.length; i += batchSize) {
       const batch = titles.slice(i, i + batchSize);
@@ -679,7 +679,7 @@ function App() {
 
           let fetched = 0;
           let page = 1;
-          while (fetched < count && page <= 4) {  // reduced max pages
+          while (fetched < count && page <= 4) {
             try {
               const res = await fetch(`${baseUrl}&page=${page}`);
               const data = await res.json();
@@ -859,6 +859,10 @@ function App() {
           });
         }
       }
+    } else {
+      // Ensure we remove from likedMovies if it was liked before
+      setLikedMovies(prev => prev.filter(m => m.id !== currentMovie.id));
+      setLastLiked(null);
     }
 
     setIsFlyingOff(true);
@@ -908,10 +912,9 @@ function App() {
       return newIndex;
     });
 
-    if (likedMovies.some(m => m.id === movieToRestore.id)) {
-      setLikedMovies(prev => prev.filter(m => m.id !== movieToRestore.id));
-      setLastLiked(null);
-    }
+    // Remove from likes if it was previously liked
+    setLikedMovies(prev => prev.filter(m => m.id !== movieToRestore.id));
+    setLastLiked(null);
 
     setTimeout(() => loadPersistentLikes(), 100);
   };
