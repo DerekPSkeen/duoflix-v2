@@ -617,9 +617,12 @@ function App() {
     return filtered;
   };
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (retryCount = 0) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
-    if (!apiKey) return;
+    if (!apiKey) {
+      setIsLoadingDeck(false);
+      return;
+    }
 
     setIsLoadingDeck(true);
 
@@ -646,99 +649,114 @@ function App() {
 
     const allResults: Movie[] = [];
 
-    for (const era of activeEras) {
-      const { min, max } = yearMap[era];
-      const dateFilter = `&primary_release_date.gte=${min}-01-01&primary_release_date.lte=${max}-12-31`;
+    try {
+      for (const era of activeEras) {
+        const { min, max } = yearMap[era];
+        const dateFilter = `&primary_release_date.gte=${min}-01-01&primary_release_date.lte=${max}-12-31`;
 
-      const genreList = Object.keys(myPrefs);
-      const combined: Record<string, number> = {};
-      let totalScore = 0;
+        const genreList = Object.keys(myPrefs);
+        const combined: Record<string, number> = {};
+        let totalScore = 0;
 
-      genreList.forEach(g => {
-        const score = (myPrefs[g] || 0) + (partnerPrefs[g] || 0);
-        combined[g] = score;
-        totalScore += score;
-      });
+        genreList.forEach(g => {
+          const score = (myPrefs[g] || 0) + (partnerPrefs[g] || 0);
+          combined[g] = score;
+          totalScore += score;
+        });
 
-      const targetTotal = 12;
-      const targets: Record<string, number> = {};
-      genreList.forEach(g => {
-        if (combined[g] > 0) {
-          const percent = combined[g] / totalScore;
-          targets[g] = Math.max(3, Math.round(targetTotal * percent));
-        }
-      });
-
-      const watchFilter = `&watch_region=${watchRegion}${monetizationFilter}`;
-
-      // Movie fetches
-      for (const [genre, count] of Object.entries(targets)) {
-        const genreId = genreIdMap[genre];
-        if (!genreId) continue;
-
-        const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}`;
-
-        let fetched = 0;
-        let page = 1;
-        while (fetched < count && page <= 5) {
-          try {
-            const res = await fetch(`${baseUrl}&page=${page}`);
-            const data = await res.json();
-            if (data.results && data.results.length > 0) {
-              allResults.push(...data.results.map((item: any) => ({ ...item, media_type: 'movie' as const })));
-              fetched += data.results.length;
-            } else break;
-            page++;
-            if (page % 2 === 0) await new Promise(r => setTimeout(r, 50)); // light rate limit breathing
-          } catch (e) {
-            break;
+        const targetTotal = 12;
+        const targets: Record<string, number> = {};
+        genreList.forEach(g => {
+          if (combined[g] > 0) {
+            const percent = combined[g] / totalScore;
+            targets[g] = Math.max(3, Math.round(targetTotal * percent));
           }
+        });
+
+        const watchFilter = `&watch_region=${watchRegion}${monetizationFilter}`;
+
+        // Movie fetches
+        for (const [genre, count] of Object.entries(targets)) {
+          const genreId = genreIdMap[genre];
+          if (!genreId) continue;
+
+          const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}`;
+
+          let fetched = 0;
+          let page = 1;
+          while (fetched < count && page <= 5) {
+            try {
+              const res = await fetch(`${baseUrl}&page=${page}`);
+              const data = await res.json();
+              if (data.results && data.results.length > 0) {
+                allResults.push(...data.results.map((item: any) => ({ ...item, media_type: 'movie' as const })));
+                fetched += data.results.length;
+              } else break;
+              page++;
+              if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
+            } catch (e) {
+              break;
+            }
+          }
+        }
+
+        // TV fetches
+        const tvTarget = 4;
+        for (const [genre, count] of Object.entries(targets)) {
+          const genreId = genreIdMap[genre];
+          if (!genreId) continue;
+
+          const baseUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}`;
+
+          let fetched = 0;
+          let page = 1;
+          while (fetched < tvTarget && page <= 4) {
+            try {
+              const res = await fetch(`${baseUrl}&page=${page}`);
+              const data = await res.json();
+              if (data.results && data.results.length > 0) {
+                allResults.push(...data.results.map((item: any) => ({
+                  ...item,
+                  title: item.name || item.title,
+                  release_date: item.first_air_date || item.release_date,
+                  media_type: 'tv' as const
+                })));
+                fetched += data.results.length;
+              } else break;
+              page++;
+              if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
+            } catch (e) {
+              break;
+            }
+          }
+          if (fetched >= tvTarget) break;
         }
       }
 
-      // TV fetches (~10%)
-      const tvTarget = 4;
-      for (const [genre, count] of Object.entries(targets)) {
-        const genreId = genreIdMap[genre];
-        if (!genreId) continue;
+      const filteredResults = await filterTitlesWithProviders(allResults);
+      const unique = filteredResults.filter((item, index, self) =>
+        index === self.findIndex(m => m.id === item.id)
+      );
+      const shuffled = unique.sort(() => Math.random() - 0.5);
 
-        const baseUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}`;
-
-        let fetched = 0;
-        let page = 1;
-        while (fetched < tvTarget && page <= 4) {
-          try {
-            const res = await fetch(`${baseUrl}&page=${page}`);
-            const data = await res.json();
-            if (data.results && data.results.length > 0) {
-              allResults.push(...data.results.map((item: any) => ({
-                ...item,
-                title: item.name || item.title,
-                release_date: item.first_air_date || item.release_date,
-                media_type: 'tv' as const
-              })));
-              fetched += data.results.length;
-            } else break;
-            page++;
-            if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
-          } catch (e) {
-            break;
-          }
-        }
-        if (fetched >= tvTarget) break;
+      if (shuffled.length === 0 && retryCount < 2) {
+        // Retry with slight delay
+        setTimeout(() => fetchMovies(retryCount + 1), 800);
+        return;
       }
+
+      setMovies(shuffled);
+      setCurrentIndex(0);
+      setSwipeHistory([]);
+    } catch (error) {
+      console.error('Fetch movies error:', error);
+      if (retryCount < 2) {
+        setTimeout(() => fetchMovies(retryCount + 1), 1000);
+        return;
+      }
+    } finally {
+      setIsLoadingDeck(false);
     }
-
-    const filteredResults = await filterTitlesWithProviders(allResults);
-    const unique = filteredResults.filter((item, index, self) =>
-      index === self.findIndex(m => m.id === item.id)
-    );
-    const shuffled = unique.sort(() => Math.random() - 0.5);
-
-    setMovies(shuffled);
-    setCurrentIndex(0);
-    setSwipeHistory([]);
-    setIsLoadingDeck(false);
   };
 
   useEffect(() => {
@@ -1411,13 +1429,29 @@ function App() {
                           </div>
                         </div>
                       </div>
+                    ) : movies.length === 0 && !isLoadingDeck ? (
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '60px 20px',
+                        color: '#fff',
+                        opacity: 0.7
+                      }}>
+                        <p>No titles found for your preferences and region.</p>
+                        <p style={{ fontSize: '0.9rem', marginTop: '12px' }}>Try changing region or preferences.</p>
+                        <button 
+                          onClick={() => window.location.reload()}
+                          style={{ marginTop: '20px', padding: '10px 24px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '999px' }}
+                        >
+                          Retry
+                        </button>
+                      </div>
                     ) : (
                       <SwipeSkeleton />
                     )}
                   </div>
                 </Suspense>
 
-                {!showDetails && !isLoadingDeck && (
+                {!showDetails && !isLoadingDeck && movies.length > 0 && (
                   <div className="button-layer">
                     <button className="btn undo" onClick={handleUndo}>↩</button>
                     <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
