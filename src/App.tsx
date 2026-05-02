@@ -680,7 +680,7 @@ function App() {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
 
-          const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}`;
+          const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}&include_adult=false`;
 
           let fetched = 0;
           let page = 1;
@@ -706,7 +706,7 @@ function App() {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
 
-          const baseUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}`;
+          const baseUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}&include_adult=false`;
 
           let fetched = 0;
           let page = 1;
