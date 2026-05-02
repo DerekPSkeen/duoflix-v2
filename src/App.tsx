@@ -816,7 +816,7 @@ function App() {
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [showLanding, currentTab]);
+  }, [showLanding, currentTab, movies.length]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
