@@ -573,7 +573,7 @@ function App() {
     if (!apiKey) return titles;
 
     const filtered: Movie[] = [];
-    const batchSize = 6;
+    const batchSize = 12; // larger batch for better performance
 
     for (let i = 0; i < titles.length; i += batchSize) {
       const batch = titles.slice(i, i + batchSize);
@@ -586,9 +586,7 @@ function App() {
             : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
           
           const res = await fetch(endpoint);
-          if (!res.ok) {
-            return; // skip unavailable titles
-          }
+          if (!res.ok) return;
           
           const data = await res.json();
           const regionData = data.results?.[selectedRegion] || {};
@@ -601,14 +599,13 @@ function App() {
           if (hasAnyOption) {
             filtered.push(title);
           }
-          // unavailable titles are now correctly dropped
         } catch (e) {
-          // skip on error
+          // skip silently
         }
       }));
 
       if (i + batchSize < titles.length) {
-        await new Promise(resolve => setTimeout(resolve, 80));
+        await new Promise(resolve => setTimeout(resolve, 60));
       }
     }
 
@@ -682,7 +679,7 @@ function App() {
 
           let fetched = 0;
           let page = 1;
-          while (fetched < count && page <= 5) {
+          while (fetched < count && page <= 4) {  // reduced max pages
             try {
               const res = await fetch(`${baseUrl}&page=${page}`);
               const data = await res.json();
@@ -691,7 +688,7 @@ function App() {
                 fetched += data.results.length;
               } else break;
               page++;
-              if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
+              if (page % 2 === 0) await new Promise(r => setTimeout(r, 40));
             } catch (e) {
               break;
             }
@@ -722,7 +719,7 @@ function App() {
                 fetched += data.results.length;
               } else break;
               page++;
-              if (page % 2 === 0) await new Promise(r => setTimeout(r, 50));
+              if (page % 2 === 0) await new Promise(r => setTimeout(r, 40));
             } catch (e) {
               break;
             }
@@ -738,7 +735,6 @@ function App() {
       const shuffled = unique.sort(() => Math.random() - 0.5);
 
       if (shuffled.length === 0 && retryCount < 2) {
-        // Retry with slight delay
         setTimeout(() => fetchMovies(retryCount + 1), 800);
         return;
       }
