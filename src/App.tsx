@@ -262,12 +262,12 @@ function App() {
     };
   }, []);
 
-  // Show install prompt after user has swiped enough to see value
+  // Improved install prompt trigger
   useEffect(() => {
-    if (movies.length > 0 && currentIndex > 8 && deferredPrompt && !showInstallPrompt) {
+    if (movies.length > 0 && currentIndex >= 5 && deferredPrompt && !showInstallPrompt) {
       const timer = setTimeout(() => {
         setShowInstallPrompt(true);
-      }, 1500);
+      }, 1200);
       return () => clearTimeout(timer);
     }
   }, [currentIndex, movies.length, deferredPrompt, showInstallPrompt]);
@@ -1507,7 +1507,7 @@ function App() {
                 </Suspense>
 
                 {!showDetails && !isLoadingDeck && movies.length > 0 && (
-                  <div className="button-layer">
+                  <div className="button-layer" style={{ border: 'none', boxShadow: 'none' }}>
                     <button className="btn undo" onClick={handleUndo}>↩</button>
                     <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
                     <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
