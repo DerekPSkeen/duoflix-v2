@@ -221,6 +221,10 @@ function App() {
 
   const prevMatchCountRef = useRef(0);
 
+  // PWA Install Prompt
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+
   const currentMovie = movies[currentIndex];
 
   const playMatchSound = () => {
@@ -242,6 +246,46 @@ function App() {
         setTimeout(() => osc.stop(), 160);
       } catch {}
     }
+  };
+
+  // PWA: Before Install Prompt Handler
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // Show install prompt after user has swiped enough to see value
+  useEffect(() => {
+    if (movies.length > 0 && currentIndex > 8 && deferredPrompt && !showInstallPrompt) {
+      const timer = setTimeout(() => {
+        setShowInstallPrompt(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex, movies.length, deferredPrompt, showInstallPrompt]);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setShowInstallPrompt(false);
+    }
+  };
+
+  const dismissInstallPrompt = () => {
+    setShowInstallPrompt(false);
   };
 
   useEffect(() => {
@@ -860,7 +904,6 @@ function App() {
         }
       }
     } else {
-      // Ensure we remove from likedMovies if it was liked before
       setLikedMovies(prev => prev.filter(m => m.id !== currentMovie.id));
       setLastLiked(null);
     }
@@ -912,7 +955,6 @@ function App() {
       return newIndex;
     });
 
-    // Remove from likes if it was previously liked
     setLikedMovies(prev => prev.filter(m => m.id !== movieToRestore.id));
     setLastLiked(null);
 
@@ -1722,6 +1764,50 @@ function App() {
                     <p style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '1rem' }}>
                       Data from TMDB / JustWatch • Availability may vary by region
                     </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PWA Install Prompt */}
+            {showInstallPrompt && deferredPrompt && (
+              <div className="modal-overlay" style={{ zIndex: 10000001 }}>
+                <div className="modal-content" style={{ maxWidth: '340px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                  <h3 style={{ marginBottom: '12px' }}>Add DuoFlix to Home Screen</h3>
+                  <p style={{ opacity: 0.9, marginBottom: '24px', lineHeight: 1.5 }}>
+                    Get quick access for better date nights. Install DuoFlix as an app on your phone.
+                  </p>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button 
+                      onClick={dismissInstallPrompt}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        background: '#333',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '999px',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Maybe Later
+                    </button>
+                    <button 
+                      onClick={handleInstallClick}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '999px',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Install App
+                    </button>
                   </div>
                 </div>
               </div>
