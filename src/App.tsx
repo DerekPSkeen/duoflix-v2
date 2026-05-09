@@ -221,7 +221,6 @@ function App() {
 
   const prevMatchCountRef = useRef(0);
 
-  // PWA Install Prompt
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
@@ -248,7 +247,6 @@ function App() {
     }
   };
 
-  // PWA: Before Install Prompt Handler
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
@@ -262,7 +260,6 @@ function App() {
     };
   }, []);
 
-  // Improved install prompt trigger
   useEffect(() => {
     if (movies.length > 0 && currentIndex >= 5 && deferredPrompt && !showInstallPrompt) {
       const timer = setTimeout(() => {
@@ -399,8 +396,7 @@ function App() {
       }
     };
   }, [coupleCode]);
-
-  const savePreferences = async () => {
+    const savePreferences = async () => {
     if (!coupleCode) {
       alert('Please create or join a room first to save preferences.');
       return;
@@ -429,50 +425,7 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    if (!isInRoom || !roomCode) {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-      return;
-    }
-
-    const channelName = `room-${roomCode}`;
-    const channel = supabase.channel(channelName);
-
-    channel.on('broadcast', { event: 'chat' }, ({ payload }) => {
-      if (payload.message) setChatMessages(prev => [...prev, payload.message]);
-    });
-
-    channel.on('broadcast', { event: 'like' }, () => {
-      setTimeout(() => loadPersistentLikes(), 300);
-    });
-
-    channel.subscribe();
-    channelRef.current = channel;
-
-    return () => {
-      if (channelRef.current) supabase.removeChannel(channelRef.current);
-    };
-  }, [isInRoom, roomCode]);
-
-  useEffect(() => {
-    const mutual = likedMovies.filter(my => 
-      sharedLikes.some(partner => partner.id === my.id)
-    );
-    
-    const newCount = mutual.length;
-    
-    if (newCount > prevMatchCountRef.current) {
-      playMatchSound();
-    }
-    
-    setMutualMatches(mutual);
-    prevMatchCountRef.current = newCount;
-  }, [likedMovies, sharedLikes]);
-
-  const loadPersistentLikes = async () => {
+  const loadPersistentLikes = useCallback(async () => {
     if (!coupleCode) return;
 
     const { data, error } = await supabase
@@ -511,11 +464,54 @@ function App() {
       setLikedMovies([]);
       setSharedLikes([]);
     }
-  };
+  }, [coupleCode, user]);
 
   useEffect(() => {
     loadPersistentLikes();
-  }, [coupleCode, user]);
+  }, [loadPersistentLikes]);
+
+  useEffect(() => {
+    if (!isInRoom || !roomCode) {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      return;
+    }
+
+    const channelName = `room-${roomCode}`;
+    const channel = supabase.channel(channelName);
+
+    channel.on('broadcast', { event: 'chat' }, ({ payload }) => {
+      if (payload.message) setChatMessages(prev => [...prev, payload.message]);
+    });
+
+    channel.on('broadcast', { event: 'like' }, () => {
+      setTimeout(() => loadPersistentLikes(), 300);
+    });
+
+    channel.subscribe();
+    channelRef.current = channel;
+
+    return () => {
+      if (channelRef.current) supabase.removeChannel(channelRef.current);
+    };
+  }, [isInRoom, roomCode, loadPersistentLikes]);
+
+  useEffect(() => {
+    const mutual = likedMovies.filter(my => 
+      sharedLikes.some(partner => partner.id === my.id)
+    );
+    
+    const newCount = mutual.length;
+    
+    if (newCount > prevMatchCountRef.current) {
+      playMatchSound();
+    }
+    
+    setMutualMatches(mutual);
+    prevMatchCountRef.current = newCount;
+  }, [likedMovies, sharedLikes]);
 
   useEffect(() => {
     if (!coupleCode) return;
@@ -537,126 +533,9 @@ function App() {
         supabase.removeChannel(likesSubscriptionRef.current);
       }
     };
-  }, [coupleCode, user]);
+  }, [coupleCode, loadPersistentLikes]);
 
-  const clearAllLikesAndMatches = async () => {
-    if (!coupleCode) {
-      alert('No couple code found. Join or create a room first.');
-      return;
-    }
-
-    if (!window.confirm('⚠️ This will permanently delete ALL likes and matches for BOTH users. This action cannot be undone. Continue?')) {
-      return;
-    }
-
-    const { error } = await supabase
-      .from('couple_likes')
-      .delete()
-      .eq('couple_code', coupleCode);
-
-    if (error) {
-      console.error('Failed to clear likes from database:', error);
-      alert('Failed to clear data from server. Please try again.');
-      return;
-    }
-
-    setLikedMovies([]);
-    setSharedLikes([]);
-    setMutualMatches([]);
-    setLastLiked(null);
-    setSwipeHistory([]);
-
-    alert('All likes and matches have been cleared for both users.');
-    setTimeout(() => loadPersistentLikes(), 300);
-  };
-
-  const clearMyLikesOnly = async () => {
-    if (!coupleCode) {
-      alert('No couple code found.');
-      return;
-    }
-
-    const confirmText = user?.id 
-      ? '⚠️ This will permanently delete ONLY YOUR likes. Your partner’s likes will stay. Continue?'
-      : '⚠️ This will permanently delete ONLY YOUR (guest) likes. Your partner’s likes will stay. Continue?';
-
-    if (!window.confirm(confirmText)) return;
-
-    let query = supabase
-      .from('couple_likes')
-      .delete()
-      .eq('couple_code', coupleCode);
-
-    if (user?.id) {
-      query = query.eq('user_id', user.id);
-    } else {
-      query = query.is('user_id', null);
-    }
-
-    const { error } = await query;
-
-    if (error) {
-      console.error('Failed to clear my likes:', error);
-      alert('Failed to clear your likes. Please try again. Error: ' + (error.message || 'Unknown error'));
-      return;
-    }
-
-    setLikedMovies([]);
-    setMutualMatches([]);
-    setLastLiked(null);
-    setSwipeHistory([]);
-
-    alert('Only your likes have been cleared. Your partner’s likes remain.');
-    setTimeout(() => loadPersistentLikes(), 300);
-  };
-
-  const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
-    if (titles.length === 0) return titles;
-
-    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
-    if (!apiKey) return titles;
-
-    const filtered: Movie[] = [];
-    const batchSize = 12;
-
-    for (let i = 0; i < titles.length; i += batchSize) {
-      const batch = titles.slice(i, i + batchSize);
-      
-      await Promise.all(batch.map(async (title) => {
-        try {
-          const isTV = title.media_type === 'tv';
-          const endpoint = isTV 
-            ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
-            : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
-          
-          const res = await fetch(endpoint);
-          if (!res.ok) return;
-          
-          const data = await res.json();
-          const regionData = data.results?.[selectedRegion] || {};
-          
-          const hasAnyOption = 
-            (regionData.flatrate && regionData.flatrate.length > 0) ||
-            (regionData.rent && regionData.rent.length > 0) ||
-            (regionData.buy && regionData.buy.length > 0);
-
-          if (hasAnyOption) {
-            filtered.push(title);
-          }
-        } catch (e) {
-          // skip silently
-        }
-      }));
-
-      if (i + batchSize < titles.length) {
-        await new Promise(resolve => setTimeout(resolve, 60));
-      }
-    }
-
-    return filtered;
-  };
-
-  const fetchMovies = async (retryCount = 0) => {
+  const fetchMovies = useCallback(async (retryCount = 0) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) {
       setIsLoadingDeck(false);
@@ -714,7 +593,6 @@ function App() {
 
         const watchFilter = `&watch_region=${watchRegion}${monetizationFilter}`;
 
-        // Movie fetches
         for (const [genre, count] of Object.entries(targets)) {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
@@ -739,7 +617,6 @@ function App() {
           }
         }
 
-        // TV fetches
         const tvTarget = 8;
         for (const [genre, count] of Object.entries(targets)) {
           const genreId = genreIdMap[genre];
@@ -795,7 +672,7 @@ function App() {
     } finally {
       setIsLoadingDeck(false);
     }
-  };
+  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
 
   useEffect(() => {
     setIsLoadingDeck(true);
@@ -805,7 +682,53 @@ function App() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
+  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion, fetchMovies]);
+
+  const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
+    if (titles.length === 0) return titles;
+
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) return titles;
+
+    const filtered: Movie[] = [];
+    const batchSize = 12;
+
+    for (let i = 0; i < titles.length; i += batchSize) {
+      const batch = titles.slice(i, i + batchSize);
+      
+      await Promise.all(batch.map(async (title) => {
+        try {
+          const isTV = title.media_type === 'tv';
+          const endpoint = isTV 
+            ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
+            : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
+          
+          const res = await fetch(endpoint);
+          if (!res.ok) return;
+          
+          const data = await res.json();
+          const regionData = data.results?.[selectedRegion] || {};
+          
+          const hasAnyOption = 
+            (regionData.flatrate && regionData.flatrate.length > 0) ||
+            (regionData.rent && regionData.rent.length > 0) ||
+            (regionData.buy && regionData.buy.length > 0);
+
+          if (hasAnyOption) {
+            filtered.push(title);
+          }
+        } catch (e) {
+          // skip silently
+        }
+      }));
+
+      if (i + batchSize < titles.length) {
+        await new Promise(resolve => setTimeout(resolve, 60));
+      }
+    }
+
+    return filtered;
+  };
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -1769,7 +1692,6 @@ function App() {
               </div>
             )}
 
-            {/* PWA Install Prompt */}
             {showInstallPrompt && deferredPrompt && (
               <div className="modal-overlay" style={{ zIndex: 10000001 }}>
                 <div className="modal-content" style={{ maxWidth: '340px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
