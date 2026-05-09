@@ -221,6 +221,7 @@ function App() {
 
   const prevMatchCountRef = useRef(0);
 
+  // PWA Install Prompt
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
@@ -247,6 +248,7 @@ function App() {
     }
   };
 
+  // PWA: Before Install Prompt Handler
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
@@ -260,6 +262,7 @@ function App() {
     };
   }, []);
 
+  // Improved install prompt trigger
   useEffect(() => {
     if (movies.length > 0 && currentIndex >= 5 && deferredPrompt && !showInstallPrompt) {
       const timer = setTimeout(() => {
@@ -396,7 +399,8 @@ function App() {
       }
     };
   }, [coupleCode]);
-    const savePreferences = async () => {
+
+  const savePreferences = async () => {
     if (!coupleCode) {
       alert('Please create or join a room first to save preferences.');
       return;
@@ -425,7 +429,50 @@ function App() {
     }
   };
 
-  const loadPersistentLikes = useCallback(async () => {
+  useEffect(() => {
+    if (!isInRoom || !roomCode) {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      return;
+    }
+
+    const channelName = `room-${roomCode}`;
+    const channel = supabase.channel(channelName);
+
+    channel.on('broadcast', { event: 'chat' }, ({ payload }) => {
+      if (payload.message) setChatMessages(prev => [...prev, payload.message]);
+    });
+
+    channel.on('broadcast', { event: 'like' }, () => {
+      setTimeout(() => loadPersistentLikes(), 300);
+    });
+
+    channel.subscribe();
+    channelRef.current = channel;
+
+    return () => {
+      if (channelRef.current) supabase.removeChannel(channelRef.current);
+    };
+  }, [isInRoom, roomCode]);
+
+  useEffect(() => {
+    const mutual = likedMovies.filter(my => 
+      sharedLikes.some(partner => partner.id === my.id)
+    );
+    
+    const newCount = mutual.length;
+    
+    if (newCount > prevMatchCountRef.current) {
+      playMatchSound();
+    }
+    
+    setMutualMatches(mutual);
+    prevMatchCountRef.current = newCount;
+  }, [likedMovies, sharedLikes]);
+
+  const loadPersistentLikes = async () => {
     if (!coupleCode) return;
 
     const { data, error } = await supabase
@@ -464,54 +511,11 @@ function App() {
       setLikedMovies([]);
       setSharedLikes([]);
     }
-  }, [coupleCode, user]);
+  };
 
   useEffect(() => {
     loadPersistentLikes();
-  }, [loadPersistentLikes]);
-
-  useEffect(() => {
-    if (!isInRoom || !roomCode) {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-      return;
-    }
-
-    const channelName = `room-${roomCode}`;
-    const channel = supabase.channel(channelName);
-
-    channel.on('broadcast', { event: 'chat' }, ({ payload }) => {
-      if (payload.message) setChatMessages(prev => [...prev, payload.message]);
-    });
-
-    channel.on('broadcast', { event: 'like' }, () => {
-      setTimeout(() => loadPersistentLikes(), 300);
-    });
-
-    channel.subscribe();
-    channelRef.current = channel;
-
-    return () => {
-      if (channelRef.current) supabase.removeChannel(channelRef.current);
-    };
-  }, [isInRoom, roomCode, loadPersistentLikes]);
-
-  useEffect(() => {
-    const mutual = likedMovies.filter(my => 
-      sharedLikes.some(partner => partner.id === my.id)
-    );
-    
-    const newCount = mutual.length;
-    
-    if (newCount > prevMatchCountRef.current) {
-      playMatchSound();
-    }
-    
-    setMutualMatches(mutual);
-    prevMatchCountRef.current = newCount;
-  }, [likedMovies, sharedLikes]);
+  }, [coupleCode, user]);
 
   useEffect(() => {
     if (!coupleCode) return;
@@ -533,9 +537,126 @@ function App() {
         supabase.removeChannel(likesSubscriptionRef.current);
       }
     };
-  }, [coupleCode, loadPersistentLikes]);
+  }, [coupleCode, user]);
 
-  const fetchMovies = useCallback(async (retryCount = 0) => {
+  const clearAllLikesAndMatches = async () => {
+    if (!coupleCode) {
+      alert('No couple code found. Join or create a room first.');
+      return;
+    }
+
+    if (!window.confirm('⚠️ This will permanently delete ALL likes and matches for BOTH users. This action cannot be undone. Continue?')) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('couple_likes')
+      .delete()
+      .eq('couple_code', coupleCode);
+
+    if (error) {
+      console.error('Failed to clear likes from database:', error);
+      alert('Failed to clear data from server. Please try again.');
+      return;
+    }
+
+    setLikedMovies([]);
+    setSharedLikes([]);
+    setMutualMatches([]);
+    setLastLiked(null);
+    setSwipeHistory([]);
+
+    alert('All likes and matches have been cleared for both users.');
+    setTimeout(() => loadPersistentLikes(), 300);
+  };
+
+  const clearMyLikesOnly = async () => {
+    if (!coupleCode) {
+      alert('No couple code found.');
+      return;
+    }
+
+    const confirmText = user?.id 
+      ? '⚠️ This will permanently delete ONLY YOUR likes. Your partner’s likes will stay. Continue?'
+      : '⚠️ This will permanently delete ONLY YOUR (guest) likes. Your partner’s likes will stay. Continue?';
+
+    if (!window.confirm(confirmText)) return;
+
+    let query = supabase
+      .from('couple_likes')
+      .delete()
+      .eq('couple_code', coupleCode);
+
+    if (user?.id) {
+      query = query.eq('user_id', user.id);
+    } else {
+      query = query.is('user_id', null);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      console.error('Failed to clear my likes:', error);
+      alert('Failed to clear your likes. Please try again. Error: ' + (error.message || 'Unknown error'));
+      return;
+    }
+
+    setLikedMovies([]);
+    setMutualMatches([]);
+    setLastLiked(null);
+    setSwipeHistory([]);
+
+    alert('Only your likes have been cleared. Your partner’s likes remain.');
+    setTimeout(() => loadPersistentLikes(), 300);
+  };
+
+  const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
+    if (titles.length === 0) return titles;
+
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) return titles;
+
+    const filtered: Movie[] = [];
+    const batchSize = 12;
+
+    for (let i = 0; i < titles.length; i += batchSize) {
+      const batch = titles.slice(i, i + batchSize);
+      
+      await Promise.all(batch.map(async (title) => {
+        try {
+          const isTV = title.media_type === 'tv';
+          const endpoint = isTV 
+            ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
+            : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
+          
+          const res = await fetch(endpoint);
+          if (!res.ok) return;
+          
+          const data = await res.json();
+          const regionData = data.results?.[selectedRegion] || {};
+          
+          const hasAnyOption = 
+            (regionData.flatrate && regionData.flatrate.length > 0) ||
+            (regionData.rent && regionData.rent.length > 0) ||
+            (regionData.buy && regionData.buy.length > 0);
+
+          if (hasAnyOption) {
+            filtered.push(title);
+          }
+        } catch (e) {
+          // skip silently
+        }
+      }));
+
+      if (i + batchSize < titles.length) {
+        await new Promise(resolve => setTimeout(resolve, 60));
+      }
+    }
+
+    return filtered;
+  };
+
+  const fetchMovies = async (retryCount = 0) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
     if (!apiKey) {
       setIsLoadingDeck(false);
@@ -593,6 +714,7 @@ function App() {
 
         const watchFilter = `&watch_region=${watchRegion}${monetizationFilter}`;
 
+        // Movie fetches
         for (const [genre, count] of Object.entries(targets)) {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
@@ -617,6 +739,7 @@ function App() {
           }
         }
 
+        // TV fetches
         const tvTarget = 8;
         for (const [genre, count] of Object.entries(targets)) {
           const genreId = genreIdMap[genre];
@@ -672,7 +795,7 @@ function App() {
     } finally {
       setIsLoadingDeck(false);
     }
-  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
+  };
 
   useEffect(() => {
     setIsLoadingDeck(true);
@@ -682,53 +805,7 @@ function App() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion, fetchMovies]);
-
-  const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
-    if (titles.length === 0) return titles;
-
-    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
-    if (!apiKey) return titles;
-
-    const filtered: Movie[] = [];
-    const batchSize = 12;
-
-    for (let i = 0; i < titles.length; i += batchSize) {
-      const batch = titles.slice(i, i + batchSize);
-      
-      await Promise.all(batch.map(async (title) => {
-        try {
-          const isTV = title.media_type === 'tv';
-          const endpoint = isTV 
-            ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
-            : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
-          
-          const res = await fetch(endpoint);
-          if (!res.ok) return;
-          
-          const data = await res.json();
-          const regionData = data.results?.[selectedRegion] || {};
-          
-          const hasAnyOption = 
-            (regionData.flatrate && regionData.flatrate.length > 0) ||
-            (regionData.rent && regionData.rent.length > 0) ||
-            (regionData.buy && regionData.buy.length > 0);
-
-          if (hasAnyOption) {
-            filtered.push(title);
-          }
-        } catch (e) {
-          // skip silently
-        }
-      }));
-
-      if (i + batchSize < titles.length) {
-        await new Promise(resolve => setTimeout(resolve, 60));
-      }
-    }
-
-    return filtered;
-  };
+  }, [myPrefs, partnerPrefs, myEraPrefs, partnerEraPrefs, selectedRegion]);
 
   const fetchActors = async (movieId: number) => {
     const apiKey = import.meta.env.VITE_TMDB_API_KEY;
@@ -1081,39 +1158,14 @@ function App() {
 
               <button 
                 onClick={handleStartSwipingFree}
-                style={{
-                  background: '#ef4444',
-                  color: 'white',
-                  fontWeight: 600,
-                  fontSize: 'clamp(1.1rem, 4.2vw, 1.25rem)',
-                  padding: '18px 52px',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)',
-                  marginBottom: '20px',
-                  cursor: 'pointer',
-                  width: '100%',
-                  maxWidth: '320px'
-                }}
+                className="landing-primary-btn"
               >
                 Start Swiping Free
               </button>
 
               <button 
                 onClick={handleSignIn}
-                style={{
-                  background: 'transparent',
-                  color: 'white',
-                  border: '2px solid rgba(255,255,255,0.8)',
-                  padding: '14px 36px',
-                  borderRadius: '9999px',
-                  fontSize: 'clamp(0.98rem, 3.9vw, 1.08rem)',
-                  fontWeight: 600,
-                  marginBottom: '40px',
-                  cursor: 'pointer',
-                  width: '100%',
-                  maxWidth: '320px'
-                }}
+                className="landing-secondary-btn"
               >
                 Sign In
               </button>
@@ -1163,18 +1215,7 @@ function App() {
               <div style={{ textAlign: 'center', marginTop: '70px' }}>
                 <button 
                   onClick={handleStartSwipingFree}
-                  style={{
-                    background: '#ef4444',
-                    color: 'white',
-                    fontWeight: 600,
-                    fontSize: 'clamp(1.05rem, 4.1vw, 1.22rem)',
-                    padding: '16px 48px',
-                    borderRadius: '9999px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    width: '100%',
-                    maxWidth: '300px'
-                  }}
+                  className="landing-primary-btn"
                 >
                   Ready? Start Swiping Free Now
                 </button>
@@ -1213,17 +1254,7 @@ function App() {
                   </ul>
                   <button 
                     onClick={handleStartSwipingFree}
-                    style={{
-                      width: '100%',
-                      background: '#444',
-                      color: 'white',
-                      padding: '13px',
-                      borderRadius: '9999px',
-                      border: 'none',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: 'clamp(1rem, 4vw, 1.08rem)'
-                    }}
+                    className="landing-primary-btn"
                   >
                     Try Free
                   </button>
@@ -1248,17 +1279,7 @@ function App() {
                     <li style={{ marginBottom: '10px' }}>✅ Mutual matches forever</li>
                   </ul>
                   <button 
-                    style={{
-                      width: '100%',
-                      background: '#ef4444',
-                      color: 'white',
-                      padding: '13px',
-                      borderRadius: '9999px',
-                      border: 'none',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: 'clamp(1rem, 4vw, 1.08rem)'
-                    }}
+                    className="landing-primary-btn"
                   >
                     Subscribe Monthly
                   </button>
@@ -1280,17 +1301,7 @@ function App() {
                     <li style={{ marginBottom: '10px' }}>✅ Best value for couples</li>
                   </ul>
                   <button 
-                    style={{
-                      width: '100%',
-                      background: '#444',
-                      color: 'white',
-                      padding: '13px',
-                      borderRadius: '9999px',
-                      border: 'none',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: 'clamp(1rem, 4vw, 1.08rem)'
-                    }}
+                    className="landing-primary-btn"
                   >
                     Subscribe Yearly
                   </button>
@@ -1692,6 +1703,7 @@ function App() {
               </div>
             )}
 
+            {/* PWA Install Prompt */}
             {showInstallPrompt && deferredPrompt && (
               <div className="modal-overlay" style={{ zIndex: 10000001 }}>
                 <div className="modal-content" style={{ maxWidth: '340px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
