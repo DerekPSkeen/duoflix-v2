@@ -739,8 +739,8 @@ function App() {
           }
         }
 
-        // TV fetches
-        const tvTarget = 8;
+        // TV fetches - increased for ~30% TV content
+        const tvTarget = 15;
         for (const [genre, count] of Object.entries(targets)) {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
