@@ -1361,114 +1361,87 @@ function App() {
             </div>
 
             {currentTab === 'swipe' && (
-              <div className="swipe-page" style={{ 
-                height: '100dvh', 
-                display: 'flex', 
-                flexDirection: 'column',
-                paddingTop: 'env(safe-area-inset-top, 0px)',
-                paddingBottom: 'env(safe-area-inset-bottom, 0px)'
-              }}>
-                <div style={{ flex: '1', position: 'relative', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                  <Suspense fallback={<SwipeSkeleton />}>
-                    <div className="poster-container" style={{
-                      position: 'relative',
-                      flex: '1',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '12px',
-                      minHeight: 0
-                    }}>
-                      {isLoadingDeck ? (
-                        <>
-                          <SwipeSkeleton />
-                          <div style={{
-                            position: 'absolute',
-                            bottom: '120px',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            color: '#fff',
-                            fontSize: '0.95rem',
-                            opacity: 0.8,
-                            textAlign: 'center',
-                            zIndex: 10,
-                            whiteSpace: 'nowrap'
-                          }}>
-                            Building your personalized deck...
-                          </div>
-                        </>
-                      ) : currentMovie ? (
-                        <div
-                          ref={cardRef}
-                          className={`poster-card ${isFlyingOff ? (flyDirection === 'right' ? 'flying-off-right' : 'flying-off-left') : ''}`}
-                          onPointerDown={handlePointerDown}
-                          onPointerMove={handlePointerMove}
-                          onPointerUp={handlePointerUp}
-                          onPointerCancel={handlePointerUp}
-                          style={{ 
-                            transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)`, 
-                            touchAction: 'none',
-                            width: '100%',
-                            maxWidth: '380px',
-                            height: '100%',
-                            maxHeight: '520px'
-                          }}
-                        >
-                          <img
-                            className="poster-img"
-                            src={`https://image.tmdb.org/t/p/w780${currentMovie.poster_path}`}
-                            alt={currentMovie.title}
-                            draggable={false}
-                            onDragStart={(e) => e.preventDefault()}
-                          />
-                          <div className="overlay" style={{ 
-                            position: 'absolute', 
-                            bottom: 0, 
-                            left: '12px', 
-                            right: '12px', 
-                            background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', 
-                            padding: '16px 16px 14px', 
-                            color: 'white', 
-                            fontSize: '0.95rem',
-                            textAlign: 'center',
-                            borderBottomLeftRadius: '24px',
-                            borderBottomRightRadius: '24px'
-                          }}>
-                            <div style={{ fontWeight: 700, marginBottom: '4px', lineHeight: 1.2 }}>{currentMovie.title}</div>
-                            <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
-                              {currentMovie.release_date?.slice(0, 4) || 'N/A'} • {currentMovie.vote_average?.toFixed(1) || '0'} ★
-                            </div>
-                          </div>
-                        </div>
-                      ) : movies.length === 0 && !isLoadingDeck ? (
-                        <div style={{
-                          textAlign: 'center',
-                          padding: '60px 20px',
-                          color: '#fff',
-                          opacity: 0.7
-                        }}>
-                          <p>No titles found for your preferences and region.</p>
-                          <p style={{ fontSize: '0.9rem', marginTop: '12px' }}>Try changing region or preferences.</p>
-                          <button 
-                            onClick={() => window.location.reload()}
-                            style={{ marginTop: '20px', padding: '10px 24px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '999px' }}
-                          >
-                            Retry
-                          </button>
-                        </div>
-                      ) : (
+              <div className="swipe-page">
+                <Suspense fallback={<SwipeSkeleton />}>
+                  <div className="poster-container">
+                    {isLoadingDeck ? (
+                      <>
                         <SwipeSkeleton />
-                      )}
-                    </div>
-                  </Suspense>
-                </div>
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '120px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          color: '#fff',
+                          fontSize: '0.95rem',
+                          opacity: 0.8,
+                          textAlign: 'center',
+                          zIndex: 10,
+                          whiteSpace: 'nowrap'
+                        }}>
+                          Building your personalized deck...
+                        </div>
+                      </>
+                    ) : currentMovie ? (
+                      <div
+                        ref={cardRef}
+                        className={`poster-card ${isFlyingOff ? (flyDirection === 'right' ? 'flying-off-right' : 'flying-off-left') : ''}`}
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerUp}
+                        style={{ transform: `translateX(${dragOffset}px) rotate(${dragOffset / 20}deg)`, touchAction: 'none' }}
+                      >
+                        <img
+                          className="poster-img"
+                          src={`https://image.tmdb.org/t/p/w780${currentMovie.poster_path}`}
+                          alt={currentMovie.title}
+                          draggable={false}
+                          onDragStart={(e) => e.preventDefault()}
+                        />
+                        <div className="overlay" style={{ 
+                          position: 'absolute', 
+                          bottom: 0, 
+                          left: '12px', 
+                          right: '12px', 
+                          background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', 
+                          padding: '16px 16px 14px', 
+                          color: 'white', 
+                          fontSize: '0.95rem',
+                          textAlign: 'center',
+                          borderBottomLeftRadius: '24px',
+                          borderBottomRightRadius: '24px'
+                        }}>
+                          <div style={{ fontWeight: 700, marginBottom: '4px', lineHeight: 1.2 }}>{currentMovie.title}</div>
+                          <div style={{ fontSize: '0.9rem', opacity: 0.95 }}>
+                            {currentMovie.release_date?.slice(0, 4) || 'N/A'} • {currentMovie.vote_average?.toFixed(1) || '0'} ★
+                          </div>
+                        </div>
+                      </div>
+                    ) : movies.length === 0 && !isLoadingDeck ? (
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '60px 20px',
+                        color: '#fff',
+                        opacity: 0.7
+                      }}>
+                        <p>No titles found for your preferences and region.</p>
+                        <p style={{ fontSize: '0.9rem', marginTop: '12px' }}>Try changing region or preferences.</p>
+                        <button 
+                          onClick={() => window.location.reload()}
+                          style={{ marginTop: '20px', padding: '10px 24px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '999px' }}
+                        >
+                          Retry
+                        </button>
+                      </div>
+                    ) : (
+                      <SwipeSkeleton />
+                    )}
+                  </div>
+                </Suspense>
 
                 {!showDetails && !isLoadingDeck && movies.length > 0 && (
-                  <div className="button-layer" style={{ 
-                    position: 'relative', 
-                    zIndex: 9999,
-                    paddingBottom: 'env(safe-area-inset-bottom, 20px)'
-                  }}>
+                  <div className="button-layer" style={{ border: 'none', boxShadow: 'none' }}>
                     <button className="btn undo" onClick={handleUndo}>↩</button>
                     <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
                     <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
