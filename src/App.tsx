@@ -1119,7 +1119,7 @@ function App() {
             textSizeAdjust: 'none',
             overflowY: 'auto',
             overflowX: 'hidden',
-            zIndex: 9999,
+            zIndex: 1000,                    // Reduced + standardized
             width: '100%',
             height: '100dvh',
             display: 'block',
@@ -1655,7 +1655,7 @@ function App() {
             </nav>
 
             {showDetails && detailMovie && (
-              <div className="modal-overlay" onClick={() => setShowDetails(false)}>
+              <div className="modal-overlay" onClick={() => setShowDetails(false)} style={{ zIndex: 2000 }}>
                 <div className="modal-content" onClick={e => e.stopPropagation()}>
                   <button className="close-btn" onClick={() => setShowDetails(false)}>×</button>
                   <h2 style={{ fontSize: '1.25rem', fontWeight: '900', marginBottom: '0.8rem', color: 'white' }}>
@@ -1705,7 +1705,7 @@ function App() {
 
             {/* PWA Install Prompt */}
             {showInstallPrompt && deferredPrompt && (
-              <div className="modal-overlay" style={{ zIndex: 10000001 }}>
+              <div className="modal-overlay" style={{ zIndex: 3000 }}>
                 <div className="modal-content" style={{ maxWidth: '340px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                   <h3 style={{ marginBottom: '12px' }}>Add DuoFlix to Home Screen</h3>
                   <p style={{ opacity: 0.9, marginBottom: '24px', lineHeight: 1.5 }}>
@@ -1753,7 +1753,7 @@ function App() {
           <div 
             className="modal-overlay" 
             onClick={closeRegionModal}
-            style={{ zIndex: 10000002 }}
+            style={{ zIndex: 2000 }}
           >
             <div 
               className="modal-content" 
@@ -1806,6 +1806,7 @@ function App() {
           <div 
             className="modal-overlay auth-modal-portal" 
             onClick={closeAuthModal}
+            style={{ zIndex: 3000 }}
           >
             <div 
               className="modal-content" 
@@ -1865,7 +1866,7 @@ function App() {
           <div 
             className="modal-overlay" 
             onClick={closePrivacyModal}
-            style={{ zIndex: 10000002 }}
+            style={{ zIndex: 2000 }}
           >
             <div 
               className="modal-content" 
@@ -1910,7 +1911,7 @@ function App() {
           <div 
             className="modal-overlay" 
             onClick={closeTermsModal}
-            style={{ zIndex: 10000002 }}
+            style={{ zIndex: 2000 }}
           >
             <div 
               className="modal-content" 
