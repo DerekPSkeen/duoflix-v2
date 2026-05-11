@@ -739,9 +739,12 @@ function App() {
           }
         }
 
-        // TV fetches - increased for ~30% TV content
+        // TV fetches - improved distribution
         const tvTarget = 15;
+        let totalTVFetched = 0;
         for (const [genre, count] of Object.entries(targets)) {
+          if (totalTVFetched >= tvTarget * 2) break; // Allow more TV overall
+
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
 
@@ -749,7 +752,7 @@ function App() {
 
           let fetched = 0;
           let page = 1;
-          while (fetched < tvTarget && page <= 4) {
+          while (fetched < tvTarget && page <= 4 && totalTVFetched < tvTarget * 2) {
             try {
               const res = await fetch(`${baseUrl}&page=${page}`);
               const data = await res.json();
@@ -761,6 +764,7 @@ function App() {
                   media_type: 'tv' as const
                 })));
                 fetched += data.results.length;
+                totalTVFetched += data.results.length;
               } else break;
               page++;
               if (page % 2 === 0) await new Promise(r => setTimeout(r, 40));
@@ -768,7 +772,6 @@ function App() {
               break;
             }
           }
-          if (fetched >= tvTarget) break;
         }
       }
 
@@ -1119,7 +1122,7 @@ function App() {
             textSizeAdjust: 'none',
             overflowY: 'auto',
             overflowX: 'hidden',
-            zIndex: 1000,                    // Reduced + standardized
+            zIndex: 1000,
             width: '100%',
             height: '100dvh',
             display: 'block',
