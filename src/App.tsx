@@ -625,10 +625,15 @@ function App() {
       await Promise.all(batch.map(async (title) => {
         try {
           const isTV = title.media_type === 'tv';
-          const endpoint = isTV 
-            ? `https://api.themoviedb.org/3/tv/${title.id}/watch/providers?api_key=${apiKey}`
-            : `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
           
+          // Minimal filtering for TV shows - accept almost all
+          if (isTV) {
+            filtered.push(title);
+            return;
+          }
+          
+          // Strict filtering only for movies
+          const endpoint = `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
           const res = await fetch(endpoint);
           if (!res.ok) return;
           
@@ -640,12 +645,12 @@ function App() {
             (regionData.rent && regionData.rent.length > 0) ||
             (regionData.buy && regionData.buy.length > 0);
 
-          // More lenient for TV shows
-          if (hasAnyOption || isTV) {
+          if (hasAnyOption) {
             filtered.push(title);
           }
         } catch (e) {
-          // skip silently
+          // For TV, accept on error
+          if (title.media_type === 'tv') filtered.push(title);
         }
       }));
 
@@ -740,11 +745,11 @@ function App() {
           }
         }
 
-        // TV fetches - improved for better volume and distribution
-        const tvTarget = 20;
+        // TV fetches - boosted for ~30% target
+        const tvTarget = 25;
         let totalTVFetched = 0;
         for (const [genre, count] of Object.entries(targets)) {
-          if (totalTVFetched >= tvTarget * 1.5) break;
+          if (totalTVFetched >= tvTarget * 2) break;
 
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
@@ -753,7 +758,7 @@ function App() {
 
           let fetched = 0;
           let page = 1;
-          while (fetched < tvTarget && page <= 5 && totalTVFetched < tvTarget * 1.5) {
+          while (fetched < tvTarget && page <= 5 && totalTVFetched < tvTarget * 2) {
             try {
               const res = await fetch(`${baseUrl}&page=${page}`);
               const data = await res.json();
