@@ -640,7 +640,8 @@ function App() {
             (regionData.rent && regionData.rent.length > 0) ||
             (regionData.buy && regionData.buy.length > 0);
 
-          if (hasAnyOption) {
+          // More lenient for TV shows
+          if (hasAnyOption || isTV) {
             filtered.push(title);
           }
         } catch (e) {
@@ -739,11 +740,11 @@ function App() {
           }
         }
 
-        // TV fetches - improved distribution
-        const tvTarget = 15;
+        // TV fetches - improved for better volume and distribution
+        const tvTarget = 20;
         let totalTVFetched = 0;
         for (const [genre, count] of Object.entries(targets)) {
-          if (totalTVFetched >= tvTarget * 2) break; // Allow more TV overall
+          if (totalTVFetched >= tvTarget * 1.5) break;
 
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
@@ -752,7 +753,7 @@ function App() {
 
           let fetched = 0;
           let page = 1;
-          while (fetched < tvTarget && page <= 4 && totalTVFetched < tvTarget * 2) {
+          while (fetched < tvTarget && page <= 5 && totalTVFetched < tvTarget * 1.5) {
             try {
               const res = await fetch(`${baseUrl}&page=${page}`);
               const data = await res.json();
