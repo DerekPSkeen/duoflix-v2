@@ -625,13 +625,13 @@ function App() {
       await Promise.all(batch.map(async (title) => {
         const isTV = title.media_type === 'tv';
         
-        // NO FILTERING FOR TV SHOWS - accept all
+        // True zero filter for TV: accept ALL TV shows
         if (isTV) {
           filtered.push(title);
           return;
         }
         
-        // Keep strict filtering only for movies
+        // Strict filtering only for movies
         try {
           const endpoint = `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
           const res = await fetch(endpoint);
@@ -720,7 +720,7 @@ function App() {
 
         const watchFilter = `&watch_region=${watchRegion}${monetizationFilter}`;
 
-        // Movie fetches
+        // Movie fetches (unchanged)
         for (const [genre, count] of Object.entries(targets)) {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
@@ -745,8 +745,8 @@ function App() {
           }
         }
 
-        // TV fetches - no filtering, strong volume for 30% target
-        const tvTarget = 28;
+        // TV fetches - strong volume + correct date field for ~30% target
+        const tvTarget = 30;
         let totalTVFetched = 0;
         for (const [genre, count] of Object.entries(targets)) {
           if (totalTVFetched >= tvTarget * 2) break;
