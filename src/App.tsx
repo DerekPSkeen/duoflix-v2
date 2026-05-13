@@ -610,41 +610,6 @@ function App() {
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
-  // Targeted addition: Fetch popular TV shows regardless of preferences
-  const fetchPopularTV = async (count: number = 40): Promise<Movie[]> => {
-    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
-    if (!apiKey) return [];
-    try {
-      const tvShows: Movie[] = [];
-      let page = 1;
-      while (tvShows.length < count && page <= 5) {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=en-US&page=${page}`
-        );
-        const data = await response.json();
-        const results = data.results || [];
-        
-        for (const item of results) {
-          if (tvShows.length >= count) break;
-          tvShows.push({
-            id: item.id,
-            title: item.name || item.title || 'Unknown TV Show',
-            poster_path: item.poster_path,
-            release_date: item.first_air_date || '',
-            vote_average: item.vote_average || 0,
-            overview: item.overview || '',
-            media_type: 'tv'
-          });
-        }
-        page++;
-      }
-      return tvShows;
-    } catch (error) {
-      console.error('Error fetching popular TV:', error);
-      return [];
-    }
-  };
-
   const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
     if (titles.length === 0) return titles;
 
@@ -816,8 +781,35 @@ function App() {
         }
       }
 
-      // Targeted fix only: Force popular TV shows (most popular, regardless of prefs)
-      const popularTV = await fetchPopularTV(40);
+      // === Targeted Fix Only (Option 2): Force US-available popular TV ===
+      const popularTV: Movie[] = [];
+      let tvPage = 1;
+      const tvPageLimit = 5;
+      while (popularTV.length < 40 && tvPage <= tvPageLimit) {
+        try {
+          const res = await fetch(
+            `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&watch_region=US&with_watch_monetization_types=flatrate|rent|buy&include_adult=false&page=${tvPage}`
+          );
+          const data = await res.json();
+          const results = data.results || [];
+          
+          for (const item of results) {
+            if (popularTV.length >= 40) break;
+            popularTV.push({
+              id: item.id,
+              title: item.name || item.title || 'Unknown TV Show',
+              poster_path: item.poster_path,
+              release_date: item.first_air_date || '',
+              vote_average: item.vote_average || 0,
+              overview: item.overview || '',
+              media_type: 'tv'
+            });
+          }
+          tvPage++;
+        } catch (e) {
+          break;
+        }
+      }
       allResults.push(...popularTV);
 
       const filteredResults = await filterTitlesWithProviders(allResults);
