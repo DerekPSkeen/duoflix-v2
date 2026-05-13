@@ -623,16 +623,16 @@ function App() {
       const batch = titles.slice(i, i + batchSize);
       
       await Promise.all(batch.map(async (title) => {
+        const isTV = title.media_type === 'tv';
+        
+        // NO FILTERING FOR TV SHOWS - accept all
+        if (isTV) {
+          filtered.push(title);
+          return;
+        }
+        
+        // Keep strict filtering only for movies
         try {
-          const isTV = title.media_type === 'tv';
-          
-          // Minimal filtering for TV shows - accept almost all
-          if (isTV) {
-            filtered.push(title);
-            return;
-          }
-          
-          // Strict filtering only for movies
           const endpoint = `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
           const res = await fetch(endpoint);
           if (!res.ok) return;
@@ -649,8 +649,7 @@ function App() {
             filtered.push(title);
           }
         } catch (e) {
-          // For TV, accept on error
-          if (title.media_type === 'tv') filtered.push(title);
+          // skip movies on error
         }
       }));
 
@@ -697,7 +696,8 @@ function App() {
     try {
       for (const era of activeEras) {
         const { min, max } = yearMap[era];
-        const dateFilter = `&primary_release_date.gte=${min}-01-01&primary_release_date.lte=${max}-12-31`;
+        const movieDateFilter = `&primary_release_date.gte=${min}-01-01&primary_release_date.lte=${max}-12-31`;
+        const tvDateFilter = `&first_air_date.gte=${min}-01-01&first_air_date.lte=${max}-12-31`;
 
         const genreList = Object.keys(myPrefs);
         const combined: Record<string, number> = {};
@@ -725,7 +725,7 @@ function App() {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
 
-          const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}&include_adult=false`;
+          const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${movieDateFilter}${watchFilter}&include_adult=false`;
 
           let fetched = 0;
           let page = 1;
@@ -745,8 +745,8 @@ function App() {
           }
         }
 
-        // TV fetches - boosted for ~30% target
-        const tvTarget = 25;
+        // TV fetches - no filtering, strong volume for 30% target
+        const tvTarget = 28;
         let totalTVFetched = 0;
         for (const [genre, count] of Object.entries(targets)) {
           if (totalTVFetched >= tvTarget * 2) break;
@@ -754,7 +754,7 @@ function App() {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
 
-          const baseUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${dateFilter}${watchFilter}&include_adult=false`;
+          const baseUrl = `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&with_genres=${genreId}${tvDateFilter}${watchFilter}&include_adult=false`;
 
           let fetched = 0;
           let page = 1;
