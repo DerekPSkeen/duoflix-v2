@@ -1484,8 +1484,11 @@ function App() {
                   <div className="button-layer" style={{ 
                     position: 'fixed', 
                     bottom: 'env(safe-area-inset-bottom, 85px)', 
-                    left: '50%', 
-                    transform: 'translateX(-50%)',
+                    left: '20px', 
+                    right: '20px', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    gap: '12px',
                     zIndex: 40 
                   }}>
                     <button className="btn undo" onClick={handleUndo}>↩</button>
