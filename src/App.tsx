@@ -1490,9 +1490,9 @@ function App() {
                     zIndex: 40 
                   }}>
                     <button className="btn undo" onClick={handleUndo} style={{ width: '52px' }}>↩</button>
-                    <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }} style={{ flex: 1, maxWidth: '136px' }}>Details</button>
-                    <button className="btn nope" onClick={() => triggerFlyOff(false)} style={{ width: '58px' }}>✕</button>
-                    <button className="btn like" onClick={() => triggerFlyOff(true)} style={{ width: '58px' }}>♥</button>
+                    <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }} style={{ flex: 1, maxWidth: '126px' }}>Details</button>
+                    <button className="btn nope" onClick={() => triggerFlyOff(false)} style={{ width: '64px' }}>✕</button>
+                    <button className="btn like" onClick={() => triggerFlyOff(true)} style={{ width: '64px' }}>♥</button>
                   </div>
                 )}
               </div>
