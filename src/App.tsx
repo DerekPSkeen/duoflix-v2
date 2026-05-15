@@ -610,6 +610,40 @@ function App() {
     setTimeout(() => loadPersistentLikes(), 300);
   };
 
+  const fetchPopularTV = async (count: number = 40): Promise<Movie[]> => {
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) return [];
+    try {
+      const tvShows: Movie[] = [];
+      let page = 1;
+      while (tvShows.length < count && page <= 5) {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/tv/popular?api_key=${apiKey}&language=en-US&page=${page}`
+        );
+        const data = await response.json();
+        const results = data.results || [];
+        
+        for (const item of results) {
+          if (tvShows.length >= count) break;
+          tvShows.push({
+            id: item.id,
+            title: item.name || item.title || 'Unknown TV Show',
+            poster_path: item.poster_path,
+            release_date: item.first_air_date || '',
+            vote_average: item.vote_average || 0,
+            overview: item.overview || '',
+            media_type: 'tv'
+          });
+        }
+        page++;
+      }
+      return tvShows;
+    } catch (error) {
+      console.error('Error fetching popular TV:', error);
+      return [];
+    }
+  };
+
   const filterTitlesWithProviders = async (titles: Movie[]): Promise<Movie[]> => {
     if (titles.length === 0) return titles;
 
@@ -625,13 +659,11 @@ function App() {
       await Promise.all(batch.map(async (title) => {
         const isTV = title.media_type === 'tv';
         
-        // True zero filter for TV: accept ALL TV shows
         if (isTV) {
           filtered.push(title);
           return;
         }
         
-        // Strict filtering only for movies
         try {
           const endpoint = `https://api.themoviedb.org/3/movie/${title.id}/watch/providers?api_key=${apiKey}`;
           const res = await fetch(endpoint);
@@ -648,9 +680,7 @@ function App() {
           if (hasAnyOption) {
             filtered.push(title);
           }
-        } catch (e) {
-          // skip movies on error
-        }
+        } catch (e) {}
       }));
 
       if (i + batchSize < titles.length) {
@@ -720,7 +750,6 @@ function App() {
 
         const watchFilter = `&watch_region=${watchRegion}${monetizationFilter}`;
 
-        // Movie fetches (unchanged)
         for (const [genre, count] of Object.entries(targets)) {
           const genreId = genreIdMap[genre];
           if (!genreId) continue;
@@ -745,7 +774,6 @@ function App() {
           }
         }
 
-        // TV fetches - strong volume + correct date field for ~30% target
         const tvTarget = 30;
         let totalTVFetched = 0;
         for (const [genre, count] of Object.entries(targets)) {
@@ -781,35 +809,7 @@ function App() {
         }
       }
 
-      // === Targeted Fix Only (Option 2): Force US-available popular TV ===
-      const popularTV: Movie[] = [];
-      let tvPage = 1;
-      const tvPageLimit = 5;
-      while (popularTV.length < 40 && tvPage <= tvPageLimit) {
-        try {
-          const res = await fetch(
-            `https://api.themoviedb.org/3/discover/tv?api_key=${apiKey}&sort_by=popularity.desc&watch_region=US&with_watch_monetization_types=flatrate|rent|buy&include_adult=false&page=${tvPage}`
-          );
-          const data = await res.json();
-          const results = data.results || [];
-          
-          for (const item of results) {
-            if (popularTV.length >= 40) break;
-            popularTV.push({
-              id: item.id,
-              title: item.name || item.title || 'Unknown TV Show',
-              poster_path: item.poster_path,
-              release_date: item.first_air_date || '',
-              vote_average: item.vote_average || 0,
-              overview: item.overview || '',
-              media_type: 'tv'
-            });
-          }
-          tvPage++;
-        } catch (e) {
-          break;
-        }
-      }
+      const popularTV = await fetchPopularTV(40);
       allResults.push(...popularTV);
 
       const filteredResults = await filterTitlesWithProviders(allResults);
@@ -1401,9 +1401,9 @@ function App() {
             </div>
 
             {currentTab === 'swipe' && (
-              <div className="swipe-page">
+              <div className="swipe-page" style={{ paddingBottom: 'env(safe-area-inset-bottom, 70px)' }}>
                 <Suspense fallback={<SwipeSkeleton />}>
-                  <div className="poster-container">
+                  <div className="poster-container" style={{ top: '10vh', height: '54vh' }}>
                     {isLoadingDeck ? (
                       <>
                         <SwipeSkeleton />
@@ -1481,7 +1481,13 @@ function App() {
                 </Suspense>
 
                 {!showDetails && !isLoadingDeck && movies.length > 0 && (
-                  <div className="button-layer" style={{ border: 'none', boxShadow: 'none' }}>
+                  <div className="button-layer" style={{ 
+                    position: 'fixed', 
+                    bottom: 'env(safe-area-inset-bottom, 85px)', 
+                    left: '50%', 
+                    transform: 'translateX(-50%)',
+                    zIndex: 40 
+                  }}>
                     <button className="btn undo" onClick={handleUndo}>↩</button>
                     <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
                     <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
@@ -1743,7 +1749,6 @@ function App() {
               </div>
             )}
 
-            {/* PWA Install Prompt */}
             {showInstallPrompt && deferredPrompt && (
               <div className="modal-overlay" style={{ zIndex: 3000 }}>
                 <div className="modal-content" style={{ maxWidth: '340px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
