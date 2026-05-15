@@ -248,7 +248,6 @@ function App() {
     }
   };
 
-  // PWA: Before Install Prompt Handler
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
@@ -262,7 +261,6 @@ function App() {
     };
   }, []);
 
-  // Improved install prompt trigger
   useEffect(() => {
     if (movies.length > 0 && currentIndex >= 5 && deferredPrompt && !showInstallPrompt) {
       const timer = setTimeout(() => {
@@ -1488,13 +1486,13 @@ function App() {
                     right: '20px', 
                     display: 'flex', 
                     justifyContent: 'center', 
-                    gap: '12px',
+                    gap: '8px',
                     zIndex: 40 
                   }}>
-                    <button className="btn undo" onClick={handleUndo}>↩</button>
-                    <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
-                    <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
-                    <button className="btn like" onClick={() => triggerFlyOff(true)}>♥</button>
+                    <button className="btn undo" onClick={handleUndo} style={{ width: '52px' }}>↩</button>
+                    <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }} style={{ flex: 1, maxWidth: '136px' }}>Details</button>
+                    <button className="btn nope" onClick={() => triggerFlyOff(false)} style={{ width: '58px' }}>✕</button>
+                    <button className="btn like" onClick={() => triggerFlyOff(true)} style={{ width: '58px' }}>♥</button>
                   </div>
                 )}
               </div>
