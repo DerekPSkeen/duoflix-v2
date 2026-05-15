@@ -1694,11 +1694,11 @@ function App() {
               </div>
             )}
 
-            <nav className="tab-bar">
-              <button type="button" onClick={() => setCurrentTab('swipe')}>Swipe</button>
-              <button type="button" onClick={() => setCurrentTab('matches')}>Matches</button>
-              <button type="button" onClick={() => setCurrentTab('watch')}>Room</button>
-              <button type="button" onClick={() => setCurrentTab('prefs')}>Prefs</button>
+            <nav className="tab-bar" style={{ zIndex: 100, pointerEvents: 'auto' }}>
+              <button onClick={() => setCurrentTab('swipe')}>Swipe</button>
+              <button onClick={() => setCurrentTab('matches')}>Matches</button>
+              <button onClick={() => setCurrentTab('watch')}>Room</button>
+              <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
             </nav>
 
             {showDetails && detailMovie && (
