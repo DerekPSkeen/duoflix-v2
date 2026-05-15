@@ -1695,10 +1695,10 @@ function App() {
             )}
 
             <nav className="tab-bar">
-              <button onClick={() => setCurrentTab('swipe')}>Swipe</button>
-              <button onClick={() => setCurrentTab('matches')}>Matches</button>
-              <button onClick={() => setCurrentTab('watch')}>Room</button>
-              <button onClick={() => setCurrentTab('prefs')}>Prefs</button>
+              <button type="button" onClick={() => setCurrentTab('swipe')}>Swipe</button>
+              <button type="button" onClick={() => setCurrentTab('matches')}>Matches</button>
+              <button type="button" onClick={() => setCurrentTab('watch')}>Room</button>
+              <button type="button" onClick={() => setCurrentTab('prefs')}>Prefs</button>
             </nav>
 
             {showDetails && detailMovie && (
