@@ -1401,7 +1401,7 @@ function App() {
             {currentTab === 'swipe' && (
               <div className="swipe-page">
                 <Suspense fallback={<SwipeSkeleton />}>
-                  <div className="poster-container" style={{ height: '56vh' }}>
+                  <div className="poster-container" style={{ height: '57vh' }}>
                     {isLoadingDeck ? (
                       <>
                         <SwipeSkeleton />
@@ -1480,7 +1480,7 @@ function App() {
 
                 {!showDetails && !isLoadingDeck && movies.length > 0 && (
                   <div className="button-layer" style={{ 
-                    bottom: 'env(safe-area-inset-bottom, 92px)', 
+                    bottom: 'env(safe-area-inset-bottom, 78px)', 
                     border: 'none', 
                     boxShadow: 'none' 
                   }}>
