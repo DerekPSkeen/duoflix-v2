@@ -1399,9 +1399,9 @@ function App() {
             </div>
 
             {currentTab === 'swipe' && (
-              <div className="swipe-page" style={{ paddingBottom: 'env(safe-area-inset-bottom, 70px)' }}>
+              <div className="swipe-page">
                 <Suspense fallback={<SwipeSkeleton />}>
-                  <div className="poster-container" style={{ top: '10vh', height: '54vh' }}>
+                  <div className="poster-container">
                     {isLoadingDeck ? (
                       <>
                         <SwipeSkeleton />
@@ -1479,20 +1479,11 @@ function App() {
                 </Suspense>
 
                 {!showDetails && !isLoadingDeck && movies.length > 0 && (
-                  <div className="button-layer" style={{ 
-                    position: 'fixed', 
-                    bottom: 'env(safe-area-inset-bottom, 85px)', 
-                    left: '20px', 
-                    right: '20px', 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    gap: '8px',
-                    zIndex: 40 
-                  }}>
-                    <button className="btn undo" onClick={handleUndo} style={{ width: '52px' }}>↩</button>
-                    <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }} style={{ flex: 1, maxWidth: '126px' }}>Details</button>
-                    <button className="btn nope" onClick={() => triggerFlyOff(false)} style={{ width: '64px' }}>✕</button>
-                    <button className="btn like" onClick={() => triggerFlyOff(true)} style={{ width: '64px' }}>♥</button>
+                  <div className="button-layer" style={{ border: 'none', boxShadow: 'none' }}>
+                    <button className="btn undo" onClick={handleUndo}>↩</button>
+                    <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
+                    <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
+                    <button className="btn like" onClick={() => triggerFlyOff(true)}>♥</button>
                   </div>
                 )}
               </div>
@@ -1694,7 +1685,7 @@ function App() {
               </div>
             )}
 
-            <nav className="tab-bar" style={{ zIndex: 100, pointerEvents: 'auto' }}>
+            <nav className="tab-bar">
               <button onClick={() => setCurrentTab('swipe')}>Swipe</button>
               <button onClick={() => setCurrentTab('matches')}>Matches</button>
               <button onClick={() => setCurrentTab('watch')}>Room</button>
