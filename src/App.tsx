@@ -1401,7 +1401,7 @@ function App() {
             {currentTab === 'swipe' && (
               <div className="swipe-page">
                 <Suspense fallback={<SwipeSkeleton />}>
-                  <div className="poster-container">
+                  <div className="poster-container" style={{ height: '56vh' }}>
                     {isLoadingDeck ? (
                       <>
                         <SwipeSkeleton />
@@ -1479,7 +1479,11 @@ function App() {
                 </Suspense>
 
                 {!showDetails && !isLoadingDeck && movies.length > 0 && (
-                  <div className="button-layer" style={{ border: 'none', boxShadow: 'none' }}>
+                  <div className="button-layer" style={{ 
+                    bottom: 'env(safe-area-inset-bottom, 92px)', 
+                    border: 'none', 
+                    boxShadow: 'none' 
+                  }}>
                     <button className="btn undo" onClick={handleUndo}>↩</button>
                     <button className="btn details" onClick={() => { setDetailMovie(currentMovie); setShowDetails(true); }}>Details</button>
                     <button className="btn nope" onClick={() => triggerFlyOff(false)}>✕</button>
